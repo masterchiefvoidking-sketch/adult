@@ -22,7 +22,7 @@ AApartmentLifeSingleCharacterGameMode::AApartmentLifeSingleCharacterGameMode()
 void AApartmentLifeSingleCharacterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	BootstrapApartment();
+	bLoadedSaveOnStart = false;
 
 	if (bAutoLoadOnStart)
 	{
@@ -34,14 +34,21 @@ void AApartmentLifeSingleCharacterGameMode::BeginPlay()
 				{
 					if (SaveSubsystem->LoadFromSlot(AutoLoadSlot))
 					{
-						if (AApartmentLifeSingleCharacterPlayerController* PC =
-							Cast<AApartmentLifeSingleCharacterPlayerController>(GetWorld()->GetFirstPlayerController()))
-						{
-							PC->ApplyPostLoadState();
-						}
+						bLoadedSaveOnStart = true;
 					}
 				}
 			}
+		}
+	}
+
+	BootstrapApartment();
+
+	if (bLoadedSaveOnStart)
+	{
+		if (AApartmentLifeSingleCharacterPlayerController* PC =
+			Cast<AApartmentLifeSingleCharacterPlayerController>(GetWorld()->GetFirstPlayerController()))
+		{
+			PC->ApplyPostLoadState();
 		}
 	}
 }
@@ -64,15 +71,8 @@ void AApartmentLifeSingleCharacterGameMode::BootstrapApartment()
 	bool bSeedWardrobe = true;
 	if (bAutoLoadOnStart)
 	{
-		if (UGameInstance* GI = GetGameInstance())
-		{
-			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
-			{
-				const bool bHasSave = SaveSubsystem->DoesSaveExist(AutoLoadSlot);
-				bSeedFurniture = !bHasSave;
-				bSeedWardrobe = !bHasSave;
-			}
-		}
+		bSeedFurniture = !bLoadedSaveOnStart;
+		bSeedWardrobe = !bLoadedSaveOnStart;
 	}
 
 	if (ApartmentUnit && bSeedFurniture)
@@ -168,6 +168,6 @@ void AApartmentLifeSingleCharacterGameMode::LinkPlayerController()
 {
 	if (AApartmentLifeSingleCharacterPlayerController* PC = Cast<AApartmentLifeSingleCharacterPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
-		PC->SetSingleCharacterContext(ApartmentUnit, GirlCharacter);
+		PC->SetSingleCharacterContext(ApartmentUnit, GirlCharacter, bLoadedSaveOnStart);
 	}
 }

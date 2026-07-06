@@ -69,6 +69,10 @@
 		{
 			"Name": "ApartmentLifeDevTools",
 			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeUI",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

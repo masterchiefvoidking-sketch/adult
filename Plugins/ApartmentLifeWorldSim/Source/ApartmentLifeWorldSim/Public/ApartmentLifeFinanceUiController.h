@@ -32,6 +32,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Finance|UI")
 	void RefreshOverlay() const;
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Finance|UI")
+	bool IsBudgetOpen() const { return bBudgetOpen; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Finance|UI")
+	bool IsShoppingOpen() const { return bShoppingOpen; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Finance|UI")
+	EApartmentLifeShopCategory GetShoppingCategory() const { return ShoppingCategory; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Finance|UI")
+	const TArray<FApartmentLifeBuiltinShopItem>& GetVisibleShopItems() const { return VisibleShopItems; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Finance|UI")
+	void OpenShoppingOverlay(EApartmentLifeShopCategory Category);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Finance|UI")
+	void CloseAllOverlays();
+
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UApartmentLifeNPCSimulationComponent> Simulation;

@@ -46,6 +46,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Work|UI")
 	bool IsWorkMenuOpen() const { return bWorkMenuOpen; }
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Work|UI")
+	bool IsShowingWorkResult() const { return bShowingResult; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Work|UI")
+	int32 GetSelectedWorkIndex() const { return SelectedWorkIndex; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Work|UI")
+	const TArray<FApartmentLifeWorkTypeDefinition>& GetVisibleWorkTypes() const { return VisibleWorkTypes; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Work|UI")
+	const FApartmentLifeWorkSessionResult& GetLastResult() const { return LastResult; }
+
 protected:
 	UFUNCTION()
 	void HandleActivityCompletedWithResult(FName ActivityId, const FApartmentLifeActivityCompletionResult& Result);

@@ -3,6 +3,7 @@
 #include "ApartmentLifeWorkUiController.h"
 #include "ApartmentLifeWorkLibrary.h"
 #include "ApartmentLifeActivityComponent.h"
+#include "ApartmentLifeUiOverlayGate.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeProgressionComponent.h"
 #include "Engine/Engine.h"
@@ -80,7 +81,7 @@ void UApartmentLifeWorkUiController::HandleActivityCompletedWithResult(FName Act
 
 void UApartmentLifeWorkUiController::RefreshOverlay() const
 {
-	if (!GEngine)
+	if (FApartmentLifeUiOverlayGate::bSuppressDebugOverlays || !GEngine)
 	{
 		return;
 	}

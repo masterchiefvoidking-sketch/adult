@@ -37,9 +37,11 @@ Centered around realistic cohabitation, apartment customization, careers, relati
 | **ApartmentLifeWardrobe** | Clothing layers, presets, laundry, seasonal/occasion outfit selection |
 | **ApartmentLifeApartment** | Room types, furniture placement, move/rotate/scale/recolor |
 | **ApartmentLifeAI** | Schedules, economy, bills, relationships, memories, personalities |
-| **ApartmentLifeActivities** | Data-driven daily activities and interaction hooks |
+| **ApartmentLifeWorldSim** | Schedules, careers, finance, mood, memory, relationships, shopping, events, save |
 
 See [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) for system diagrams and extension points.
+
+See [Docs/WORLD_SIMULATION.md](Docs/WORLD_SIMULATION.md) for the simulation engine.
 
 ## Key Classes
 
@@ -48,7 +50,8 @@ See [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) for system diagrams and extensi
 | `AApartmentLifeCameraPawn` | Camera | Player inspection camera |
 | `AApartmentLifeSimCharacter` | Game | Fully composed sim character |
 | `AApartmentLifeApartmentUnit` | Apartment | Customizable apartment root |
-| `UApartmentLifeLifeSimulationComponent` | AI | Autonomous NPC life loop |
+| `UApartmentLifeNPCSimulationComponent` | WorldSim | Master NPC life engine |
+| `UApartmentLifeSaveSubsystem` | Core | Full world save/load |
 | `UApartmentLifeWardrobeComponent` | Wardrobe | Clothing and laundry |
 | `UApartmentLifeActivityComponent` | Activities | Activity execution |
 | `UApartmentLifeGameTimeSubsystem` | Core | World clock — never pauses for player |

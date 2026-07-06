@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeTypes.h"
+#include "ApartmentLifeCalendarTypes.h"
 
 bool FApartmentLifeGameTime::operator==(const FApartmentLifeGameTime& Other) const
 {
@@ -20,38 +21,7 @@ void FApartmentLifeGameTime::AddMinutes(int32 Minutes)
 	}
 
 	TotalMinutes += Minutes;
-	Minute += Minutes;
-
-	while (Minute >= 60)
-	{
-		Minute -= 60;
-		++Hour;
-	}
-
-	while (Hour >= 24)
-	{
-		Hour -= 24;
-		++Day;
-	}
-
-	while (Day > 28)
-	{
-		const int32 DaysInMonth = (Month == 2) ? 28 : ((Month == 4 || Month == 6 || Month == 9 || Month == 11) ? 30 : 31);
-		if (Day > DaysInMonth)
-		{
-			Day -= DaysInMonth;
-			++Month;
-			if (Month > 12)
-			{
-				Month = 1;
-				++Year;
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
+	FApartmentLifeCalendarUtils::SyncCalendarFields(*this, 2026, 7, 6, 8, 0);
 }
 
 float FApartmentLifeGameTime::GetTimeOfDayNormalized() const
@@ -62,4 +32,14 @@ float FApartmentLifeGameTime::GetTimeOfDayNormalized() const
 FString FApartmentLifeGameTime::ToDisplayString() const
 {
 	return FString::Printf(TEXT("%04d-%02d-%02d %02d:%02d"), Year, Month, Day, Hour, Minute);
+}
+
+int32 FApartmentLifeGameTime::GetDayOfYear() const
+{
+	int32 DayOfYear = Day;
+	for (int32 M = 1; M < Month; ++M)
+	{
+		DayOfYear += FApartmentLifeCalendarUtils::GetDaysInMonth(Year, M);
+	}
+	return DayOfYear;
 }

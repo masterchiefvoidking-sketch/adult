@@ -45,6 +45,10 @@
 		{
 			"Name": "ApartmentLifeActivities",
 			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeWorldSim",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

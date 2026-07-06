@@ -38,6 +38,7 @@ struct APARTMENTLIFECORE_API FApartmentLifeGameTime
 	APARTMENTLIFECORE_API void AddMinutes(int32 Minutes);
 	APARTMENTLIFECORE_API float GetTimeOfDayNormalized() const;
 	APARTMENTLIFECORE_API FString ToDisplayString() const;
+	APARTMENTLIFECORE_API int32 GetDayOfYear() const;
 };
 
 UENUM(BlueprintType)

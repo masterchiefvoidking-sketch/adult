@@ -3,14 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ApartmentLifeCharacterBase.h"
-#include "ApartmentLifeSimCharacter.generated.h"
+#include "ApartmentLifeSimCharacter.h"
+#include "ApartmentLifeNPCSimulationComponent.h"
+#include "ApartmentLifeWardrobeComponent.h"
+#include "ApartmentLifeActivityComponent.h"
+#include "ApartmentLifeGameTimeSubsystem.h"
 
-class UApartmentLifeWardrobeComponent;
-class UApartmentLifeLifeSimulationComponent;
-class UApartmentLifeActivityComponent;
-
-/** Fully composed sim character with appearance, wardrobe, autonomous AI, and activities. */
+/** Fully composed sim character with world simulation, wardrobe, and activities. */
 UCLASS()
 class ADULTANIMEAPARTMENTLIFE_API AApartmentLifeSimCharacter : public AApartmentLifeCharacterBase
 {
@@ -20,20 +19,28 @@ public:
 	AApartmentLifeSimCharacter();
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
-	UApartmentLifeWardrobeComponent* GetWardrobeComponent() const { return WardrobeComponent; }
+	UApartmentLifeNPCSimulationComponent* GetSimulationComponent() const { return SimulationComponent; }
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
-	UApartmentLifeLifeSimulationComponent* GetLifeSimulationComponent() const { return LifeSimulationComponent; }
+	UApartmentLifeWardrobeComponent* GetWardrobeComponent() const { return WardrobeComponent; }
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeActivityComponent* GetActivityComponent() const { return ActivityComponent; }
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	TObjectPtr<UApartmentLifeWardrobeComponent> WardrobeComponent;
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void HandleActivityChanged(FName ActivityId);
+
+	UFUNCTION()
+	void HandleScheduleOccasion(const FApartmentLifeGameTime& NewTime);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-	TObjectPtr<UApartmentLifeLifeSimulationComponent> LifeSimulationComponent;
+	TObjectPtr<UApartmentLifeNPCSimulationComponent> SimulationComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeWardrobeComponent> WardrobeComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeActivityComponent> ActivityComponent;

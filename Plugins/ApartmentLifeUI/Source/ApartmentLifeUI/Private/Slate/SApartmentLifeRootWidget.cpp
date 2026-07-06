@@ -108,6 +108,12 @@ void SApartmentLifeRootWidget::SetView(
 						TEXT("Comfort %.0f | Confidence %.0f | Stress %.0f | Affection %.0f | %s"),
 						Hud.Comfort, Hud.Confidence, Hud.Stress, Hud.Affection, *Hud.ActivityLabel)))
 				]
+				+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 4.f, 0.f, 0.f)
+				[
+					SNew(STextBlock)
+					.Visibility(Hud.DeveloperOverlayLabel.IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible)
+					.Text(FText::FromString(Hud.DeveloperOverlayLabel))
+				]
 			]
 		];
 		HudBox->AddSlot().AutoHeight().Padding(0.f, 4.f, 0.f, 0.f)
@@ -138,7 +144,8 @@ void SApartmentLifeRootWidget::SetView(
 		|| Screen == EApartmentLifeUiScreen::Profile
 		|| Screen == EApartmentLifeUiScreen::SaveLoad
 		|| Screen == EApartmentLifeUiScreen::Settings
-		|| Screen == EApartmentLifeUiScreen::CharacterCreator;
+		|| Screen == EApartmentLifeUiScreen::CharacterCreator
+		|| Screen == EApartmentLifeUiScreen::DeveloperHub;
 
 	if (bShowMainMenu)
 	{

@@ -13,7 +13,7 @@ public class ApartmentLifeDevTools : ModuleRules
 			"Core", "CoreUObject", "Engine",
 			"ApartmentLifeCore", "ApartmentLifeApartment", "ApartmentLifeWorldSim",
 			"ApartmentLifeSocial", "ApartmentLifeCharacter", "ApartmentLifeCharacterPipeline", "ApartmentLifeActivities",
-			"ApartmentLifeWardrobe"
+			"ApartmentLifeWardrobe", "ApartmentLifeCamera", "ApartmentLifeImmersion", "ApartmentLifeInteraction"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

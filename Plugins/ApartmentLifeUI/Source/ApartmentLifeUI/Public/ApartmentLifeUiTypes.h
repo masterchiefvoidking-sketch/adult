@@ -23,7 +23,8 @@ enum class EApartmentLifeUiScreen : uint8
 	Profile			UMETA(DisplayName = "Profile"),
 	SaveLoad		UMETA(DisplayName = "Save / Load"),
 	Settings		UMETA(DisplayName = "Settings"),
-	CharacterCreator UMETA(DisplayName = "Character Creator")
+	CharacterCreator UMETA(DisplayName = "Character Creator"),
+	DeveloperHub	UMETA(DisplayName = "Developer Hub")
 };
 
 USTRUCT(BlueprintType)
@@ -87,6 +88,9 @@ struct APARTMENTLIFEUI_API FApartmentLifeHudViewModel
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
 	FString ActivityLabel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	FString DeveloperOverlayLabel;
 };
 
 USTRUCT(BlueprintType)

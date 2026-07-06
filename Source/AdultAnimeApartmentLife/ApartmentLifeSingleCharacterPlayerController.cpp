@@ -23,6 +23,8 @@
 #include "ApartmentLifeCameraSettingsSubsystem.h"
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeDebugMenuComponent.h"
+#include "ApartmentLifeDeveloperUiController.h"
+#include "ApartmentLifeDeveloperSubsystem.h"
 #include "ApartmentLifeUiBridgeComponent.h"
 #include "ApartmentLifeUiSubsystem.h"
 #include "ApartmentLifeCharacterCreatorUiController.h"
@@ -41,6 +43,7 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 	FinanceUiController = CreateDefaultSubobject<UApartmentLifeFinanceUiController>(TEXT("FinanceUi"));
 	UiBridgeComponent = CreateDefaultSubobject<UApartmentLifeUiBridgeComponent>(TEXT("UiBridge"));
 	CreatorUiController = CreateDefaultSubobject<UApartmentLifeCharacterCreatorUiController>(TEXT("CreatorUi"));
+	DeveloperUiController = CreateDefaultSubobject<UApartmentLifeDeveloperUiController>(TEXT("DeveloperUi"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -126,8 +129,14 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			FinanceUiController,
 			InteractionHudComponent,
 			CreatorUiController,
+			DeveloperUiController,
 			QuickSaveSlot,
 			bEnterGameplayDirectly);
+	}
+
+	if (DeveloperUiController)
+	{
+		DeveloperUiController->InitializeContext(this, InApartment, InGirlCharacter);
 	}
 
 	if (CreatorUiController && InGirlCharacter)
@@ -179,6 +188,7 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("FocusGirlFace"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlFace);
 	InputComponent->BindAction(TEXT("FocusGirlOutfit"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit);
 	InputComponent->BindAction(TEXT("ToggleDebugMenu"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu);
+	InputComponent->BindAction(TEXT("TogglePerfOverlay"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnTogglePerfOverlay);
 	InputComponent->BindAction(TEXT("UiBack"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnUiBack);
 	InputComponent->BindAction(TEXT("ToggleGameHud"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleGameHud);
 	InputComponent->BindAction(TEXT("OpenSaveLoadScreen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenSaveLoadScreen);
@@ -847,9 +857,26 @@ void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit()
 
 void AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu()
 {
+	if (DeveloperUiController)
+	{
+		DeveloperUiController->ToggleDeveloperHub();
+		return;
+	}
+
 	if (DebugMenuComponent)
 	{
 		DebugMenuComponent->ToggleMenu();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnTogglePerfOverlay()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UApartmentLifeDeveloperSubsystem* Dev = GI->GetSubsystem<UApartmentLifeDeveloperSubsystem>())
+		{
+			Dev->TogglePerformanceOverlay();
+		}
 	}
 }
 
@@ -870,6 +897,12 @@ void AApartmentLifeSingleCharacterPlayerController::OnUiBack()
 	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
 	{
 		CloseWardrobeSession();
+		return;
+	}
+
+	if (DeveloperUiController && DeveloperUiController->IsDeveloperHubOpen())
+	{
+		DeveloperUiController->CloseDeveloperHub();
 		return;
 	}
 

@@ -20,6 +20,7 @@ class UApartmentLifeClothingFitComponent;
 class UApartmentLifeBedroomRoutineComponent;
 struct FApartmentLifeGameTime;
 struct FApartmentLifeBodyFitProfile;
+class UApartmentLifeRoutineChainComponent;
 
 /** Fully composed sim character with world simulation, wardrobe, activities, and character pipeline. */
 UCLASS()
@@ -65,6 +66,15 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeBedroomRoutineComponent* GetBedroomRoutineComponent() const { return BedroomRoutineComponent; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life")
+	UApartmentLifeRoutineChainComponent* GetRoutineChainComponent() const { return RoutineChainComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life")
+	bool StartMorningRoutine();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life")
+	bool StartEveningRoutine();
 
 protected:
 	virtual void BeginPlay() override;
@@ -131,4 +141,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeBedroomRoutineComponent> BedroomRoutineComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeRoutineChainComponent> RoutineChainComponent;
 };

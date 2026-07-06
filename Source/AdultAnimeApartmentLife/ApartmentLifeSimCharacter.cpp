@@ -15,6 +15,8 @@
 #include "ApartmentLifeInteractionSelectionComponent.h"
 #include "ApartmentLifeBedroomRoutineComponent.h"
 #include "ApartmentLifeGirlLifeLibrary.h"
+#include "ApartmentLifeActivityLibrary.h"
+#include "ApartmentLifeRoutineChainComponent.h"
 #include "ApartmentLifeWardrobeLibrary.h"
 #include "ApartmentLifeWardrobeCatalogLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
@@ -35,6 +37,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	InteractionComponent = CreateDefaultSubobject<UApartmentLifeInteractionComponent>(TEXT("Interaction"));
 	InteractionSelectionComponent = CreateDefaultSubobject<UApartmentLifeInteractionSelectionComponent>(TEXT("InteractionSelection"));
 	BedroomRoutineComponent = CreateDefaultSubobject<UApartmentLifeBedroomRoutineComponent>(TEXT("BedroomRoutine"));
+	RoutineChainComponent = CreateDefaultSubobject<UApartmentLifeRoutineChainComponent>(TEXT("RoutineChain"));
 }
 
 void AApartmentLifeSimCharacter::BeginPlay()
@@ -97,7 +100,7 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 
 	if (AnimationComponent)
 	{
-		AnimationComponent->SetAnimationGroup(UApartmentLifeCharacterPipelineLibrary::GetAnimationGroupForActivity(ActivityId));
+		AnimationComponent->SetAnimationGroup(UApartmentLifeActivityLibrary::GetAnimationGroupForActivity(ActivityId));
 	}
 
 	if (SimulationComponent)
@@ -141,6 +144,13 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 		if (YogaComponent)
 		{
 			YogaComponent->StartYogaSession(FName(TEXT("pose.builtin.stretch")), true);
+		}
+	}
+	else if (Id.Contains(TEXT("brush")) || Id.Contains(TEXT("wash_face")) || Id.Contains(TEXT("skincare")) || Id.Contains(TEXT("hair")) || Id.Contains(TEXT("makeup")))
+	{
+		if (GroomingComponent)
+		{
+			GroomingComponent->StartBuiltinMirrorRoutine();
 		}
 	}
 	else if (Id.Contains(TEXT("shower")) || Id.Contains(TEXT("hygiene")))
@@ -189,11 +199,6 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 
 void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 {
-	if (SimulationComponent)
-	{
-		UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(SimulationComponent, ActivityId);
-	}
-
 	if (WardrobeComponent)
 	{
 		WardrobeComponent->MarkEquippedWorn();
@@ -210,7 +215,7 @@ void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 		YogaComponent->EndYogaSession();
 	}
 
-	if (GroomingComponent && (ActivityId.ToString().Contains(TEXT("shower")) || ActivityId.ToString().Contains(TEXT("groom"))))
+	if (GroomingComponent && (ActivityId.ToString().Contains(TEXT("shower")) || ActivityId.ToString().Contains(TEXT("groom")) || ActivityId.ToString().Contains(TEXT("hygiene"))))
 	{
 		GroomingComponent->AdvanceStep();
 	}
@@ -293,6 +298,16 @@ void AApartmentLifeSimCharacter::HandlePurchasedItem(FName ItemId)
 void AApartmentLifeSimCharacter::HandleWardrobeUpdated()
 {
 	RefreshClothingFitFromBody();
+}
+
+bool AApartmentLifeSimCharacter::StartMorningRoutine()
+{
+	return RoutineChainComponent && RoutineChainComponent->StartRoutineChain(FName(TEXT("routine.morning")));
+}
+
+bool AApartmentLifeSimCharacter::StartEveningRoutine()
+{
+	return RoutineChainComponent && RoutineChainComponent->StartRoutineChain(FName(TEXT("routine.evening")));
 }
 
 void AApartmentLifeSimCharacter::RefreshNPCStyleFromSimulation()

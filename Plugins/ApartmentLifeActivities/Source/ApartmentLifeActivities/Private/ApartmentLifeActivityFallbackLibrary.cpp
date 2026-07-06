@@ -15,5 +15,7 @@ int32 UApartmentLifeActivityFallbackLibrary::GetBuiltinDurationMinutes(FName Act
 	if (Id.Contains(TEXT("dress")) || Id.Contains(TEXT("wardrobe"))) return 10;
 	if (Id.Contains(TEXT("social")) || Id.Contains(TEXT("talk"))) return 20;
 	if (Id.Contains(TEXT("relax")) || Id.Contains(TEXT("read")) || Id.Contains(TEXT("tv"))) return 30;
+	if (Id.Contains(TEXT("breathe"))) return 10;
+	if (Id.Contains(TEXT("laundry"))) return 30;
 	return 15;
 }

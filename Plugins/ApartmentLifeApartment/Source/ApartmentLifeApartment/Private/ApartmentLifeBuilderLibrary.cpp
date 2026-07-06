@@ -302,31 +302,31 @@ TArray<EApartmentLifeFurnitureInteraction> UApartmentLifeBuilderLibrary::GetInte
 	switch (Category)
 	{
 	case EApartmentLifeFurnitureCategory::Bed:
-		Interactions = { EApartmentLifeFurnitureInteraction::Sleep, EApartmentLifeFurnitureInteraction::Nap, EApartmentLifeFurnitureInteraction::Sit, EApartmentLifeFurnitureInteraction::Read };
+		Interactions = { EApartmentLifeFurnitureInteraction::Sleep, EApartmentLifeFurnitureInteraction::Nap, EApartmentLifeFurnitureInteraction::Sit, EApartmentLifeFurnitureInteraction::Read, EApartmentLifeFurnitureInteraction::PhoneBrowse };
 		break;
 	case EApartmentLifeFurnitureCategory::Sofa:
-		Interactions = { EApartmentLifeFurnitureInteraction::Sit, EApartmentLifeFurnitureInteraction::WatchTV, EApartmentLifeFurnitureInteraction::Talk, EApartmentLifeFurnitureInteraction::Relax };
+		Interactions = { EApartmentLifeFurnitureInteraction::Sit, EApartmentLifeFurnitureInteraction::WatchTV, EApartmentLifeFurnitureInteraction::Talk, EApartmentLifeFurnitureInteraction::Relax, EApartmentLifeFurnitureInteraction::ListenMusic, EApartmentLifeFurnitureInteraction::PlayGame, EApartmentLifeFurnitureInteraction::PhoneBrowse };
 		break;
 	case EApartmentLifeFurnitureCategory::TV:
 		Interactions = { EApartmentLifeFurnitureInteraction::WatchTV, EApartmentLifeFurnitureInteraction::Relax };
 		break;
 	case EApartmentLifeFurnitureCategory::Desk:
-		Interactions = { EApartmentLifeFurnitureInteraction::UseComputer, EApartmentLifeFurnitureInteraction::Study, EApartmentLifeFurnitureInteraction::WorkFromHome };
+		Interactions = { EApartmentLifeFurnitureInteraction::UseComputer, EApartmentLifeFurnitureInteraction::Study, EApartmentLifeFurnitureInteraction::WorkFromHome, EApartmentLifeFurnitureInteraction::Freelance, EApartmentLifeFurnitureInteraction::BudgetReview };
 		break;
 	case EApartmentLifeFurnitureCategory::Mirror:
 		Interactions = { EApartmentLifeFurnitureInteraction::Groom, EApartmentLifeFurnitureInteraction::CheckOutfit };
 		break;
 	case EApartmentLifeFurnitureCategory::Closet:
-		Interactions = { EApartmentLifeFurnitureInteraction::ChangeOutfit, EApartmentLifeFurnitureInteraction::ManageWardrobe };
+		Interactions = { EApartmentLifeFurnitureInteraction::ChangeOutfit, EApartmentLifeFurnitureInteraction::ManageWardrobe, EApartmentLifeFurnitureInteraction::OrganizeCloset };
 		break;
 	case EApartmentLifeFurnitureCategory::KitchenAppliance:
-		Interactions = { EApartmentLifeFurnitureInteraction::Cook, EApartmentLifeFurnitureInteraction::Eat, EApartmentLifeFurnitureInteraction::CleanDishes };
+		Interactions = { EApartmentLifeFurnitureInteraction::Cook, EApartmentLifeFurnitureInteraction::Eat, EApartmentLifeFurnitureInteraction::CleanDishes, EApartmentLifeFurnitureInteraction::MakeSnack, EApartmentLifeFurnitureInteraction::GroceryCheck };
 		break;
 	case EApartmentLifeFurnitureCategory::BathroomFixture:
 		Interactions = { EApartmentLifeFurnitureInteraction::Shower, EApartmentLifeFurnitureInteraction::BrushTeeth, EApartmentLifeFurnitureInteraction::SkinCare, EApartmentLifeFurnitureInteraction::HairCare };
 		break;
 	case EApartmentLifeFurnitureCategory::WorkoutEquipment:
-		Interactions = { EApartmentLifeFurnitureInteraction::Yoga, EApartmentLifeFurnitureInteraction::Stretch, EApartmentLifeFurnitureInteraction::Exercise };
+		Interactions = { EApartmentLifeFurnitureInteraction::Yoga, EApartmentLifeFurnitureInteraction::Stretch, EApartmentLifeFurnitureInteraction::Exercise, EApartmentLifeFurnitureInteraction::Breathe };
 		break;
 	case EApartmentLifeFurnitureCategory::LaundryMachine:
 		Interactions = { EApartmentLifeFurnitureInteraction::DoLaundry };

@@ -120,7 +120,17 @@ enum class EApartmentLifeFurnitureInteraction : uint8
 	Yoga			UMETA(DisplayName = "Yoga"),
 	Stretch			UMETA(DisplayName = "Stretch"),
 	Exercise		UMETA(DisplayName = "Exercise"),
-	DoLaundry		UMETA(DisplayName = "Do Laundry")
+	DoLaundry		UMETA(DisplayName = "Do Laundry"),
+	PlayGame		UMETA(DisplayName = "Play Game"),
+	ListenMusic		UMETA(DisplayName = "Listen to Music"),
+	MakeSnack		UMETA(DisplayName = "Make Snack"),
+	PhoneBrowse		UMETA(DisplayName = "Phone Browse"),
+	Freelance		UMETA(DisplayName = "Freelance Work"),
+	BudgetReview	UMETA(DisplayName = "Budget Review"),
+	OrganizeCloset	UMETA(DisplayName = "Organize Closet"),
+	Decorate		UMETA(DisplayName = "Decorate"),
+	Breathe			UMETA(DisplayName = "Breathing Exercise"),
+	GroceryCheck	UMETA(DisplayName = "Grocery Check")
 };
 
 UENUM(BlueprintType)

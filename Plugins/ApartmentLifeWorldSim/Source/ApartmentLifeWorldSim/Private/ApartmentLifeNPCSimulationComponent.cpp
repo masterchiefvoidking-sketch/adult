@@ -30,6 +30,79 @@ bool UApartmentLifeNPCSimulationComponent::HasCloseRelationship() const
 	return false;
 }
 
+bool UApartmentLifeNPCSimulationComponent::GetRelationshipWith(FName OtherCharacterId, FApartmentLifeRelationshipRecord& OutRecord) const
+{
+	for (const FApartmentLifeRelationshipRecord& Record : Relationships)
+	{
+		if (Record.OtherCharacterId == OtherCharacterId)
+		{
+			OutRecord = Record;
+			return true;
+		}
+	}
+	return false;
+}
+
+void UApartmentLifeNPCSimulationComponent::ApplySocialFulfillment(float Amount)
+{
+	MoodInfluences.SocialFulfillment = FMath::Clamp(MoodInfluences.SocialFulfillment + Amount, 0.f, 100.f);
+	Needs.Social = FMath::Clamp(Needs.Social - Amount * 0.5f, 0.f, 100.f);
+}
+
+void UApartmentLifeNPCSimulationComponent::ComputeSharedInterestsWith(FName OtherCharacterId, const FApartmentLifePersonalityTraits& OtherPersonality)
+{
+	const float Overlap =
+		(FMath::Abs(Personality.CookingInterest - OtherPersonality.CookingInterest) < 0.3f ? 1.f : 0.f)
+		+ (FMath::Abs(Personality.GamingInterest - OtherPersonality.GamingInterest) < 0.3f ? 1.f : 0.f)
+		+ (FMath::Abs(Personality.ReadingInterest - OtherPersonality.ReadingInterest) < 0.3f ? 1.f : 0.f)
+		+ (FMath::Abs(Personality.FitnessInterest - OtherPersonality.FitnessInterest) < 0.3f ? 1.f : 0.f)
+		+ (FMath::Abs(Personality.MusicInterest - OtherPersonality.MusicInterest) < 0.3f ? 1.f : 0.f);
+
+	for (FApartmentLifeRelationshipRecord& Record : Relationships)
+	{
+		if (Record.OtherCharacterId == OtherCharacterId)
+		{
+			Record.SharedInterests = FMath::Clamp(Overlap * 20.f, 0.f, 100.f);
+			Record.Compatibility = FMath::Clamp(50.f + Overlap * 8.f, 0.f, 100.f);
+			return;
+		}
+	}
+}
+
+void UApartmentLifeNPCSimulationComponent::RecordConversationWith(FName OtherCharacterId, float Quality)
+{
+	for (FApartmentLifeRelationshipRecord& Record : Relationships)
+	{
+		if (Record.OtherCharacterId == OtherCharacterId)
+		{
+			Record.RecordConversation(Quality);
+			return;
+		}
+	}
+
+	FApartmentLifeRelationshipRecord NewRecord;
+	NewRecord.OtherCharacterId = OtherCharacterId;
+	NewRecord.RecordConversation(Quality);
+	Relationships.Add(NewRecord);
+}
+
+void UApartmentLifeNPCSimulationComponent::RecordSharedActivityWith(FName OtherCharacterId, float Quality)
+{
+	for (FApartmentLifeRelationshipRecord& Record : Relationships)
+	{
+		if (Record.OtherCharacterId == OtherCharacterId)
+		{
+			Record.RecordSharedActivity(Quality);
+			return;
+		}
+	}
+
+	FApartmentLifeRelationshipRecord NewRecord;
+	NewRecord.OtherCharacterId = OtherCharacterId;
+	NewRecord.RecordSharedActivity(Quality);
+	Relationships.Add(NewRecord);
+}
+
 void UApartmentLifeNPCSimulationComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -456,13 +529,28 @@ void UApartmentLifeNPCSimulationComponent::CaptureSaveData_Implementation(TMap<F
 	OutData.Add(TEXT("Savings"), FString::SanitizeFloat(Finance.Savings));
 	OutData.Add(TEXT("CreditScore"), FString::FromInt(Finance.CreditScore));
 	OutData.Add(TEXT("CareerTier"), FString::FromInt(Career.PromotionTier));
-	OutData.Add(TEXT("Mood"), FString::SanitizeFloat(Mood.OverallMood));
 	OutData.Add(TEXT("CurrentActivity"), CurrentActivityId.ToString());
 	OutData.Add(TEXT("ApartmentTier"), FString::FromInt(Apartment.ApartmentTier));
 
 	FString PersonalityJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Personality, PersonalityJson);
 	OutData.Add(TEXT("Personality"), PersonalityJson);
+
+	FString MoodJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Mood, MoodJson);
+	OutData.Add(TEXT("Mood"), MoodJson);
+
+	FString MoodInfluencesJson;
+	FJsonObjectConverter::UStructToJsonObjectString(MoodInfluences, MoodInfluencesJson);
+	OutData.Add(TEXT("MoodInfluences"), MoodInfluencesJson);
+
+	FString RelationshipsJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Relationships, RelationshipsJson);
+	OutData.Add(TEXT("Relationships"), RelationshipsJson);
+
+	FString MemoriesJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Memories, MemoriesJson);
+	OutData.Add(TEXT("Memories"), MemoriesJson);
 }
 
 void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
@@ -483,10 +571,6 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	{
 		Career.PromotionTier = FCString::Atoi(**Tier);
 	}
-	if (const FString* MoodVal = InData.Find(TEXT("Mood")))
-	{
-		Mood.OverallMood = FCString::Atof(**MoodVal);
-	}
 	if (const FString* Activity = InData.Find(TEXT("CurrentActivity")))
 	{
 		CurrentActivityId = FName(**Activity);
@@ -498,5 +582,21 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	if (const FString* PersonalityJson = InData.Find(TEXT("Personality")))
 	{
 		FJsonObjectConverter::JsonObjectStringToUStruct(*PersonalityJson, &Personality);
+	}
+	if (const FString* MoodJson = InData.Find(TEXT("Mood")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*MoodJson, &Mood);
+	}
+	if (const FString* MoodInfluencesJson = InData.Find(TEXT("MoodInfluences")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*MoodInfluencesJson, &MoodInfluences);
+	}
+	if (const FString* RelationshipsJson = InData.Find(TEXT("Relationships")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*RelationshipsJson, &Relationships);
+	}
+	if (const FString* MemoriesJson = InData.Find(TEXT("Memories")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*MemoriesJson, &Memories);
 	}
 }

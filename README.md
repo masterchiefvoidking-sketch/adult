@@ -39,12 +39,14 @@ Centered around realistic cohabitation, apartment customization, careers, relati
 | **ApartmentLifeAI** | Schedules, economy, bills, relationships, memories, personalities |
 | **ApartmentLifeWorldSim** | Schedules, careers, finance, mood, memory, relationships, shopping, events, save |
 | **ApartmentLifeCharacterPipeline** | Animation groups, yoga mini-game, grooming routines, NPC style AI |
+| **ApartmentLifeSocial** | Dialogue, relationships, memory, romance, reputation, NPC social autonomy |
 
 See [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) for system diagrams and extension points.
 
 See [Docs/WORLD_SIMULATION.md](Docs/WORLD_SIMULATION.md) for the simulation engine.
 See [Docs/APARTMENT_BUILDER.md](Docs/APARTMENT_BUILDER.md) for the apartment builder system.
 See [Docs/CHARACTER_PIPELINE.md](Docs/CHARACTER_PIPELINE.md) for character creator, wardrobe, and animation pipeline.
+See [Docs/SOCIAL_SIMULATION.md](Docs/SOCIAL_SIMULATION.md) for dialogue, relationships, and emotional AI.
 
 ## Key Classes
 
@@ -61,6 +63,8 @@ See [Docs/CHARACTER_PIPELINE.md](Docs/CHARACTER_PIPELINE.md) for character creat
 | `UApartmentLifeCharacterCreatorComponent` | Character | Full character creator state |
 | `UApartmentLifeAnimationComponent` | CharacterPipeline | Animation group and fitness state |
 | `UApartmentLifeYogaMinigameComponent` | CharacterPipeline | Yoga pose matching mini-game |
+| `UApartmentLifeConversationComponent` | Social | Dialogue session and history |
+| `UApartmentLifeSocialSubsystem` | Social | Invitations, reputation, NPC friendship autonomy |
 
 ## Content Pipeline
 

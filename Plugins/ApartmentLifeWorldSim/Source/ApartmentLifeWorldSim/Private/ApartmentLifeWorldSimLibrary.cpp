@@ -126,12 +126,19 @@ FApartmentLifeMoodState UApartmentLifeWorldSimLibrary::RecalculateMood(
 		+ Influences.FinancialSecurity * 0.15f
 		+ Influences.MealQuality * 0.1f
 		+ Influences.ExerciseBenefit * 0.1f
-		+ Influences.SocialFulfillment * 0.15f;
+		+ Influences.SocialFulfillment * 0.15f
+		+ Influences.PersonalAchievement * 0.1f;
 
 	Updated.OverallMood = FMath::FInterpTo(Updated.OverallMood, FMath::Clamp(RawMood, 0.f, 100.f), 0.3f, 1.f);
+	Updated.Happiness = Updated.OverallMood;
 	Updated.Stress = FMath::Clamp(100.f - Influences.FinancialSecurity * 0.5f - Influences.WorkSatisfaction * 0.3f + (1.f - Personality.Patience) * 20.f, 0.f, 100.f);
 	Updated.Energy = FMath::Clamp(Influences.SleepQuality + Influences.ExerciseBenefit * 0.5f - Updated.Fatigue, 0.f, 100.f);
 	Updated.Fatigue = FMath::Clamp(Updated.Fatigue + (100.f - Influences.SleepQuality) * 0.05f - Influences.ExerciseBenefit * 0.02f, 0.f, 100.f);
+	Updated.Confidence = FMath::Clamp(Updated.OverallMood * 0.5f + Influences.PersonalAchievement * 0.3f + Personality.Confidence * 20.f, 0.f, 100.f);
+	Updated.Motivation = FMath::Clamp(Updated.OverallMood * 0.4f + Influences.WorkSatisfaction * 0.3f + Personality.Ambition * 30.f, 0.f, 100.f);
+	Updated.Loneliness = FMath::Clamp(100.f - Influences.SocialFulfillment - Personality.Extroversion * 20.f, 0.f, 100.f);
+	Updated.Comfort = FMath::Clamp(Influences.ApartmentCleanliness * 0.4f + Influences.WeatherComfort * 0.2f + Updated.OverallMood * 0.4f, 0.f, 100.f);
+	Updated.SocialBattery = FMath::Clamp(Updated.Energy * 0.5f + Influences.SocialFulfillment * 0.3f - Personality.Introversion * 20.f, 0.f, 100.f);
 
 	return Updated;
 }

@@ -52,6 +52,27 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
 	bool HasCloseRelationship() const;
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	const TArray<FApartmentLifeRelationshipRecord>& GetRelationships() const { return Relationships; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	const TArray<FApartmentLifeMemoryRecord>& GetMemories() const { return Memories; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	bool GetRelationshipWith(FName OtherCharacterId, FApartmentLifeRelationshipRecord& OutRecord) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void ApplySocialFulfillment(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void ComputeSharedInterestsWith(FName OtherCharacterId, const FApartmentLifePersonalityTraits& OtherPersonality);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void RecordConversationWith(FName OtherCharacterId, float Quality);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void RecordSharedActivityWith(FName OtherCharacterId, float Quality);
+
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
 	void SetCareerData(UApartmentLifeCareerData* InCareerData);
 

@@ -10,6 +10,8 @@
 #include "ApartmentLifeNPCStyleComponent.h"
 #include "ApartmentLifeCharacterCreatorComponent.h"
 #include "ApartmentLifeClothingFitComponent.h"
+#include "ApartmentLifeConversationComponent.h"
+#include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 
@@ -23,6 +25,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	GroomingComponent = CreateDefaultSubobject<UApartmentLifeGroomingRoutineComponent>(TEXT("Grooming"));
 	NPCStyleComponent = CreateDefaultSubobject<UApartmentLifeNPCStyleComponent>(TEXT("NPCStyle"));
 	ClothingFitComponent = CreateDefaultSubobject<UApartmentLifeClothingFitComponent>(TEXT("ClothingFit"));
+	ConversationComponent = CreateDefaultSubobject<UApartmentLifeConversationComponent>(TEXT("Conversation"));
 }
 
 void AApartmentLifeSimCharacter::BeginPlay()
@@ -54,6 +57,14 @@ void AApartmentLifeSimCharacter::BeginPlay()
 	}
 
 	RefreshNPCStyleFromSimulation();
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UApartmentLifeSocialSubsystem* SocialSubsystem = GI->GetSubsystem<UApartmentLifeSocialSubsystem>())
+		{
+			SocialSubsystem->RegisterSimCharacter(this);
+		}
+	}
 }
 
 void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
@@ -66,6 +77,14 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 	if (AnimationComponent)
 	{
 		AnimationComponent->SetAnimationGroup(UApartmentLifeCharacterPipelineLibrary::GetAnimationGroupForActivity(ActivityId));
+	}
+
+	if (ActivityId.ToString().Contains(TEXT("social")) || ActivityId.ToString().Contains(TEXT("talk")))
+	{
+		if (AnimationComponent)
+		{
+			AnimationComponent->SetAnimationGroup(EApartmentLifeAnimationGroup::Conversation);
+		}
 	}
 }
 

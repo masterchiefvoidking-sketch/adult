@@ -15,6 +15,7 @@ class UApartmentLifeYogaMinigameComponent;
 class UApartmentLifeGroomingRoutineComponent;
 class UApartmentLifeNPCStyleComponent;
 class UApartmentLifeClothingFitComponent;
+class UApartmentLifeConversationComponent;
 struct FApartmentLifeGameTime;
 struct FApartmentLifeBodyFitProfile;
 
@@ -50,6 +51,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeClothingFitComponent* GetClothingFitComponent() const { return ClothingFitComponent; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life")
+	UApartmentLifeConversationComponent* GetConversationComponent() const { return ConversationComponent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,4 +96,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeClothingFitComponent> ClothingFitComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeConversationComponent> ConversationComponent;
 };

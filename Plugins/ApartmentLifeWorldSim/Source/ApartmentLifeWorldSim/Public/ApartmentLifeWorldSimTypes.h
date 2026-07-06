@@ -12,6 +12,14 @@ enum class EApartmentLifeMemoryCategory : uint8
 	PersonMet			UMETA(DisplayName = "Person Met"),
 	Conversation		UMETA(DisplayName = "Conversation"),
 	GiftReceived		UMETA(DisplayName = "Gift"),
+	Invitation			UMETA(DisplayName = "Invitation"),
+	Holiday				UMETA(DisplayName = "Holiday"),
+	Birthday			UMETA(DisplayName = "Birthday"),
+	SharedHobby			UMETA(DisplayName = "Shared Hobby"),
+	ApartmentVisit		UMETA(DisplayName = "Apartment Visit"),
+	PersonalMilestone	UMETA(DisplayName = "Personal Milestone"),
+	PromiseKept			UMETA(DisplayName = "Promise Kept"),
+	PromiseBroken		UMETA(DisplayName = "Promise Broken"),
 	MissedAppointment	UMETA(DisplayName = "Missed Appointment"),
 	SharedActivity		UMETA(DisplayName = "Shared Activity"),
 	LifeEvent			UMETA(DisplayName = "Life Event"),
@@ -72,6 +80,9 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifePersonalityTraits
 	float Introversion = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float Extroversion = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
 	float Kindness = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
@@ -81,19 +92,34 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifePersonalityTraits
 	float Humor = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
-	float Tidiness = 0.5f;
+	float Patience = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float Empathy = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
 	float Ambition = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
-	float Patience = 0.5f;
+	float Tidiness = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float Creativity = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float Curiosity = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float Responsibility = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
 	float Generosity = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
-	float Creativity = 0.5f;
+	float Optimism = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
+	float EmotionalOpenness = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Personality", meta = (ClampMin = "0", ClampMax = "1"))
 	float Organization = 0.5f;
@@ -126,6 +152,9 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeMoodState
 	float OverallMood = 60.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float Happiness = 60.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
 	float Stress = 20.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
@@ -133,6 +162,21 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeMoodState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
 	float Energy = 80.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float Confidence = 55.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float Motivation = 60.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float Loneliness = 15.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float Comfort = 65.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood", meta = (ClampMin = "0", ClampMax = "100"))
+	float SocialBattery = 70.f;
 
 	APARTMENTLIFEWORLDSIM_API EApartmentLifeMoodLevel GetMoodLevel() const;
 	APARTMENTLIFEWORLDSIM_API float GetProductivityMultiplier() const;
@@ -167,6 +211,9 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeMoodInfluences
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood")
 	float SocialFulfillment = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mood")
+	float PersonalAchievement = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -261,6 +308,12 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeRelationshipRecord
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship")
 	FName OtherCharacterId;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship")
+	FName RelationshipStage = FName(TEXT("stage.stranger"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
+	float Familiarity = 10.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
 	float Friendship = 30.f;
 
@@ -274,16 +327,26 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeRelationshipRecord
 	float Comfort = 30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
+	float Admiration = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
 	float Compatibility = 50.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
 	float SharedInterests = 20.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship", meta = (ClampMin = "0", ClampMax = "100"))
+	float RomanceAttraction = 0.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship")
 	int32 ConversationCount = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Relationship")
+	int32 SharedActivityCount = 0;
+
 	APARTMENTLIFEWORLDSIM_API float GetInvitationScore() const;
 	APARTMENTLIFEWORLDSIM_API void RecordConversation(float Quality);
+	APARTMENTLIFEWORLDSIM_API void RecordSharedActivity(float Quality);
 };
 
 USTRUCT(BlueprintType)
@@ -310,8 +373,12 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeMemoryRecord
 	float EmotionalWeight = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Memory")
+	FText SummaryText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Memory")
 	int32 ReinforcementCount = 0;
 
+	APARTMENTLIFEWORLDSIM_API float GetRecencyWeight(const FApartmentLifeGameTime& CurrentTime) const;
 	APARTMENTLIFEWORLDSIM_API void ApplyDecay(float DecayRate);
 	APARTMENTLIFEWORLDSIM_API void Reinforce(float Amount);
 };

@@ -54,9 +54,28 @@ void FApartmentLifeRelationshipRecord::RecordConversation(float Quality)
 {
 	++ConversationCount;
 	const float Delta = FMath::Clamp(Quality, -1.f, 1.f) * 5.f;
+	Familiarity = FMath::Clamp(Familiarity + FMath::Abs(Delta) * 0.5f, 0.f, 100.f);
 	Friendship = FMath::Clamp(Friendship + Delta, 0.f, 100.f);
 	Trust = FMath::Clamp(Trust + Delta * 0.5f, 0.f, 100.f);
 	Comfort = FMath::Clamp(Comfort + Delta * 0.3f, 0.f, 100.f);
+}
+
+void FApartmentLifeRelationshipRecord::RecordSharedActivity(float Quality)
+{
+	++SharedActivityCount;
+	const float Delta = FMath::Clamp(Quality, -1.f, 1.f) * 6.f;
+	Familiarity = FMath::Clamp(Familiarity + FMath::Abs(Delta) * 0.6f, 0.f, 100.f);
+	Friendship = FMath::Clamp(Friendship + Delta, 0.f, 100.f);
+	Trust = FMath::Clamp(Trust + Delta * 0.4f, 0.f, 100.f);
+	Comfort = FMath::Clamp(Comfort + Delta * 0.5f, 0.f, 100.f);
+	SharedInterests = FMath::Clamp(SharedInterests + Delta * 0.3f, 0.f, 100.f);
+}
+
+float FApartmentLifeMemoryRecord::GetRecencyWeight(const FApartmentLifeGameTime& CurrentTime) const
+{
+	const int64 MinuteDelta = FMath::Max<int64>(0, CurrentTime.TotalMinutes - Timestamp.TotalMinutes);
+	const float Recency = FMath::Clamp(1.f - static_cast<float>(MinuteDelta) / (90.f * 24.f * 60.f), 0.1f, 1.f);
+	return Strength * Recency * (1.f + FMath::Abs(EmotionalWeight) * 0.25f);
 }
 
 void FApartmentLifeMemoryRecord::ApplyDecay(float DecayRate)

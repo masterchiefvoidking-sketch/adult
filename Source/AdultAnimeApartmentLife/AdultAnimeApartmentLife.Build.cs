@@ -23,7 +23,8 @@ public class AdultAnimeApartmentLife : ModuleRules
 			"ApartmentLifeAI",
 			"ApartmentLifeActivities",
 			"ApartmentLifeWorldSim",
-			"ApartmentLifeCharacterPipeline"
+			"ApartmentLifeCharacterPipeline",
+			"ApartmentLifeSocial"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

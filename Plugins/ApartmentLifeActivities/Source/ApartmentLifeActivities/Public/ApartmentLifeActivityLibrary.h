@@ -50,4 +50,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Activity")
 	static EApartmentLifeActivityRoom RoomTypeToActivityRoom(EApartmentLifeRoomType Room);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Activity")
+	static EApartmentLifeRoomType ActivityRoomToRoomType(EApartmentLifeActivityRoom Room);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Activity")
+	static EApartmentLifeRoomType GetPreferredRoomForActivity(FName ActivityId);
 };

@@ -98,9 +98,7 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 		{
 			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
 			{
-				FApartmentLifeGameTime Time = TimeSubsystem->GetCurrentTime();
-				Time.Hour = (Time.Hour + 1) % 24;
-				TimeSubsystem->SetCurrentTime(Time);
+				TimeSubsystem->AdvanceMinutes(60);
 			}
 		}
 	}

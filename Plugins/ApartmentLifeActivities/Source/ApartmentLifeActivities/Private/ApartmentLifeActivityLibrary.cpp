@@ -53,6 +53,33 @@ EApartmentLifeActivityRoom UApartmentLifeActivityLibrary::RoomTypeToActivityRoom
 	}
 }
 
+EApartmentLifeRoomType UApartmentLifeActivityLibrary::ActivityRoomToRoomType(EApartmentLifeActivityRoom Room)
+{
+	switch (Room)
+	{
+	case EApartmentLifeActivityRoom::Bedroom: return EApartmentLifeRoomType::Bedroom;
+	case EApartmentLifeActivityRoom::Bathroom: return EApartmentLifeRoomType::Bathroom;
+	case EApartmentLifeActivityRoom::LivingRoom: return EApartmentLifeRoomType::LivingRoom;
+	case EApartmentLifeActivityRoom::Kitchen: return EApartmentLifeRoomType::Kitchen;
+	case EApartmentLifeActivityRoom::DiningRoom: return EApartmentLifeRoomType::DiningRoom;
+	case EApartmentLifeActivityRoom::WalkInCloset: return EApartmentLifeRoomType::Bedroom;
+	case EApartmentLifeActivityRoom::Office: return EApartmentLifeRoomType::Office;
+	case EApartmentLifeActivityRoom::LaundryRoom: return EApartmentLifeRoomType::LaundryRoom;
+	case EApartmentLifeActivityRoom::YogaArea: return EApartmentLifeRoomType::LivingRoom;
+	default: return EApartmentLifeRoomType::LivingRoom;
+	}
+}
+
+EApartmentLifeRoomType UApartmentLifeActivityLibrary::GetPreferredRoomForActivity(FName ActivityId)
+{
+	FApartmentLifeActivityDefinition Def;
+	if (TryGetDefinition(ActivityId, Def))
+	{
+		return ActivityRoomToRoomType(Def.RequiredRoom);
+	}
+	return EApartmentLifeRoomType::LivingRoom;
+}
+
 bool UApartmentLifeActivityLibrary::CanStartActivity(
 	FName ActivityId,
 	EApartmentLifeRoomType CurrentRoom,

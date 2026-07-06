@@ -5,6 +5,7 @@
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeInteractionLibrary.h"
 #include "ApartmentLifeActivityComponent.h"
+#include "ApartmentLifeActivityLibrary.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 
@@ -153,7 +154,8 @@ bool UApartmentLifeInteractionSelectionComponent::StartActivityOnOwner(FName Act
 
 	if (UApartmentLifeActivityComponent* Activity = GetOwner()->FindComponentByClass<UApartmentLifeActivityComponent>())
 	{
-		return Activity->StartActivity(ActivityId);
+		const EApartmentLifeRoomType PreferredRoom = UApartmentLifeActivityLibrary::GetPreferredRoomForActivity(ActivityId);
+		return Activity->StartActivity(ActivityId, PreferredRoom);
 	}
 	return false;
 }

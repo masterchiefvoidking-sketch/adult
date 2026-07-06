@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "0.1.0",
 	"FriendlyName": "Apartment Life Dev Tools",
-	"Description": "Private development debug tools: spawn, time, money, save tests, animation and dialogue preview.",
+	"Description": "Private development toolkit: Developer Hub, live property editor, content browser, validation, lighting lab, performance overlay, and backup tools.",
 	"Category": "Apartment Life",
 	"CreatedBy": "Adult Anime Apartment Life",
 	"CanContainContent": false,

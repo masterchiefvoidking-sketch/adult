@@ -25,24 +25,33 @@ void AApartmentLifeSingleCharacterGameMode::BeginPlay()
 	Super::BeginPlay();
 	bLoadedSaveOnStart = false;
 
+	bool bShouldLoadSave = false;
 	if (bAutoLoadOnStart)
 	{
 		if (UGameInstance* GI = GetGameInstance())
 		{
 			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
 			{
-				if (SaveSubsystem->DoesSaveExist(AutoLoadSlot))
-				{
-					if (SaveSubsystem->LoadFromSlot(AutoLoadSlot))
-					{
-						bLoadedSaveOnStart = true;
-					}
-				}
+				bShouldLoadSave = SaveSubsystem->DoesSaveExist(AutoLoadSlot);
 			}
 		}
 	}
 
 	BootstrapApartment();
+
+	if (bShouldLoadSave)
+	{
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				if (SaveSubsystem->LoadFromSlot(AutoLoadSlot))
+				{
+					bLoadedSaveOnStart = true;
+				}
+			}
+		}
+	}
 
 	if (bLoadedSaveOnStart)
 	{
@@ -140,15 +149,22 @@ void AApartmentLifeSingleCharacterGameMode::ConfigureGirlCharacter(AApartmentLif
 		return;
 	}
 
-	if (UApartmentLifeNPCSimulationComponent* Sim = Character->GetSimulationComponent())
+	if (bSeedWardrobe)
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = Character->GetSimulationComponent())
+		{
+			Sim->CharacterId = FName(TEXT("character.main"));
+			UApartmentLifeGirlLifeLibrary::ConfigureRemoteWorkCareer(Sim, RemoteWorkTypeId);
+			Sim->Personality.Kindness = 0.75f;
+			Sim->Personality.Empathy = 0.8f;
+			Sim->Personality.FitnessInterest = 0.65f;
+			Sim->AffectionTowardPlayer = 55.f;
+			Sim->TrustTowardPlayer = 50.f;
+		}
+	}
+	else if (UApartmentLifeNPCSimulationComponent* Sim = Character->GetSimulationComponent())
 	{
 		Sim->CharacterId = FName(TEXT("character.main"));
-		UApartmentLifeGirlLifeLibrary::ConfigureRemoteWorkCareer(Sim, RemoteWorkTypeId);
-		Sim->Personality.Kindness = 0.75f;
-		Sim->Personality.Empathy = 0.8f;
-		Sim->Personality.FitnessInterest = 0.65f;
-		Sim->AffectionTowardPlayer = 55.f;
-		Sim->TrustTowardPlayer = 50.f;
 	}
 
 	if (bSeedWardrobe)

@@ -18,6 +18,7 @@ class UApartmentLifeWardrobeShoppingComponent;
 class UApartmentLifeWorkUiController;
 class UApartmentLifeFinanceUiController;
 class UApartmentLifeCharacterCreatorUiController;
+class UApartmentLifeDeveloperUiController;
 class UApartmentLifeUiBridgeComponent;
 
 /**
@@ -70,6 +71,8 @@ protected:
 	void OnToggleBuildMode();
 	void OnBuildTopDown();
 	void OnOpenWardrobe();
+	void OpenWardrobeSession();
+	bool IsWardrobeActivityId(FName ActivityId) const;
 	void OnOpenWorkMenu();
 	void OnToggleBudget();
 	void OnOpenApartmentShop();
@@ -86,6 +89,7 @@ protected:
 	void OnFocusGirlFace();
 	void OnFocusGirlOutfit();
 	void OnToggleDebugMenu();
+	void OnTogglePerfOverlay();
 	void OnUiBack();
 	void OnToggleGameHud();
 	void OnOpenSaveLoadScreen();
@@ -172,6 +176,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Single Character|Creator")
 	TObjectPtr<UApartmentLifeCharacterCreatorUiController> CreatorUiController;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Developer")
+	TObjectPtr<UApartmentLifeDeveloperUiController> DeveloperUiController;
 
 	UPROPERTY(EditAnywhere, Category = "Single Character|Save")
 	int32 QuickSaveSlot = 0;

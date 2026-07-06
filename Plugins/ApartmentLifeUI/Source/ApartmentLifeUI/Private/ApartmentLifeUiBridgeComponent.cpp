@@ -28,6 +28,9 @@
 #include "ApartmentLifeProgressionComponent.h"
 #include "ApartmentLifeActivityComponent.h"
 #include "ApartmentLifeCharacterCreatorUiController.h"
+#include "ApartmentLifeDeveloperUiController.h"
+#include "ApartmentLifeDeveloperSubsystem.h"
+#include "ApartmentLifeDeveloperLibrary.h"
 #include "ApartmentLifeCharacterCreatorTypes.h"
 #include "ApartmentLifeCharacterCreatorLibrary.h"
 #include "ApartmentLifeImmersionSubsystem.h"
@@ -86,6 +89,7 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	UApartmentLifeFinanceUiController* InFinanceUi,
 	UApartmentLifeInteractionHudComponent* InInteractionHud,
 	UApartmentLifeCharacterCreatorUiController* InCreatorUi,
+	UApartmentLifeDeveloperUiController* InDeveloperUi,
 	int32 InQuickSaveSlot,
 	bool bInEnterGameplayDirectly)
 {
@@ -97,6 +101,7 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	FinanceUi = InFinanceUi;
 	InteractionHud = InInteractionHud;
 	CreatorUi = InCreatorUi;
+	DeveloperUi = InDeveloperUi;
 	QuickSaveSlot = InQuickSaveSlot;
 	bEnterGameplayDirectly = bInEnterGameplayDirectly;
 
@@ -108,6 +113,11 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	if (CreatorUi.IsValid())
 	{
 		CreatorUi->OnCreatorUiStateChanged.AddDynamic(this, &UApartmentLifeUiBridgeComponent::HandleCreatorUiStateChanged);
+	}
+
+	if (DeveloperUi.IsValid())
+	{
+		DeveloperUi->OnDeveloperUiStateChanged.AddDynamic(this, &UApartmentLifeUiBridgeComponent::HandleDeveloperUiStateChanged);
 	}
 
 	if (UApartmentLifeInteractionSelectionComponent* Selection = GetSelection())
@@ -450,6 +460,14 @@ void UApartmentLifeUiBridgeComponent::TickComponent(float DeltaTime, ELevelTick 
 			Yoga->UpdatePoseInput(InputAccuracy, DeltaTime);
 		}
 	}
+
+	if (UGameInstance* GI = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+	{
+		if (UApartmentLifeDeveloperSubsystem* Dev = GI->GetSubsystem<UApartmentLifeDeveloperSubsystem>())
+		{
+			Dev->TickPerformance(DeltaTime, this, GirlCharacter.Get(), QuickSaveSlot);
+		}
+	}
 }
 
 void UApartmentLifeUiBridgeComponent::RefreshMainMenuSlots()
@@ -538,6 +556,17 @@ void UApartmentLifeUiBridgeComponent::RefreshHud()
 		Hud.ActivityLabel = Activity->GetCurrentActivityId().ToString();
 	}
 
+	if (UGameInstance* GI = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+	{
+		if (UApartmentLifeDeveloperSubsystem* Dev = GI->GetSubsystem<UApartmentLifeDeveloperSubsystem>())
+		{
+			if (Dev->IsPerformanceOverlayVisible())
+			{
+				Hud.DeveloperOverlayLabel = UApartmentLifeDeveloperLibrary::FormatPerformanceSnapshot(Dev->GetPerformanceSnapshot());
+			}
+		}
+	}
+
 	Ui->SetHudState(Hud);
 }
 
@@ -600,6 +629,7 @@ void UApartmentLifeUiBridgeComponent::RefreshActiveScreen()
 	case EApartmentLifeUiScreen::Settings: PushSettingsPanel(); break;
 	case EApartmentLifeUiScreen::CharacterCreator: PushCharacterCreatorPanel(); break;
 	case EApartmentLifeUiScreen::Yoga: PushYogaPanel(); break;
+	case EApartmentLifeUiScreen::DeveloperHub: PushDeveloperHubPanel(); break;
 	default: break;
 	}
 }
@@ -925,7 +955,7 @@ void UApartmentLifeUiBridgeComponent::PushProfilePanel()
 		{TEXT("Stress"), FString::Printf(TEXT("%.0f"), Sim->Mood.Stress)},
 		{TEXT("Affection"), FString::Printf(TEXT("%.0f"), Sim->AffectionTowardPlayer)},
 		{TEXT("Savings"), FString::Printf(TEXT("$%.0f"), Sim->Finance.Savings)},
-		{TEXT("Apartment Comfort"), FString::Printf(TEXT("%.0f"), Sim->Apartment.ComfortScore)}
+		{TEXT("Apartment Comfort"), FString::Printf(TEXT("%.0f"), Sim->Apartment.Cleanliness)}
 	};
 
 	for (const TPair<FString, FString>& Stat : Stats)
@@ -1300,6 +1330,19 @@ void UApartmentLifeUiBridgeComponent::HandleUiBack()
 		return;
 	}
 
+	if (Screen == EApartmentLifeUiScreen::DeveloperHub && DeveloperUi.IsValid())
+	{
+		if (DeveloperUi->GetActiveSection() != EApartmentLifeDeveloperHubSection::Root)
+		{
+			DeveloperUi->NavigateToSection(EApartmentLifeDeveloperHubSection::Root);
+			PushDeveloperHubPanel();
+			return;
+		}
+		DeveloperUi->CloseDeveloperHub();
+		Ui->CloseScreen();
+		return;
+	}
+
 	if (Screen == EApartmentLifeUiScreen::Wardrobe && WardrobeUi.IsValid())
 	{
 		if (AApartmentLifePlayerController* ALPC = Cast<AApartmentLifePlayerController>(OwnerController.Get()))
@@ -1389,6 +1432,11 @@ void UApartmentLifeUiBridgeComponent::HandleListItemSelected(EApartmentLifeUiScr
 		WardrobeUi->SelectItemIndex(Index);
 		WardrobeUi->PreviewSelectedItem();
 		PushWardrobePanel();
+	}
+	else if (Screen == EApartmentLifeUiScreen::DeveloperHub && DeveloperUi.IsValid())
+	{
+		DeveloperUi->SelectContentIndex(Index);
+		PushDeveloperHubPanel();
 	}
 }
 
@@ -1656,6 +1704,10 @@ void UApartmentLifeUiBridgeComponent::HandleListItemActivated(EApartmentLifeUiSc
 		}
 		break;
 
+	case EApartmentLifeUiScreen::DeveloperHub:
+		HandleDeveloperHubActivation(Index);
+		break;
+
 	default:
 		break;
 	}
@@ -1681,8 +1733,15 @@ void UApartmentLifeUiBridgeComponent::HandleMainMenuContinue(int32 SlotIndex)
 	UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>();
 	if (SaveSubsystem && SaveSubsystem->DoesSaveExist(SlotIndex))
 	{
-		SaveSubsystem->LoadFromSlot(SlotIndex);
-		OnPostLoadRequested.Broadcast();
+		const bool bLoaded = SaveSubsystem->LoadFromSlot(SlotIndex);
+		if (bLoaded)
+		{
+			OnPostLoadRequested.Broadcast();
+		}
+		else if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())
+		{
+			Ui->ShowToast(FText::FromString(TEXT("Load failed")), 2.f);
+		}
 	}
 
 	if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())

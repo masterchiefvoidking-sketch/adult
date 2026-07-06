@@ -2,6 +2,7 @@
 
 #include "ApartmentLifeDebugMenuComponent.h"
 #include "ApartmentLifeDevToolsLibrary.h"
+#include "ApartmentLifeDeveloperSubsystem.h"
 #include "ApartmentLifeWardrobeTypes.h"
 #include "ApartmentLifeApartmentUnit.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
@@ -62,7 +63,19 @@ void UApartmentLifeDebugMenuComponent::ShowMenuOverlay() const
 
 void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 {
-	if (!bMenuOpen)
+	bool bAllowActions = bMenuOpen;
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (const UApartmentLifeDeveloperSubsystem* Dev = GI->GetSubsystem<UApartmentLifeDeveloperSubsystem>())
+			{
+				bAllowActions = bAllowActions || Dev->IsDeveloperModeEnabled();
+			}
+		}
+	}
+
+	if (!bAllowActions)
 	{
 		return;
 	}
@@ -85,9 +98,7 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 		{
 			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
 			{
-				FApartmentLifeGameTime Time = TimeSubsystem->GetCurrentTime();
-				Time.Hour = (Time.Hour + 1) % 24;
-				TimeSubsystem->SetCurrentTime(Time);
+				TimeSubsystem->AdvanceMinutes(60);
 			}
 		}
 	}

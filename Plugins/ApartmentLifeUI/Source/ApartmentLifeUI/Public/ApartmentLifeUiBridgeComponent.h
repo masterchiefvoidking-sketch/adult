@@ -18,6 +18,7 @@ class UApartmentLifeUiSubsystem;
 class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWorkUiController;
 class UApartmentLifeCharacterCreatorUiController;
+class UApartmentLifeDeveloperUiController;
 class UApartmentLifeImmersionSubsystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApartmentLifeUiBridgePostLoadRequested);
@@ -39,6 +40,7 @@ public:
 		UApartmentLifeFinanceUiController* InFinanceUi,
 		UApartmentLifeInteractionHudComponent* InInteractionHud,
 		UApartmentLifeCharacterCreatorUiController* InCreatorUi,
+		UApartmentLifeDeveloperUiController* InDeveloperUi = nullptr,
 		int32 InQuickSaveSlot = 0,
 		bool bInEnterGameplayDirectly = true);
 
@@ -90,6 +92,8 @@ protected:
 	void PushSettingsPanel();
 	void PushYogaPanel();
 	void PushCharacterCreatorPanel();
+	void PushDeveloperHubPanel();
+	void HandleDeveloperHubActivation(int32 Index);
 	void SyncSettingsFromCamera();
 	void ApplySettingsToCamera();
 	void ApplyImmersionSettings();
@@ -126,6 +130,9 @@ protected:
 
 	UFUNCTION()
 	void HandleCreatorUiStateChanged();
+
+	UFUNCTION()
+	void HandleDeveloperUiStateChanged();
 
 	UFUNCTION()
 	void HandleInteractableSelected(AActor* Target, const TArray<struct FApartmentLifeInteractionDescriptor>& Actions);
@@ -175,6 +182,9 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<UApartmentLifeCharacterCreatorUiController> CreatorUi;
+
+	UPROPERTY()
+	TWeakObjectPtr<UApartmentLifeDeveloperUiController> DeveloperUi;
 
 	int32 QuickSaveSlot = 0;
 	bool bEnterGameplayDirectly = true;

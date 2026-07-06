@@ -66,6 +66,9 @@ protected:
 	void HandleActivityChanged(FName ActivityId);
 
 	UFUNCTION()
+	void HandleActivityCompleted(FName ActivityId);
+
+	UFUNCTION()
 	void HandleScheduleOccasion(const FApartmentLifeGameTime& NewTime);
 
 	UFUNCTION()

@@ -12,9 +12,8 @@
 #include "ApartmentLifeClothingFitComponent.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeInteractionComponent.h"
+#include "ApartmentLifeGirlLifeLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
-#include "ApartmentLifeCitySubsystem.h"
-#include "ApartmentLifeWorldSimCityBridge.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 
@@ -39,6 +38,11 @@ void AApartmentLifeSimCharacter::BeginPlay()
 	if (SimulationComponent)
 	{
 		SimulationComponent->OnActivityChanged.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityChanged);
+	}
+
+	if (ActivityComponent)
+	{
+		ActivityComponent->OnActivityCompleted.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityCompleted);
 	}
 
 	if (CreatorComponent)
@@ -69,21 +73,6 @@ void AApartmentLifeSimCharacter::BeginPlay()
 			SocialSubsystem->RegisterSimCharacter(this);
 		}
 	}
-
-	if (UWorld* World = GetWorld())
-	{
-		if (UApartmentLifeCitySubsystem* CitySubsystem = World->GetSubsystem<UApartmentLifeCitySubsystem>())
-		{
-			if (SimulationComponent)
-			{
-				CitySubsystem->UpdateNPCLocation(
-					SimulationComponent->GetCharacterId(),
-					SimulationComponent->GetHomeDistrictId(),
-					NAME_None,
-					0.f);
-			}
-		}
-	}
 }
 
 void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
@@ -100,7 +89,7 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 
 	if (SimulationComponent)
 	{
-		UApartmentLifeWorldSimCityBridge::ApplyActivitySkillGain(SimulationComponent->Skills, ActivityId);
+		UApartmentLifeGirlLifeLibrary::ApplyActivitySkillGain(SimulationComponent->Skills, ActivityId);
 	}
 
 	if (ActivityId.ToString().Contains(TEXT("social")) || ActivityId.ToString().Contains(TEXT("talk")))
@@ -109,6 +98,14 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 		{
 			AnimationComponent->SetAnimationGroup(EApartmentLifeAnimationGroup::Conversation);
 		}
+	}
+}
+
+void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
+{
+	if (SimulationComponent)
+	{
+		UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(SimulationComponent, ActivityId);
 	}
 }
 

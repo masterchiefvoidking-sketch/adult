@@ -302,3 +302,33 @@ FApartmentLifeDialogueContext UApartmentLifeSocialLibrary::BuildDialogueContext(
 
 	return Context;
 }
+
+FApartmentLifeDialogueContext UApartmentLifeSocialLibrary::BuildPlayerDialogueContext(
+	UApartmentLifeNPCSimulationComponent* GirlSim,
+	const FApartmentLifeGameTime& Time,
+	const FApartmentLifeWeatherState& Weather,
+	FName LocationTag)
+{
+	FApartmentLifeDialogueContext Context;
+	if (!GirlSim)
+	{
+		return Context;
+	}
+
+	Context.SpeakerCharacterId = GirlSim->GetCharacterId();
+	Context.ListenerCharacterId = FName(TEXT("player"));
+	Context.SpeakerPersonality = GirlSim->GetPersonality();
+	Context.SpeakerMood = GirlSim->GetMood();
+	Context.CareerId = GirlSim->GetCareer().CareerId;
+	Context.TimeOfDay = Time;
+	Context.Weather = Weather;
+	Context.LocationTag = LocationTag;
+
+	Context.Relationship.Friendship = GirlSim->GetAffectionTowardPlayer();
+	Context.Relationship.Trust = GirlSim->TrustTowardPlayer;
+	Context.Relationship.Comfort = GirlSim->GetMood().Comfort;
+	Context.Relationship.RomanceAttraction = GirlSim->GetAffectionTowardPlayer() * 0.85f;
+	Context.Relationship.Compatibility = (GirlSim->GetAffectionTowardPlayer() + GirlSim->TrustTowardPlayer) * 0.5f;
+
+	return Context;
+}

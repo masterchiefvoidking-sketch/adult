@@ -25,7 +25,6 @@ public class AdultAnimeApartmentLife : ModuleRules
 			"ApartmentLifeWorldSim",
 			"ApartmentLifeCharacterPipeline",
 			"ApartmentLifeSocial",
-			"ApartmentLifeCity",
 			"ApartmentLifeInteraction",
 			"ApartmentLifeDevTools"
 		});

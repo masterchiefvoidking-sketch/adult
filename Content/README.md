@@ -44,12 +44,12 @@ DeveloperTools/
 Tests/
 ```
 
-## Vertical Slice Minimum Content
+## Single Character Minimum Content
 
-To replace C++ placeholders with real assets, author first:
+Author first for `character.main`:
 
-1. One apartment layout data asset (`DA_Apartment_OneBedroom`)
-2. Six furniture data assets matching starter IDs (`furniture.bed.default`, etc.)
-3. One character archetype per sim character
-4. A small casual outfit set (top, bottom, footwear)
+1. One apartment layout data asset
+2. Eight furniture data assets (bed, closet, desk, sofa, kitchen, shower, mirror, yoga mat)
+3. One girl character archetype + AnimBP
+4. Small casual outfit set
 5. `Maps/DevSandbox` — empty floor + lighting for PIE

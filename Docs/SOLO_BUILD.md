@@ -1,150 +1,76 @@
 # Solo Build Pipeline
 
-Private single-developer workflow for **Adult Anime Apartment Life**. This document describes how to extend the game without building enterprise systems.
+Private single-developer workflow for **Adult Anime Apartment Life** — **one girl, one apartment** (MP08).
 
-## Scope
+## Scope (Current)
 
-Build the smallest powerful version first:
+Build around:
 
 1. One apartment
-2. One customizable main character
-3. One customizable partner NPC
-4. One wardrobe system
-5. One furniture/build mode
-6. One daily routine system
-7. One relationship/dialogue system
-8. One yoga mini-game
-9. One shower/grooming routine (non-explicit)
-10. One bedroom routine: sleep, relax, read, change outfit
+2. One customizable girl character
+3. One player-controlled camera
+4. Wardrobe, furniture, daily routine, dialogue
+5. Yoga, grooming, shower (non-explicit), bedroom routines
+6. Computer-based income
+7. Local save/load
 
-Do **not** build yet: multiplayer, accounts, marketplace, cloud backend, mod browser, live-service economy.
+## Deferred (Do Not Build Yet)
+
+- City simulation and open world
+- Multiple NPCs and social networks
+- Large career / traffic / public events systems
+- Multiplayer, accounts, marketplace, cloud, mod browser
+
+See [SINGLE_CHARACTER.md](SINGLE_CHARACTER.md) for the active build spec.
 
 ## Folder Structure
 
 Create these Content Browser folders under `/Game/`:
 
 ```
-Characters/
-  Body/
-  Hair/
-  Clothing/
-  Animations/
-Apartments/
-  Rooms/
-  Furniture/
-  Materials/
-Gameplay/
-  Camera/
-  Interaction/
-  AI/
-  Schedules/
-  Relationships/
-  Activities/
-UI/
-  CharacterCreator/
-  Wardrobe/
-  BuildMode/
-  Dialogue/
-  Inventory/
-Data/
-  Characters/
-  Clothing/
-  Furniture/
-  Jobs/
-  Activities/
-  Dialogues/
+Characters/Body, Hair, Clothing, Animations
+Apartments/Rooms, Furniture, Materials
+Gameplay/Camera, Interaction, Schedules, Activities
+UI/CharacterCreator, Wardrobe, BuildMode, Dialogue
+Data/Characters, Clothing, Furniture, Activities, Dialogues
 SaveSystem/
 DeveloperTools/
 Tests/
 ```
 
-## Content Workflow
+## Active Plugins
 
-All gameplay content is added through **Primary Data Assets**, not hardcoded C++.
+| Plugin | Role |
+|--------|------|
+| ApartmentLifeCore | Time, save, data registry |
+| ApartmentLifeCamera | Orbit, build, character focus cameras |
+| ApartmentLifeCharacter | Creator and body |
+| ApartmentLifeWardrobe | Clothing and presets |
+| ApartmentLifeApartment | Furniture and build mode |
+| ApartmentLifeInteraction | Interact → activity |
+| ApartmentLifeActivities | Activity execution + fallbacks |
+| ApartmentLifeWorldSim | Girl life sim, mood, finance, affection |
+| ApartmentLifeCharacterPipeline | Animation, yoga, grooming |
+| ApartmentLifeSocial | Player dialogue |
+| ApartmentLifeDevTools | Debug helpers (non-shipping) |
 
-Each content item should define:
-
-| Field | Purpose |
-|-------|---------|
-| ID | Stable save-compatible identifier |
-| Display name | UI label |
-| Category | Filtering and rules |
-| Description | Tooltips and debug |
-| Tags | Search, AI, weather/occasion |
-| Price | Economy when applicable |
-| Requirements | Unlock gates |
-| Preview image/icon | UI and build mode |
-| Data references | Meshes, animations, activities |
-
-## Plugin Map (Vertical Slice)
-
-| Plugin | Role in solo build |
-|--------|----------------------|
-| **ApartmentLifeCore** | Time, save, data registry |
-| **ApartmentLifeCamera** | Orbit, build, character creator cameras |
-| **ApartmentLifeCharacter** | Creator and body |
-| **ApartmentLifeWardrobe** | Clothing layers and presets |
-| **ApartmentLifeApartment** | Apartment, furniture, build mode |
-| **ApartmentLifeInteraction** | Universal interact → activity wiring |
-| **ApartmentLifeActivities** | Activity execution |
-| **ApartmentLifeWorldSim** | NPC schedules, mood, finance |
-| **ApartmentLifeCharacterPipeline** | Animation, yoga, grooming |
-| **ApartmentLifeSocial** | Dialogue and relationships |
-| **ApartmentLifeDevTools** | Private debug helpers (non-shipping) |
+**Disabled by default:** `ApartmentLifeCity`
 
 ## Developer Tools
 
-`UApartmentLifeDevToolsLibrary` (non-shipping) provides:
-
-- Add money
-- Change time of day
-- Spawn furniture
-- Reset apartment layout
-- Teleport character
-- Preview animation group
-- Preview dialogue
-- Save/load test slots
-
-Use these from Blueprint or the console during iteration. They are stripped in shipping builds.
+`UApartmentLifeDevToolsLibrary` — add money, change time, spawn furniture, save/load tests. Non-shipping only.
 
 ## Save / Load Rule
 
-**No feature is complete unless it survives save/load.**
+No feature is complete unless it survives save/load. Girl state includes affection, hygiene, energy, savings, wardrobe, and apartment layout.
 
-Persist through `IApartmentLifeSaveable` and `UApartmentLifeSaveSubsystem`:
+## Test Checklist
 
-- Character appearance and wardrobe
-- Apartment furniture placement
-- NPC schedule and simulation state
-- Relationship values
-- Money and inventory
-- Time of day and activity progress
-- Social and city subsystem state (via save registry)
-
-## Testing Checklist
-
-Run automation tests under `ApartmentLife.Interaction.*` and the builder/social/world sim suites.
-
-Manual vertical slice loop:
-
-1. Create / spawn character
-2. Move camera (orbit, pan, zoom)
-3. Change outfit (G)
-4. Place furniture (B build mode)
-5. Interact with bed, shower, yoga mat (E)
-6. Talk to partner (Q)
-7. Quick save (F5)
-8. Quick load (F9)
-9. Continue after loading
-
-## Next Expansion (When Ready)
-
-After the slice is stable, add content in this order:
-
-1. More clothing data assets
-2. More furniture and one layout data asset
-3. Dialogue topic data assets
-4. Schedule template for partner NPC
-5. UI widgets bound to existing components
-
-Keep each addition data-driven and save-compatible.
+1. Spawn girl + apartment
+2. Camera orbit / pan / zoom / face / outfit focus
+3. Wardrobe (G) and closet interact
+4. Build mode furniture placement
+5. Bed, shower, desk, yoga mat interactions
+6. Computer work → savings increase
+7. Talk (Q) → affection changes
+8. F5 save → F9 load → continue

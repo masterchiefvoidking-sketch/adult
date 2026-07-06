@@ -1,25 +1,25 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
-#include "ApartmentLifeVerticalSliceGameMode.h"
-#include "ApartmentLifeSlicePlayerController.h"
+#include "ApartmentLifeSingleCharacterGameMode.h"
+#include "ApartmentLifeSingleCharacterPlayerController.h"
 #include "ApartmentLifeSimCharacter.h"
 #include "ApartmentLifeApartmentUnit.h"
 #include "ApartmentLifeFurniturePlacementComponent.h"
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
+#include "ApartmentLifeGirlLifeLibrary.h"
 #include "ApartmentLifeSaveSubsystem.h"
-#include "ApartmentLifeSocialSubsystem.h"
 #include "Engine/World.h"
 
-AApartmentLifeVerticalSliceGameMode::AApartmentLifeVerticalSliceGameMode()
+AApartmentLifeSingleCharacterGameMode::AApartmentLifeSingleCharacterGameMode()
 {
-	PlayerControllerClass = AApartmentLifeSlicePlayerController::StaticClass();
+	PlayerControllerClass = AApartmentLifeSingleCharacterPlayerController::StaticClass();
 }
 
-void AApartmentLifeVerticalSliceGameMode::BeginPlay()
+void AApartmentLifeSingleCharacterGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	BootstrapSlice();
+	BootstrapApartment();
 
 	if (bAutoLoadOnStart)
 	{
@@ -36,7 +36,7 @@ void AApartmentLifeVerticalSliceGameMode::BeginPlay()
 	}
 }
 
-void AApartmentLifeVerticalSliceGameMode::BootstrapSlice()
+void AApartmentLifeSingleCharacterGameMode::BootstrapApartment()
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -48,8 +48,7 @@ void AApartmentLifeVerticalSliceGameMode::BootstrapSlice()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	ApartmentUnit = World->SpawnActor<AApartmentLifeApartmentUnit>(AApartmentLifeApartmentUnit::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, Params);
-	PlayerCharacter = World->SpawnActor<AApartmentLifeSimCharacter>(AApartmentLifeSimCharacter::StaticClass(), FVector(120.f, 0.f, 0.f), FRotator(0.f, 180.f, 0.f), Params);
-	PartnerCharacter = World->SpawnActor<AApartmentLifeSimCharacter>(AApartmentLifeSimCharacter::StaticClass(), FVector(220.f, 120.f, 0.f), FRotator(0.f, -90.f, 0.f), Params);
+	GirlCharacter = World->SpawnActor<AApartmentLifeSimCharacter>(AApartmentLifeSimCharacter::StaticClass(), FVector(0.f, 0.f, 0.f), FRotator(0.f, 180.f, 0.f), Params);
 
 	bool bSeedFurniture = true;
 	if (bAutoLoadOnStart)
@@ -68,27 +67,11 @@ void AApartmentLifeVerticalSliceGameMode::BootstrapSlice()
 		SeedStarterFurniture(ApartmentUnit);
 	}
 
-	ConfigureCharacter(PlayerCharacter, FName(TEXT("player.main")), FVector(120.f, 0.f, 0.f));
-	ConfigureCharacter(PartnerCharacter, FName(TEXT("npc.partner")), FVector(220.f, 120.f, 0.f));
-
-	if (PlayerCharacter && PartnerCharacter)
-	{
-		if (UApartmentLifeNPCSimulationComponent* PlayerSim = PlayerCharacter->GetSimulationComponent())
-		{
-			PlayerSim->AdjustRelationship(FName(TEXT("npc.partner")), 40.f, 35.f, 30.f);
-		}
-		if (UApartmentLifeNPCSimulationComponent* PartnerSim = PartnerCharacter->GetSimulationComponent())
-		{
-			PartnerSim->AdjustRelationship(FName(TEXT("player.main")), 40.f, 35.f, 30.f);
-			PartnerSim->Personality.Extroversion = 0.7f;
-			PartnerSim->Personality.CookingInterest = 0.8f;
-		}
-	}
-
+	ConfigureGirlCharacter(GirlCharacter);
 	LinkPlayerController();
 }
 
-void AApartmentLifeVerticalSliceGameMode::SeedStarterFurniture(AApartmentLifeApartmentUnit* Apartment)
+void AApartmentLifeSingleCharacterGameMode::SeedStarterFurniture(AApartmentLifeApartmentUnit* Apartment)
 {
 	if (!Apartment)
 	{
@@ -106,7 +89,9 @@ void AApartmentLifeVerticalSliceGameMode::SeedStarterFurniture(AApartmentLifeApa
 	const TArray<FSliceFurnitureSeed> Seeds = {
 		{ FName(TEXT("furniture.bed.default")), EApartmentLifeRoomType::Bedroom, FVector(-150.f, -80.f, 0.f), EApartmentLifeFurnitureCategory::Bed },
 		{ FName(TEXT("furniture.closet.default")), EApartmentLifeRoomType::Bedroom, FVector(-220.f, 40.f, 0.f), EApartmentLifeFurnitureCategory::Closet },
+		{ FName(TEXT("furniture.desk.default")), EApartmentLifeRoomType::Office, FVector(-40.f, -120.f, 0.f), EApartmentLifeFurnitureCategory::Desk },
 		{ FName(TEXT("furniture.sofa.default")), EApartmentLifeRoomType::LivingRoom, FVector(80.f, 60.f, 0.f), EApartmentLifeFurnitureCategory::Sofa },
+		{ FName(TEXT("furniture.kitchen.default")), EApartmentLifeRoomType::Kitchen, FVector(140.f, 160.f, 0.f), EApartmentLifeFurnitureCategory::KitchenAppliance },
 		{ FName(TEXT("furniture.shower.default")), EApartmentLifeRoomType::Bathroom, FVector(-80.f, 180.f, 0.f), EApartmentLifeFurnitureCategory::BathroomFixture },
 		{ FName(TEXT("furniture.mirror.default")), EApartmentLifeRoomType::Bathroom, FVector(20.f, 180.f, 0.f), EApartmentLifeFurnitureCategory::Mirror },
 		{ FName(TEXT("furniture.yoga_mat.default")), EApartmentLifeRoomType::LivingRoom, FVector(180.f, -40.f, 0.f), EApartmentLifeFurnitureCategory::WorkoutEquipment },
@@ -132,33 +117,29 @@ void AApartmentLifeVerticalSliceGameMode::SeedStarterFurniture(AApartmentLifeApa
 	}
 }
 
-void AApartmentLifeVerticalSliceGameMode::ConfigureCharacter(AApartmentLifeSimCharacter* Character, FName CharacterId, const FVector& Location)
+void AApartmentLifeSingleCharacterGameMode::ConfigureGirlCharacter(AApartmentLifeSimCharacter* Character)
 {
 	if (!Character)
 	{
 		return;
 	}
 
-	Character->SetActorLocation(Location);
-
 	if (UApartmentLifeNPCSimulationComponent* Sim = Character->GetSimulationComponent())
 	{
-		Sim->CharacterId = CharacterId;
-	}
-
-	if (UGameInstance* GI = GetGameInstance())
-	{
-		if (UApartmentLifeSocialSubsystem* Social = GI->GetSubsystem<UApartmentLifeSocialSubsystem>())
-		{
-			Social->RegisterSimCharacter(Character);
-		}
+		Sim->CharacterId = FName(TEXT("character.main"));
+		UApartmentLifeGirlLifeLibrary::ConfigureRemoteWorkCareer(Sim, RemoteWorkTypeId);
+		Sim->Personality.Kindness = 0.75f;
+		Sim->Personality.Empathy = 0.8f;
+		Sim->Personality.FitnessInterest = 0.65f;
+		Sim->AffectionTowardPlayer = 55.f;
+		Sim->TrustTowardPlayer = 50.f;
 	}
 }
 
-void AApartmentLifeVerticalSliceGameMode::LinkPlayerController()
+void AApartmentLifeSingleCharacterGameMode::LinkPlayerController()
 {
-	if (AApartmentLifeSlicePlayerController* SlicePC = Cast<AApartmentLifeSlicePlayerController>(GetWorld()->GetFirstPlayerController()))
+	if (AApartmentLifeSingleCharacterPlayerController* PC = Cast<AApartmentLifeSingleCharacterPlayerController>(GetWorld()->GetFirstPlayerController()))
 	{
-		SlicePC->SetSliceContext(ApartmentUnit, PlayerCharacter, PartnerCharacter);
+		PC->SetSingleCharacterContext(ApartmentUnit, GirlCharacter);
 	}
 }

@@ -25,6 +25,30 @@ bool UApartmentLifeConversationComponent::StartConversation(AActor* Partner, con
 	CurrentSession.PartnerCharacterId = PartnerSim->GetCharacterId();
 	CurrentSession.Phase = EApartmentLifeConversationPhase::Greeting;
 	CurrentPartner = Partner;
+	bPlayerConversation = false;
+	return true;
+}
+
+bool UApartmentLifeConversationComponent::StartConversationWithPlayer()
+{
+	if (CurrentSession.bIsActive)
+	{
+		return false;
+	}
+
+	UApartmentLifeNPCSimulationComponent* GirlSim = GetOwnerSimulation();
+	if (!GirlSim)
+	{
+		return false;
+	}
+
+	CurrentSession = FApartmentLifeConversationSession();
+	CurrentSession.bIsActive = true;
+	CurrentSession.InitiatorCharacterId = FName(TEXT("player"));
+	CurrentSession.PartnerCharacterId = FName(TEXT("player"));
+	CurrentSession.Phase = EApartmentLifeConversationPhase::Greeting;
+	CurrentPartner = nullptr;
+	bPlayerConversation = true;
 	return true;
 }
 
@@ -52,7 +76,11 @@ bool UApartmentLifeConversationComponent::AdvanceConversation(const UApartmentLi
 			Weather = TimeSubsystem->GetCurrentWeather();
 		}
 
-		if (UApartmentLifeNPCSimulationComponent* ListenerSim = GetPartnerSimulation())
+		if (bPlayerConversation)
+		{
+			Context = UApartmentLifeSocialLibrary::BuildPlayerDialogueContext(SpeakerSim, Time, Weather, FName(TEXT("apartment.home")));
+		}
+		else if (UApartmentLifeNPCSimulationComponent* ListenerSim = GetPartnerSimulation())
 		{
 			Context = UApartmentLifeSocialLibrary::BuildDialogueContext(SpeakerSim, ListenerSim, Time, Weather, NAME_None);
 		}
@@ -93,6 +121,7 @@ void UApartmentLifeConversationComponent::EndConversation()
 	OnConversationEnded.Broadcast(CurrentSession);
 	CurrentSession = FApartmentLifeConversationSession();
 	CurrentPartner = nullptr;
+	bPlayerConversation = false;
 }
 
 void UApartmentLifeConversationComponent::ApplyConversationResults(float Quality)
@@ -103,9 +132,18 @@ void UApartmentLifeConversationComponent::ApplyConversationResults(float Quality
 		return;
 	}
 
-	SpeakerSim->RecordConversationWith(CurrentSession.PartnerCharacterId, Quality);
-	SpeakerSim->RecordMemory(EApartmentLifeMemoryCategory::Conversation, CurrentSession.PartnerCharacterId, FMath::Abs(Quality));
-	SpeakerSim->ApplySocialFulfillment(FMath::Max(0.f, Quality * 10.f));
+	if (bPlayerConversation)
+	{
+		SpeakerSim->AdjustPlayerBond(Quality * 4.f, Quality * 2.f);
+		SpeakerSim->RecordMemory(EApartmentLifeMemoryCategory::Conversation, FName(TEXT("player")), FMath::Abs(Quality));
+		SpeakerSim->ApplySocialFulfillment(FMath::Max(0.f, Quality * 10.f));
+	}
+	else
+	{
+		SpeakerSim->RecordConversationWith(CurrentSession.PartnerCharacterId, Quality);
+		SpeakerSim->RecordMemory(EApartmentLifeMemoryCategory::Conversation, CurrentSession.PartnerCharacterId, FMath::Abs(Quality));
+		SpeakerSim->ApplySocialFulfillment(FMath::Max(0.f, Quality * 10.f));
+	}
 
 	if (Quality > 0.3f)
 	{

@@ -60,7 +60,7 @@
 		},
 		{
 			"Name": "ApartmentLifeCity",
-			"Enabled": true
+			"Enabled": false
 		},
 		{
 			"Name": "ApartmentLifeInteraction",

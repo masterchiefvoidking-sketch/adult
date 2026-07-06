@@ -23,6 +23,9 @@ public:
 	bool StartConversation(AActor* Partner, const FApartmentLifeDialogueContext& Context);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Conversation")
+	bool StartConversationWithPlayer();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Conversation")
 	bool AdvanceConversation(const UApartmentLifeDialogueTopicData* Topic);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Conversation")
@@ -60,4 +63,6 @@ protected:
 
 	UPROPERTY()
 	TArray<EApartmentLifeConversationTopic> RecentlyDiscussedTopics;
+
+	bool bPlayerConversation = false;
 };

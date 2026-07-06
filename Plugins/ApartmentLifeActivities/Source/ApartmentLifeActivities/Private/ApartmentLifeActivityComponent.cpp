@@ -4,6 +4,7 @@
 #include "ApartmentLifeContentSettings.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
+#include "ApartmentLifeActivityFallbackLibrary.h"
 
 void UApartmentLifeActivityComponent::HandleMinuteAdvanced(const FApartmentLifeGameTime& NewTime)
 {
@@ -21,8 +22,36 @@ void UApartmentLifeActivityComponent::HandleMinuteAdvanced(const FApartmentLifeG
 
 bool UApartmentLifeActivityComponent::StartActivity(FName ActivityId)
 {
+	if (ActivityId.IsNone())
+	{
+		return false;
+	}
+
 	UApartmentLifeActivityData* Activity = ResolveActivity(ActivityId);
-	if (!Activity || !CanStartActivity(Activity))
+	if (!Activity)
+	{
+		if (bActivityActive)
+		{
+			CancelCurrentActivity();
+		}
+
+		CurrentActivityId = ActivityId;
+		bActivityActive = true;
+		RemainingMinutes = FMath::Max(1, UApartmentLifeActivityFallbackLibrary::GetBuiltinDurationMinutes(ActivityId));
+
+		if (UWorld* World = GetWorld())
+		{
+			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+			{
+				TimeSubsystem->OnMinuteAdvanced.AddDynamic(this, &UApartmentLifeActivityComponent::HandleMinuteAdvanced);
+			}
+		}
+
+		OnActivityStarted.Broadcast(CurrentActivityId);
+		return true;
+	}
+
+	if (!CanStartActivity(Activity))
 	{
 		return false;
 	}

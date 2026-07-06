@@ -69,4 +69,11 @@ public:
 		const FApartmentLifeGameTime& Time,
 		const FApartmentLifeWeatherState& Weather,
 		FName LocationTag);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Social")
+	static FApartmentLifeDialogueContext BuildPlayerDialogueContext(
+		UApartmentLifeNPCSimulationComponent* GirlSim,
+		const FApartmentLifeGameTime& Time,
+		const FApartmentLifeWeatherState& Weather,
+		FName LocationTag);
 };

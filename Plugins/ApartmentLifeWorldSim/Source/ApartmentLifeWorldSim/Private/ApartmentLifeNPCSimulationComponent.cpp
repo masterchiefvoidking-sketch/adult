@@ -13,9 +13,9 @@
 UApartmentLifeNPCSimulationComponent::UApartmentLifeNPCSimulationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	CharacterId = FName(TEXT("npc.default"));
-	Career.CareerId = FName(TEXT("career.office_worker"));
-	Career.HourlyWage = 22.f;
+	CharacterId = FName(TEXT("character.main"));
+	Career.CareerId = FName(TEXT("career.remote_programmer"));
+	Career.HourlyWage = 32.f;
 	Finance.MonthlyRent = 950.f;
 }
 
@@ -308,7 +308,15 @@ void UApartmentLifeNPCSimulationComponent::UpdateNeedsAndMood(const FApartmentLi
 
 void UApartmentLifeNPCSimulationComponent::ProcessDailyFinance()
 {
-	const float MonthlyIncome = Career.ComputeMonthlyIncome();
+	const FString CareerIdStr = Career.CareerId.ToString().ToLower();
+	const bool bComputerBasedIncome = CareerIdStr.Contains(TEXT("remote"))
+		|| CareerIdStr.Contains(TEXT("freelancer"))
+		|| CareerIdStr.Contains(TEXT("digital"))
+		|| CareerIdStr.Contains(TEXT("tutor"))
+		|| CareerIdStr.Contains(TEXT("editor"))
+		|| CareerIdStr.Contains(TEXT("assistant"));
+
+	const float MonthlyIncome = bComputerBasedIncome ? 0.f : Career.ComputeMonthlyIncome();
 	const float FixedExpenses = Finance.GetMonthlyFixedExpenses();
 	const float TotalExpenses = FixedExpenses + Finance.MonthlyEntertainment;
 
@@ -470,6 +478,12 @@ void UApartmentLifeNPCSimulationComponent::AdjustRelationship(FName OtherCharact
 	Relationships.Add(NewRecord);
 }
 
+void UApartmentLifeNPCSimulationComponent::AdjustPlayerBond(float AffectionDelta, float TrustDelta)
+{
+	AffectionTowardPlayer = FMath::Clamp(AffectionTowardPlayer + AffectionDelta, 0.f, 100.f);
+	TrustTowardPlayer = FMath::Clamp(TrustTowardPlayer + TrustDelta, 0.f, 100.f);
+}
+
 bool UApartmentLifeNPCSimulationComponent::TryInitiateSocialInvitation(FName TargetCharacterId) const
 {
 	for (const FApartmentLifeRelationshipRecord& Record : Relationships)
@@ -566,6 +580,12 @@ void UApartmentLifeNPCSimulationComponent::CaptureSaveData_Implementation(TMap<F
 	OutData.Add(TEXT("CareerTier"), FString::FromInt(Career.PromotionTier));
 	OutData.Add(TEXT("CurrentActivity"), CurrentActivityId.ToString());
 	OutData.Add(TEXT("ApartmentTier"), FString::FromInt(Apartment.ApartmentTier));
+	OutData.Add(TEXT("AffectionTowardPlayer"), FString::SanitizeFloat(AffectionTowardPlayer));
+	OutData.Add(TEXT("TrustTowardPlayer"), FString::SanitizeFloat(TrustTowardPlayer));
+
+	FString NeedsJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Needs, NeedsJson);
+	OutData.Add(TEXT("Needs"), NeedsJson);
 
 	FString PersonalityJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Personality, PersonalityJson);
@@ -617,6 +637,18 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	if (const FString* AptTier = InData.Find(TEXT("ApartmentTier")))
 	{
 		Apartment.ApartmentTier = FCString::Atoi(**AptTier);
+	}
+	if (const FString* Affection = InData.Find(TEXT("AffectionTowardPlayer")))
+	{
+		AffectionTowardPlayer = FCString::Atof(**Affection);
+	}
+	if (const FString* Trust = InData.Find(TEXT("TrustTowardPlayer")))
+	{
+		TrustTowardPlayer = FCString::Atof(**Trust);
+	}
+	if (const FString* NeedsJson = InData.Find(TEXT("Needs")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*NeedsJson, &Needs);
 	}
 	if (const FString* PersonalityJson = InData.Find(TEXT("Personality")))
 	{

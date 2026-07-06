@@ -92,4 +92,32 @@ bool FApartmentLifeBuiltinScheduleTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeGirlLifeComputerIncomeTest,
+	"ApartmentLife.WorldSim.GirlLife.ComputerIncome",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeGirlLifeComputerIncomeTest::RunTest(const FString& Parameters)
+{
+	TestTrue(TEXT("Computer work activity detected"),
+		UApartmentLifeGirlLifeLibrary::IsComputerWorkActivity(FName(TEXT("activity.work.computer"))));
+	TestFalse(TEXT("Shower is not computer work"),
+		UApartmentLifeGirlLifeLibrary::IsComputerWorkActivity(FName(TEXT("activity.hygiene.shower"))));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeGirlLifeShowerEffectsTest,
+	"ApartmentLife.WorldSim.GirlLife.ShowerCompletion",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeGirlLifeShowerEffectsTest::RunTest(const FString& Parameters)
+{
+	UApartmentLifeNPCSimulationComponent* Sim = NewObject<UApartmentLifeNPCSimulationComponent>();
+	Sim->Needs.Hygiene = 40.f;
+	UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(Sim, FName(TEXT("activity.hygiene.shower")));
+	TestTrue(TEXT("Hygiene improves after shower"), Sim->Needs.Hygiene > 40.f);
+	return true;
+}
+
 #endif

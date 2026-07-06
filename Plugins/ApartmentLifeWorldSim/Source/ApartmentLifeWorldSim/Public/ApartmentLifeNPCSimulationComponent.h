@@ -101,6 +101,12 @@ public:
 	void AdjustRelationship(FName OtherCharacterId, float FriendshipDelta, float TrustDelta, float RespectDelta);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void AdjustPlayerBond(float AffectionDelta, float TrustDelta);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	float GetAffectionTowardPlayer() const { return AffectionTowardPlayer; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
 	bool TryInitiateSocialInvitation(FName TargetCharacterId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
@@ -132,6 +138,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation")
 	FApartmentLifeApartmentProgressState Apartment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation|Player", meta = (ClampMin = "0", ClampMax = "100"))
+	float AffectionTowardPlayer = 50.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation|Player", meta = (ClampMin = "0", ClampMax = "100"))
+	float TrustTowardPlayer = 50.f;
 
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Simulation")
 	FOnNPCActivityChanged OnActivityChanged;

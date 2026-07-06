@@ -1,0 +1,18 @@
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+*.sln
+*.xcodeproj
+*.xcworkspace
+.vs/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cursor
+.cursor/

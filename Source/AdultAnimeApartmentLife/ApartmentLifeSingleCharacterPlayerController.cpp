@@ -12,10 +12,12 @@
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
 #include "ApartmentLifeFurnitureActor.h"
+#include "ApartmentLifeDebugMenuComponent.h"
 #include "Engine/World.h"
 
 AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlayerController()
 {
+	DebugMenuComponent = CreateDefaultSubobject<UApartmentLifeDebugMenuComponent>(TEXT("DebugMenu"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -24,6 +26,11 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 {
 	ApartmentUnit = InApartment;
 	GirlCharacter = InGirlCharacter;
+
+	if (DebugMenuComponent)
+	{
+		DebugMenuComponent->InitializeContext(this, InApartment, InGirlCharacter);
+	}
 
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
@@ -53,6 +60,28 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("TalkWithGirl"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnTalkWithGirl);
 	InputComponent->BindAction(TEXT("FocusGirlFace"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlFace);
 	InputComponent->BindAction(TEXT("FocusGirlOutfit"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit);
+	InputComponent->BindAction(TEXT("ToggleDebugMenu"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu);
+	InputComponent->BindAction(TEXT("CharacterCreatorCamera"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnCharacterCreatorCamera);
+
+	InputComponent->BindAction(TEXT("DebugAddMoney"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugAddMoney);
+	InputComponent->BindAction(TEXT("DebugAdvanceHour"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugAdvanceHour);
+	InputComponent->BindAction(TEXT("DebugSetMorning"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugSetMorning);
+	InputComponent->BindAction(TEXT("DebugMoodUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugMoodUp);
+	InputComponent->BindAction(TEXT("DebugMoodDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugMoodDown);
+	InputComponent->BindAction(TEXT("DebugEnergyUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyUp);
+	InputComponent->BindAction(TEXT("DebugEnergyDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyDown);
+	InputComponent->BindAction(TEXT("DebugHygieneUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugHygieneUp);
+	InputComponent->BindAction(TEXT("DebugHygieneDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugHygieneDown);
+	InputComponent->BindAction(TEXT("DebugCycleOutfit"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugCycleOutfit);
+	InputComponent->BindAction(TEXT("DebugTeleportBedroom"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportBedroom);
+	InputComponent->BindAction(TEXT("DebugTeleportBathroom"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportBathroom);
+	InputComponent->BindAction(TEXT("DebugTeleportLivingRoom"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportLivingRoom);
+	InputComponent->BindAction(TEXT("DebugTeleportKitchen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportKitchen);
+	InputComponent->BindAction(TEXT("DebugTeleportOffice"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportOffice);
+	InputComponent->BindAction(TEXT("DebugTriggerYoga"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugTriggerYoga);
+	InputComponent->BindAction(TEXT("DebugSaveNow"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugSaveNow);
+	InputComponent->BindAction(TEXT("DebugLoadNow"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow);
+	InputComponent->BindAction(TEXT("DebugResetApartment"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment);
 }
 
 UApartmentLifeBuildModeComponent* AApartmentLifeSingleCharacterPlayerController::GetBuildMode() const
@@ -145,7 +174,7 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 
 	if (UApartmentLifeWardrobeComponent* Wardrobe = GirlCharacter->GetWardrobeComponent())
 	{
-		Wardrobe->SelectOutfitForOutfitContext(EApartmentLifeOutfitContext::Casual, FApartmentLifeWeatherState());
+		Wardrobe->SelectOutfitForOutfitContext(EApartmentLifeOutfitContext::Everyday, FApartmentLifeWeatherState());
 	}
 
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
@@ -236,3 +265,42 @@ void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit()
 		}
 	}
 }
+
+void AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu()
+{
+	if (DebugMenuComponent)
+	{
+		DebugMenuComponent->ToggleMenu();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnCharacterCreatorCamera()
+{
+	if (GirlCharacter.IsValid())
+	{
+		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+		{
+			CameraPawn->EnterCharacterCreatorMode(GirlCharacter.Get());
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnDebugAddMoney() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("AddMoney"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugAdvanceHour() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("AdvanceHour"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugSetMorning() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("SetMorning"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("EnergyUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("EnergyDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugHygieneUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("HygieneUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugHygieneDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("HygieneDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugCycleOutfit() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("CycleOutfit"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportBedroom() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TeleportBedroom"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportBathroom() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TeleportBathroom"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportLivingRoom() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TeleportLivingRoom"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportKitchen() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TeleportKitchen"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTeleportOffice() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TeleportOffice"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugTriggerYoga() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("TriggerYoga"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugSaveNow() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("SaveNow"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("LoadNow"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetApartment"))); }

@@ -156,6 +156,11 @@ void UApartmentLifeWardrobeComponent::SetStyleProfile(const FApartmentLifeWardro
 	StyleProfile = Profile;
 }
 
+void UApartmentLifeWardrobeComponent::SetClosetInventory(const TArray<FName>& ItemIds)
+{
+	ClosetInventory = ItemIds;
+}
+
 void UApartmentLifeWardrobeComponent::RefreshVisuals() {}
 
 UApartmentLifeClothingItemData* UApartmentLifeWardrobeComponent::ResolveClothingData(FName ClothingItemId) const
@@ -211,6 +216,14 @@ void UApartmentLifeWardrobeComponent::CaptureSaveData_Implementation(TMap<FStrin
 	OutData.Add(TEXT("EquippedSlots"), EquippedJson);
 	OutData.Add(TEXT("FavoriteOutfits"), FavoritesJson);
 	OutData.Add(TEXT("StyleProfile"), StyleJson);
+
+	TArray<FString> InventoryIds;
+	InventoryIds.Reserve(ClosetInventory.Num());
+	for (const FName& ItemId : ClosetInventory)
+	{
+		InventoryIds.Add(ItemId.ToString());
+	}
+	OutData.Add(TEXT("ClosetInventory"), FString::Join(InventoryIds, TEXT(",")));
 }
 
 void UApartmentLifeWardrobeComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
@@ -218,5 +231,18 @@ void UApartmentLifeWardrobeComponent::RestoreSaveData_Implementation(const TMap<
 	if (const FString* J = InData.Find(TEXT("EquippedSlots"))) FJsonObjectConverter::JsonArrayStringToUStruct(*J, &EquippedSlots);
 	if (const FString* J = InData.Find(TEXT("FavoriteOutfits"))) FJsonObjectConverter::JsonArrayStringToUStruct(*J, &FavoriteOutfits);
 	if (const FString* J = InData.Find(TEXT("StyleProfile"))) FJsonObjectConverter::JsonObjectStringToUStruct(*J, &StyleProfile);
+	if (const FString* Inventory = InData.Find(TEXT("ClosetInventory")))
+	{
+		ClosetInventory.Empty();
+		TArray<FString> InventoryIds;
+		Inventory->ParseIntoArray(InventoryIds, TEXT(","), true);
+		for (const FString& ItemId : InventoryIds)
+		{
+			if (!ItemId.IsEmpty())
+			{
+				ClosetInventory.Add(FName(*ItemId));
+			}
+		}
+	}
 	RefreshVisuals();
 }

@@ -10,6 +10,9 @@
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSocialLibrary.h"
 #include "ApartmentLifeCharacterPipelineTypes.h"
+#include "ApartmentLifeActivityComponent.h"
+#include "ApartmentLifeWardrobeComponent.h"
+#include "ApartmentLifeWorldSimLibrary.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
@@ -52,6 +55,143 @@ bool UApartmentLifeDevToolsLibrary::SetGameHour(UObject* WorldContextObject, int
 		return true;
 	}
 	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetMood(AActor* Character, float Mood)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Mood.OverallMood = FMath::Clamp(Mood, 0.f, 100.f);
+		Sim->Mood.Happiness = Sim->Mood.OverallMood;
+		Sim->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(Sim->Mood, Sim->MoodInfluences, Sim->Personality);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetEnergy(AActor* Character, float Energy)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Mood.Energy = FMath::Clamp(Energy, 0.f, 100.f);
+		Sim->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(Sim->Mood, Sim->MoodInfluences, Sim->Personality);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetHygiene(AActor* Character, float Hygiene)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Needs.Hygiene = FMath::Clamp(Hygiene, 0.f, 100.f);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::EquipOutfitContext(AActor* Character, EApartmentLifeOutfitContext Context)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeWardrobeComponent* Wardrobe = Character ? Character->FindComponentByClass<UApartmentLifeWardrobeComponent>() : nullptr)
+	{
+		FApartmentLifeWeatherState Weather;
+		if (UWorld* World = Character->GetWorld())
+		{
+			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+			{
+				Weather = TimeSubsystem->GetCurrentWeather();
+			}
+		}
+		Wardrobe->SelectOutfitForOutfitContext(Context, Weather);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::TeleportToRoom(AActor* Character, EApartmentLifeRoomType Room)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	return TeleportCharacter(Character, GetRoomTeleportLocation(Room));
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::TriggerActivity(AActor* Character, FName ActivityId)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (!Character || ActivityId.IsNone())
+	{
+		return false;
+	}
+
+	if (UApartmentLifeActivityComponent* Activity = Character->FindComponentByClass<UApartmentLifeActivityComponent>())
+	{
+		return Activity->StartActivity(ActivityId);
+	}
+	return false;
+#endif
+}
+
+FVector UApartmentLifeDevToolsLibrary::GetRoomTeleportLocation(EApartmentLifeRoomType Room)
+{
+	switch (Room)
+	{
+	case EApartmentLifeRoomType::Bedroom: return FVector(-150.f, -80.f, 0.f);
+	case EApartmentLifeRoomType::Bathroom: return FVector(-30.f, 180.f, 0.f);
+	case EApartmentLifeRoomType::LivingRoom: return FVector(80.f, 60.f, 0.f);
+	case EApartmentLifeRoomType::Kitchen: return FVector(140.f, 160.f, 0.f);
+	case EApartmentLifeRoomType::Office: return FVector(-40.f, -120.f, 0.f);
+	default: return FVector::ZeroVector;
+	}
+}
+
+FString UApartmentLifeDevToolsLibrary::BuildCharacterDebugSummary(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return FString();
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		int32 Hour = 0;
+		if (UWorld* World = Character ? Character->GetWorld() : nullptr)
+		{
+			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+			{
+				Hour = TimeSubsystem->GetCurrentTime().Hour;
+			}
+		}
+
+		return FString::Printf(
+			TEXT("Time %02d:00 | Mood %.0f | Energy %.0f | Hygiene %.0f | Stress %.0f | Savings $%.0f | Activity %s"),
+			Hour,
+			Sim->GetMood().OverallMood,
+			Sim->GetMood().Energy,
+			Sim->Needs.Hygiene,
+			Sim->GetMood().Stress,
+			Sim->GetFinance().Savings,
+			*Sim->GetCurrentActivityId().ToString());
+	}
+	return TEXT("No simulation component");
 #endif
 }
 

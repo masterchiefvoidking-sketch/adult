@@ -133,3 +133,53 @@ bool UApartmentLifeActivityComponent::CanStartActivity(const UApartmentLifeActiv
 
 	return true;
 }
+
+FString UApartmentLifeActivityComponent::GetSaveId_Implementation() const
+{
+	if (const AActor* Owner = GetOwner())
+	{
+		return FString::Printf(TEXT("activity_%s"), *Owner->GetName());
+	}
+	return TEXT("activity_unknown");
+}
+
+void UApartmentLifeActivityComponent::CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const
+{
+	OutData.Add(TEXT("bActivityActive"), bActivityActive ? TEXT("1") : TEXT("0"));
+	OutData.Add(TEXT("CurrentActivityId"), CurrentActivityId.ToString());
+	OutData.Add(TEXT("RemainingMinutes"), FString::FromInt(RemainingMinutes));
+}
+
+void UApartmentLifeActivityComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
+{
+	if (const FString* Active = InData.Find(TEXT("bActivityActive")))
+	{
+		bActivityActive = *Active == TEXT("1");
+	}
+	if (const FString* ActivityId = InData.Find(TEXT("CurrentActivityId")))
+	{
+		CurrentActivityId = FName(**ActivityId);
+	}
+	if (const FString* Remaining = InData.Find(TEXT("RemainingMinutes")))
+	{
+		RemainingMinutes = FCString::Atoi(**Remaining);
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+		{
+			TimeSubsystem->OnMinuteAdvanced.RemoveDynamic(this, &UApartmentLifeActivityComponent::HandleMinuteAdvanced);
+			if (bActivityActive && !CurrentActivityId.IsNone())
+			{
+				TimeSubsystem->OnMinuteAdvanced.AddDynamic(this, &UApartmentLifeActivityComponent::HandleMinuteAdvanced);
+			}
+		}
+	}
+
+	if (!bActivityActive)
+	{
+		CurrentActivityId = NAME_None;
+		RemainingMinutes = 0;
+	}
+}

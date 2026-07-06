@@ -269,7 +269,17 @@ FName UApartmentLifeWorldSimLibrary::GetActivityIdForBlock(EApartmentLifeSchedul
 	case EApartmentLifeScheduleBlock::Breakfast:	return FName(TEXT("activity.cooking.breakfast"));
 	case EApartmentLifeScheduleBlock::GetDressed:	return FName(TEXT("activity.grooming.dress"));
 	case EApartmentLifeScheduleBlock::Commute:		return FName(TEXT("activity.travel.commute"));
-	case EApartmentLifeScheduleBlock::Work:			return Career.CareerId.IsNone() ? FName(TEXT("activity.work.office")) : FName(*(Career.CareerId.ToString() + TEXT(".work")));
+	case EApartmentLifeScheduleBlock::Work:
+	{
+		const FString CareerStr = Career.CareerId.ToString().ToLower();
+		if (CareerStr.Contains(TEXT("remote")) || CareerStr.Contains(TEXT("freelancer"))
+			|| CareerStr.Contains(TEXT("digital")) || CareerStr.Contains(TEXT("tutor"))
+			|| CareerStr.Contains(TEXT("editor")) || CareerStr.Contains(TEXT("assistant")))
+		{
+			return FName(TEXT("activity.work.computer"));
+		}
+		return Career.CareerId.IsNone() ? FName(TEXT("activity.work.computer")) : FName(*(Career.CareerId.ToString() + TEXT(".work")));
+	}
 	case EApartmentLifeScheduleBlock::Lunch:			return FName(TEXT("activity.cooking.lunch"));
 	case EApartmentLifeScheduleBlock::Shopping:		return FName(TEXT("activity.shopping.grocery"));
 	case EApartmentLifeScheduleBlock::Exercise:		return FName(TEXT("activity.fitness.yoga"));
@@ -305,8 +315,7 @@ TArray<FApartmentLifeDailyScheduleSlot> UApartmentLifeWorldSimLibrary::CreateBui
 	AddSlot(EApartmentLifeScheduleBlock::Hygiene, 7, 8);
 	AddSlot(EApartmentLifeScheduleBlock::Breakfast, 8, 9);
 	AddSlot(EApartmentLifeScheduleBlock::GetDressed, 9, 9);
-	AddSlot(EApartmentLifeScheduleBlock::Commute, 9, 10);
-	AddSlot(EApartmentLifeScheduleBlock::Work, 10, 12);
+	AddSlot(EApartmentLifeScheduleBlock::Work, 9, 12);
 	AddSlot(EApartmentLifeScheduleBlock::Lunch, 12, 13);
 	AddSlot(EApartmentLifeScheduleBlock::Work, 13, 17);
 	AddSlot(EApartmentLifeScheduleBlock::Shopping, 17, 18);

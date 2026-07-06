@@ -58,4 +58,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Builder")
 	static TArray<EApartmentLifeFurnitureInteraction> GetInteractionsForCategory(EApartmentLifeFurnitureCategory Category);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Builder")
+	static FName GetActivityIdForInteraction(EApartmentLifeFurnitureInteraction Interaction);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Builder")
+	static FText GetDisplayNameForInteraction(EApartmentLifeFurnitureInteraction Interaction);
 };

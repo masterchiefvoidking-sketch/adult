@@ -10,6 +10,7 @@ class AApartmentLifeApartmentUnit;
 class AApartmentLifeSimCharacter;
 class UApartmentLifeInteractionComponent;
 class UApartmentLifeBuildModeComponent;
+class UApartmentLifeDebugMenuComponent;
 
 /**
  * Player camera controller for the single-girl private build.
@@ -43,6 +44,27 @@ protected:
 	void OnTalkWithGirl();
 	void OnFocusGirlFace();
 	void OnFocusGirlOutfit();
+	void OnToggleDebugMenu();
+	void OnCharacterCreatorCamera();
+	void OnDebugAddMoney();
+	void OnDebugAdvanceHour();
+	void OnDebugSetMorning();
+	void OnDebugMoodUp();
+	void OnDebugMoodDown();
+	void OnDebugEnergyUp();
+	void OnDebugEnergyDown();
+	void OnDebugHygieneUp();
+	void OnDebugHygieneDown();
+	void OnDebugCycleOutfit();
+	void OnDebugTeleportBedroom();
+	void OnDebugTeleportBathroom();
+	void OnDebugTeleportLivingRoom();
+	void OnDebugTeleportKitchen();
+	void OnDebugTeleportOffice();
+	void OnDebugTriggerYoga();
+	void OnDebugSaveNow();
+	void OnDebugLoadNow();
+	void OnDebugResetApartment();
 
 	UApartmentLifeBuildModeComponent* GetBuildMode() const;
 	UApartmentLifeInteractionComponent* GetGirlInteraction() const;
@@ -54,6 +76,9 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<AApartmentLifeSimCharacter> GirlCharacter;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Debug")
+	TObjectPtr<UApartmentLifeDebugMenuComponent> DebugMenuComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Single Character|Save")
 	int32 QuickSaveSlot = 0;

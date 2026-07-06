@@ -32,10 +32,10 @@ bool UApartmentLifeYogaMinigameComponent::StartYogaSession(FName PoseId, bool bO
 	}
 
 	SessionState = FApartmentLifeYogaSessionState();
-	SessionState.CurrentPoseId = PoseId;
+	SessionState.CurrentPoseId = PoseId.IsNone() ? FName(TEXT("pose.builtin.stretch")) : PoseId;
 	SessionState.bOnYogaMat = bOnMat;
 	OnYogaSessionUpdated.Broadcast(SessionState);
-	return ActivePose != nullptr && bOnMat;
+	return bOnMat;
 }
 
 void UApartmentLifeYogaMinigameComponent::UpdatePoseInput(float InputAccuracy, float DeltaTime)

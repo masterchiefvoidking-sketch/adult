@@ -155,6 +155,8 @@ void UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(UApartmentLifeNPCSim
 	{
 		const float Payout = ComputeComputerWorkPayout(Simulation, ActivityId);
 		Simulation->Finance.Savings += Payout;
+		Simulation->Mood.Energy = FMath::Clamp(Simulation->Mood.Energy - 10.f, 0.f, 100.f);
+		Simulation->Mood.Stress = FMath::Clamp(Simulation->Mood.Stress + 5.f, 0.f, 100.f);
 		Simulation->MoodInfluences.WorkSatisfaction = FMath::Clamp(Simulation->MoodInfluences.WorkSatisfaction + 8.f, 0.f, 100.f);
 		Simulation->Mood.Motivation = FMath::Clamp(Simulation->Mood.Motivation + 4.f, 0.f, 100.f);
 		if (Payout > 0.f)

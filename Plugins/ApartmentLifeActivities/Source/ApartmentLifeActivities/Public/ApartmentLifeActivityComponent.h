@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ApartmentLifeSaveable.h"
 #include "ApartmentLifeTypes.h"
 #include "ApartmentLifeActivityData.h"
 #include "ApartmentLifeActivityComponent.generated.h"
@@ -18,11 +19,15 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActivityCompleted, FName, Activit
  * is triggered via Blueprint/AnimBP using MontageId from the activity data asset.
  */
 UCLASS(ClassGroup = Activity, meta = (BlueprintSpawnableComponent))
-class APARTMENTLIFEACTIVITIES_API UApartmentLifeActivityComponent : public UActorComponent
+class APARTMENTLIFEACTIVITIES_API UApartmentLifeActivityComponent : public UActorComponent, public IApartmentLifeSaveable
 {
 	GENERATED_BODY()
 
 public:
+	virtual FString GetSaveId_Implementation() const override;
+	virtual void CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const override;
+	virtual void RestoreSaveData_Implementation(const TMap<FString, FString>& InData) override;
+
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Activity")
 	bool StartActivity(FName ActivityId);
 

@@ -22,6 +22,12 @@ public:
 	void StartRoutine(UApartmentLifeGroomingRoutineData* RoutineData);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Grooming")
+	void StartBuiltinShowerRoutine();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Grooming")
+	void StartBuiltinMirrorRoutine();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Grooming")
 	void AdvanceStep();
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Grooming")

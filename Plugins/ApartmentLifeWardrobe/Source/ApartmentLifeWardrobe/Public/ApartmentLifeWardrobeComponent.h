@@ -54,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
 	void SetStyleProfile(const FApartmentLifeWardrobeStyleProfile& Profile);
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void SetClosetInventory(const TArray<FName>& ItemIds);
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Wardrobe")
 	FOnWardrobeUpdated OnWardrobeUpdated;
 

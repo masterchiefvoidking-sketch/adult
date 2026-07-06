@@ -307,6 +307,9 @@ TArray<EApartmentLifeFurnitureInteraction> UApartmentLifeBuilderLibrary::GetInte
 	case EApartmentLifeFurnitureCategory::Sofa:
 		Interactions = { EApartmentLifeFurnitureInteraction::Sit, EApartmentLifeFurnitureInteraction::WatchTV, EApartmentLifeFurnitureInteraction::Talk, EApartmentLifeFurnitureInteraction::Relax };
 		break;
+	case EApartmentLifeFurnitureCategory::TV:
+		Interactions = { EApartmentLifeFurnitureInteraction::WatchTV, EApartmentLifeFurnitureInteraction::Relax };
+		break;
 	case EApartmentLifeFurnitureCategory::Desk:
 		Interactions = { EApartmentLifeFurnitureInteraction::UseComputer, EApartmentLifeFurnitureInteraction::Study, EApartmentLifeFurnitureInteraction::WorkFromHome };
 		break;
@@ -334,4 +337,39 @@ TArray<EApartmentLifeFurnitureInteraction> UApartmentLifeBuilderLibrary::GetInte
 	}
 
 	return Interactions;
+}
+
+FName UApartmentLifeBuilderLibrary::GetActivityIdForInteraction(EApartmentLifeFurnitureInteraction Interaction)
+{
+	switch (Interaction)
+	{
+	case EApartmentLifeFurnitureInteraction::Sleep: return FName(TEXT("activity.sleep.bed"));
+	case EApartmentLifeFurnitureInteraction::Nap: return FName(TEXT("activity.sleep.nap"));
+	case EApartmentLifeFurnitureInteraction::Read: return FName(TEXT("activity.read.book"));
+	case EApartmentLifeFurnitureInteraction::WatchTV: return FName(TEXT("activity.entertainment.tv"));
+	case EApartmentLifeFurnitureInteraction::UseComputer: return FName(TEXT("activity.work.computer"));
+	case EApartmentLifeFurnitureInteraction::WorkFromHome: return FName(TEXT("activity.work.computer"));
+	case EApartmentLifeFurnitureInteraction::Shower: return FName(TEXT("activity.hygiene.shower"));
+	case EApartmentLifeFurnitureInteraction::Groom: return FName(TEXT("activity.groom.mirror"));
+	case EApartmentLifeFurnitureInteraction::ManageWardrobe: return FName(TEXT("activity.dress.wardrobe"));
+	case EApartmentLifeFurnitureInteraction::Yoga: return FName(TEXT("activity.fitness.yoga"));
+	case EApartmentLifeFurnitureInteraction::Cook: return FName(TEXT("activity.cook.prepare"));
+	case EApartmentLifeFurnitureInteraction::Eat: return FName(TEXT("activity.eat.meal"));
+	default: return FName(TEXT("activity.relax.sit"));
+	}
+}
+
+FText UApartmentLifeBuilderLibrary::GetDisplayNameForInteraction(EApartmentLifeFurnitureInteraction Interaction)
+{
+	switch (Interaction)
+	{
+	case EApartmentLifeFurnitureInteraction::Shower: return FText::FromString(TEXT("Shower Routine"));
+	case EApartmentLifeFurnitureInteraction::UseComputer: return FText::FromString(TEXT("Remote Work"));
+	case EApartmentLifeFurnitureInteraction::WorkFromHome: return FText::FromString(TEXT("Remote Work"));
+	case EApartmentLifeFurnitureInteraction::Yoga: return FText::FromString(TEXT("Yoga"));
+	case EApartmentLifeFurnitureInteraction::Sleep: return FText::FromString(TEXT("Sleep"));
+	case EApartmentLifeFurnitureInteraction::Groom: return FText::FromString(TEXT("Groom"));
+	case EApartmentLifeFurnitureInteraction::ManageWardrobe: return FText::FromString(TEXT("Open Wardrobe"));
+	default: return UEnum::GetDisplayValueAsText(Interaction);
+	}
 }

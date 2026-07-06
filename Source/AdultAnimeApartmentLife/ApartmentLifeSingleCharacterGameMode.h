@@ -25,7 +25,7 @@ protected:
 
 	void BootstrapApartment();
 	void SeedStarterFurniture(AApartmentLifeApartmentUnit* Apartment);
-	void ConfigureGirlCharacter(AApartmentLifeSimCharacter* Character);
+	void ConfigureGirlCharacter(AApartmentLifeSimCharacter* Character, bool bSeedWardrobe = true);
 	void LinkPlayerController();
 
 	UPROPERTY(EditAnywhere, Category = "Single Character")

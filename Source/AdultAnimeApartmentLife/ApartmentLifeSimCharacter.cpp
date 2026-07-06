@@ -12,6 +12,7 @@
 #include "ApartmentLifeClothingFitComponent.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeInteractionComponent.h"
+#include "ApartmentLifeBedroomRoutineComponent.h"
 #include "ApartmentLifeGirlLifeLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
@@ -29,6 +30,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	ClothingFitComponent = CreateDefaultSubobject<UApartmentLifeClothingFitComponent>(TEXT("ClothingFit"));
 	ConversationComponent = CreateDefaultSubobject<UApartmentLifeConversationComponent>(TEXT("Conversation"));
 	InteractionComponent = CreateDefaultSubobject<UApartmentLifeInteractionComponent>(TEXT("Interaction"));
+	BedroomRoutineComponent = CreateDefaultSubobject<UApartmentLifeBedroomRoutineComponent>(TEXT("BedroomRoutine"));
 }
 
 void AApartmentLifeSimCharacter::BeginPlay()
@@ -42,6 +44,7 @@ void AApartmentLifeSimCharacter::BeginPlay()
 
 	if (ActivityComponent)
 	{
+		ActivityComponent->OnActivityStarted.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityStarted);
 		ActivityComponent->OnActivityCompleted.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityCompleted);
 	}
 
@@ -101,11 +104,81 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 	}
 }
 
+void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
+{
+	const FString Id = ActivityId.ToString().ToLower();
+
+	if (Id.Contains(TEXT("yoga")) || Id.Contains(TEXT("stretch")))
+	{
+		if (YogaComponent)
+		{
+			YogaComponent->StartYogaSession(FName(TEXT("pose.builtin.stretch")), true);
+		}
+	}
+	else if (Id.Contains(TEXT("shower")) || Id.Contains(TEXT("hygiene")))
+	{
+		if (GroomingComponent)
+		{
+			GroomingComponent->StartBuiltinShowerRoutine();
+		}
+	}
+	else if (Id.Contains(TEXT("groom")) || Id.Contains(TEXT("mirror")))
+	{
+		if (GroomingComponent)
+		{
+			GroomingComponent->StartBuiltinMirrorRoutine();
+		}
+	}
+	else if (Id.Contains(TEXT("sleep.bed")))
+	{
+		if (BedroomRoutineComponent)
+		{
+			BedroomRoutineComponent->StartRoutine(EApartmentLifeBedroomRoutineType::Sleep);
+		}
+	}
+	else if (Id.Contains(TEXT("sleep.nap")))
+	{
+		if (BedroomRoutineComponent)
+		{
+			BedroomRoutineComponent->StartRoutine(EApartmentLifeBedroomRoutineType::Nap);
+		}
+	}
+	else if (Id.Contains(TEXT("read")))
+	{
+		if (BedroomRoutineComponent)
+		{
+			BedroomRoutineComponent->StartRoutine(EApartmentLifeBedroomRoutineType::Read);
+		}
+	}
+	else if (Id.Contains(TEXT("relax")))
+	{
+		if (BedroomRoutineComponent)
+		{
+			BedroomRoutineComponent->StartRoutine(EApartmentLifeBedroomRoutineType::Relax);
+		}
+	}
+}
+
 void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 {
 	if (SimulationComponent)
 	{
 		UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(SimulationComponent, ActivityId);
+	}
+
+	if (YogaComponent && ActivityId.ToString().Contains(TEXT("yoga")))
+	{
+		YogaComponent->EndYogaSession();
+	}
+
+	if (GroomingComponent && (ActivityId.ToString().Contains(TEXT("shower")) || ActivityId.ToString().Contains(TEXT("groom"))))
+	{
+		GroomingComponent->AdvanceStep();
+	}
+
+	if (BedroomRoutineComponent)
+	{
+		BedroomRoutineComponent->EndRoutine();
 	}
 }
 

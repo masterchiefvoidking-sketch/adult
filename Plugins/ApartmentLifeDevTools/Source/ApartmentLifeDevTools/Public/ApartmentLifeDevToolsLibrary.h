@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ApartmentLifeApartmentTypes.h"
+#include "ApartmentLifeWardrobeTypes.h"
 #include "ApartmentLifeDevToolsLibrary.generated.h"
 
 class AApartmentLifeApartmentUnit;
@@ -25,6 +26,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev", meta = (WorldContext = "WorldContextObject"))
 	static bool SetGameHour(UObject* WorldContextObject, int32 Hour);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool SetMood(AActor* Character, float Mood);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool SetEnergy(AActor* Character, float Energy);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool SetHygiene(AActor* Character, float Hygiene);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool EquipOutfitContext(AActor* Character, EApartmentLifeOutfitContext Context);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool TeleportToRoom(AActor* Character, EApartmentLifeRoomType Room);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool TriggerActivity(AActor* Character, FName ActivityId);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev", meta = (WorldContext = "WorldContextObject"))
 	static bool SpawnFurnitureAtCursor(
@@ -50,6 +69,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev", meta = (WorldContext = "WorldContextObject"))
 	static bool LoadTest(UObject* WorldContextObject, int32 SlotIndex = 0);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Dev")
+	static FVector GetRoomTeleportLocation(EApartmentLifeRoomType Room);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Dev")
+	static FString BuildCharacterDebugSummary(AActor* Character);
 
 	static UApartmentLifeNPCSimulationComponent* GetSimulation(AActor* Character);
 };

@@ -18,5 +18,10 @@ public class ApartmentLifeWardrobe : ModuleRules
 			"ApartmentLifeCore",
 			"ApartmentLifeCharacter"
 		});
+
+		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)
+		{
+			PrivateDependencyModuleNames.Add("AutomationTest");
+		}
 	}
 }

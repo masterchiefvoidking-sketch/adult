@@ -33,6 +33,15 @@ bool FApartmentLifeInteractionActivityMapTest::RunTest(const FString& Parameters
 		UApartmentLifeInteractionLibrary::GetPrimaryInteraction(Interactions),
 		EApartmentLifeFurnitureInteraction::Read);
 
+	const FApartmentLifeInteractionDescriptor ShowerDesc =
+		UApartmentLifeInteractionLibrary::BuildDescriptor(EApartmentLifeFurnitureInteraction::Shower);
+	TestEqual(TEXT("Shower descriptor activity"), ShowerDesc.ActivityId, FName(TEXT("activity.hygiene.shower")));
+	TestTrue(TEXT("Shower has duration"), ShowerDesc.DurationMinutes > 0);
+
+	const FApartmentLifeInteractionDescriptor WorkDesc =
+		UApartmentLifeInteractionLibrary::BuildDescriptor(EApartmentLifeFurnitureInteraction::UseComputer);
+	TestEqual(TEXT("Computer maps to remote work"), WorkDesc.ActivityId, FName(TEXT("activity.work.computer")));
+
 	return true;
 }
 

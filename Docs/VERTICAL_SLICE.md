@@ -4,6 +4,8 @@ The original vertical slice (MP07) proved the daily loop. **MP08 refocused** the
 
 Use [SINGLE_CHARACTER.md](SINGLE_CHARACTER.md) as the current playable spec.
 
+For MP09 build order and done criteria, see [FIRST_VERTICAL_SLICE.md](FIRST_VERTICAL_SLICE.md).
+
 ## What Changed (MP08)
 
 | MP07 | MP08 |

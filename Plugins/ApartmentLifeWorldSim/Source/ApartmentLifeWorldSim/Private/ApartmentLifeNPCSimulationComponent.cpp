@@ -610,6 +610,11 @@ void UApartmentLifeNPCSimulationComponent::CaptureSaveData_Implementation(TMap<F
 	FString SkillsJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Skills, SkillsJson);
 	OutData.Add(TEXT("Skills"), SkillsJson);
+
+	FString ScheduleJson;
+	FJsonObjectConverter::UStructToJsonObjectString(TodaysSchedule, ScheduleJson);
+	OutData.Add(TEXT("TodaysSchedule"), ScheduleJson);
+	OutData.Add(TEXT("LastScheduleDay"), FString::FromInt(LastScheduleDay));
 }
 
 void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
@@ -673,5 +678,13 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	if (const FString* SkillsJson = InData.Find(TEXT("Skills")))
 	{
 		FJsonObjectConverter::JsonObjectStringToUStruct(*SkillsJson, &Skills);
+	}
+	if (const FString* ScheduleJson = InData.Find(TEXT("TodaysSchedule")))
+	{
+		FJsonObjectConverter::JsonArrayStringToUStruct(*ScheduleJson, &TodaysSchedule);
+	}
+	if (const FString* ScheduleDay = InData.Find(TEXT("LastScheduleDay")))
+	{
+		LastScheduleDay = FCString::Atoi(**ScheduleDay);
 	}
 }

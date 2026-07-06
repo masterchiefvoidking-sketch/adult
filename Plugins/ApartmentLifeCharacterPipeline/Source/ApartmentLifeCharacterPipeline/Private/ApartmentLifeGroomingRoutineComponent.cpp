@@ -16,6 +16,34 @@ void UApartmentLifeGroomingRoutineComponent::StartRoutine(UApartmentLifeGrooming
 	}
 }
 
+void UApartmentLifeGroomingRoutineComponent::StartBuiltinShowerRoutine()
+{
+	ActiveRoutine = nullptr;
+	RoutineState = FApartmentLifeGroomingRoutineState();
+	RoutineState.PreferredStepOrder = {
+		EApartmentLifeGroomingStep::Shower,
+		EApartmentLifeGroomingStep::BrushTeeth,
+		EApartmentLifeGroomingStep::HairCare,
+		EApartmentLifeGroomingStep::SkinCare
+	};
+	RoutineState.CurrentStep = EApartmentLifeGroomingStep::Shower;
+	OnGroomingStepChanged.Broadcast(RoutineState.CurrentStep);
+}
+
+void UApartmentLifeGroomingRoutineComponent::StartBuiltinMirrorRoutine()
+{
+	ActiveRoutine = nullptr;
+	RoutineState = FApartmentLifeGroomingRoutineState();
+	RoutineState.PreferredStepOrder = {
+		EApartmentLifeGroomingStep::WashFace,
+		EApartmentLifeGroomingStep::HairCare,
+		EApartmentLifeGroomingStep::Makeup,
+		EApartmentLifeGroomingStep::MirrorCheck
+	};
+	RoutineState.CurrentStep = EApartmentLifeGroomingStep::WashFace;
+	OnGroomingStepChanged.Broadcast(RoutineState.CurrentStep);
+}
+
 void UApartmentLifeGroomingRoutineComponent::AdvanceStep()
 {
 	if (!ActiveRoutine) return;

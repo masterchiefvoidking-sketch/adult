@@ -72,7 +72,7 @@ bool AApartmentLifeFurnitureActor::ExecuteInteraction_Implementation(AActor* Int
 
 FText AApartmentLifeFurnitureActor::GetInteractionPrompt_Implementation(EApartmentLifeFurnitureInteraction Interaction) const
 {
-	return FText::FromString(UEnum::GetValueAsString(Interaction));
+	return UApartmentLifeBuilderLibrary::GetDisplayNameForInteraction(Interaction);
 }
 
 void AApartmentLifeFurnitureActor::SetInteractionsForCategory(EApartmentLifeFurnitureCategory Category)
@@ -82,7 +82,7 @@ void AApartmentLifeFurnitureActor::SetInteractionsForCategory(EApartmentLifeFurn
 	{
 		FApartmentLifeInteractionPoint Point;
 		Point.InteractionType = Interaction;
-		Point.ActivityId = FName(*FString::Printf(TEXT("activity.%s"), *UEnum::GetValueAsString(Interaction)));
+		Point.ActivityId = UApartmentLifeBuilderLibrary::GetActivityIdForInteraction(Interaction);
 		InteractionPoints.Add(Point);
 	}
 }

@@ -173,6 +173,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void AdjustPhotoAperture(float Delta);
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void TakeHighResScreenshot();
+
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Camera")
 	bool IsCharacterPreviewRotationEnabled() const { return bRotateCharacterInsteadOfCamera; }
 

@@ -59,6 +59,10 @@ protected:
 	void OnFocusGirlShoes();
 	void OnPhotoFovUp();
 	void OnPhotoFovDown();
+	void OnPhotoApertureUp();
+	void OnPhotoApertureDown();
+	void OnPhotoScreenshot();
+	void OnPhotoSaveBookmark();
 	void OnToggleBuildMode();
 	void OnBuildTopDown();
 	void OnOpenWardrobe();

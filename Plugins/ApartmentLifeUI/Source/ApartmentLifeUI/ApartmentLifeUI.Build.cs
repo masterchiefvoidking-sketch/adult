@@ -28,7 +28,8 @@ public class ApartmentLifeUI : ModuleRules
 			"ApartmentLifeApartment",
 			"ApartmentLifeActivities",
 			"ApartmentLifeInteraction",
-			"ApartmentLifeCharacterPipeline"
+			"ApartmentLifeCharacterPipeline",
+			"ApartmentLifeImmersion"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

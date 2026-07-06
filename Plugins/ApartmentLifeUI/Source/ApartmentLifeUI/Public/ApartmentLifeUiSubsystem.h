@@ -42,8 +42,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
 	void ToggleHud();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
+	void SetHudSuppressed(bool bSuppressed);
+
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|UI")
-	bool IsHudVisible() const { return Settings.bHudVisible; }
+	bool IsHudVisible() const { return Settings.bHudVisible && !bHudSuppressed; }
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|UI")
 	EApartmentLifeUiScreen GetActiveScreen() const { return ActiveScreen; }
@@ -121,5 +124,6 @@ protected:
 	FApartmentLifeUiToast ActiveToast;
 
 	EApartmentLifeUiScreen ActiveScreen = EApartmentLifeUiScreen::Gameplay;
+	bool bHudSuppressed = false;
 	TSharedPtr<SApartmentLifeRootWidget> RootWidget;
 };

@@ -39,6 +39,16 @@ struct APARTMENTLIFECAMERA_API FApartmentLifePhotoModeSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Photo")
 	bool bHideUI = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Photo")
+	FName PoseId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Photo")
+	FName FacialExpressionId;
+
+	/** Index into EApartmentLifeLightingPreset */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Photo")
+	uint8 LightingPresetIndex = 2;
 };
 
 USTRUCT(BlueprintType)

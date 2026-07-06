@@ -29,6 +29,10 @@
 #include "ApartmentLifeCharacterCreatorUiController.h"
 #include "ApartmentLifeCharacterCreatorTypes.h"
 #include "ApartmentLifeCharacterCreatorLibrary.h"
+#include "ApartmentLifeImmersionSubsystem.h"
+#include "ApartmentLifeImmersionLibrary.h"
+#include "ApartmentLifeAnimationComponent.h"
+#include "ApartmentLifeCharacterPipelineTypes.h"
 
 namespace
 {
@@ -41,6 +45,22 @@ namespace
 	{
 		OutSlotIndex = Encoded / 10;
 		OutAction = Encoded % 10;
+	}
+
+	EApartmentLifeFacialExpression MapMicroCueToFacialExpression(EApartmentLifeMicroAnimationCue Cue)
+	{
+		switch (Cue)
+		{
+		case EApartmentLifeMicroAnimationCue::RelaxedSmile: return EApartmentLifeFacialExpression::Happy;
+		case EApartmentLifeMicroAnimationCue::Yawn: return EApartmentLifeFacialExpression::Sleepy;
+		case EApartmentLifeMicroAnimationCue::Stretch: return EApartmentLifeFacialExpression::Relaxed;
+		case EApartmentLifeMicroAnimationCue::LookAround: return EApartmentLifeFacialExpression::Neutral;
+		case EApartmentLifeMicroAnimationCue::HairAdjust:
+		case EApartmentLifeMicroAnimationCue::ClothingAdjust:
+			return EApartmentLifeFacialExpression::Embarrassed;
+		default:
+			return EApartmentLifeFacialExpression::Neutral;
+		}
 	}
 }
 
@@ -114,6 +134,7 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	}
 
 	BindUiSubsystem();
+	BindImmersionDelegates();
 
 	FApartmentLifeUiOverlayGate::bSuppressDebugOverlays = true;
 
@@ -122,6 +143,8 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 		Ui->EnsureViewportUi();
 		RefreshMainMenuSlots();
 		SyncSettingsFromCamera();
+		SyncImmersionSettingsFromSubsystem();
+		RefreshImmersionFromGameTime();
 
 		if (bEnterGameplayDirectly)
 		{
@@ -163,6 +186,174 @@ UApartmentLifeUiSubsystem* UApartmentLifeUiBridgeComponent::GetUiSubsystem() con
 
 	UGameInstance* GI = GetWorld()->GetGameInstance();
 	return GI ? GI->GetSubsystem<UApartmentLifeUiSubsystem>() : nullptr;
+}
+
+UApartmentLifeImmersionSubsystem* UApartmentLifeUiBridgeComponent::GetImmersionSubsystem() const
+{
+	if (!GetWorld())
+	{
+		return nullptr;
+	}
+
+	UGameInstance* GI = GetWorld()->GetGameInstance();
+	return GI ? GI->GetSubsystem<UApartmentLifeImmersionSubsystem>() : nullptr;
+}
+
+void UApartmentLifeUiBridgeComponent::BindImmersionDelegates()
+{
+	if (bImmersionBindingsComplete || !GetWorld())
+	{
+		return;
+	}
+
+	if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+	{
+		TimeSubsystem->OnHourAdvanced.AddDynamic(this, &UApartmentLifeUiBridgeComponent::HandleGameHourAdvanced);
+	}
+
+	if (OwnerController.IsValid())
+	{
+		if (AApartmentLifeCameraPawn* CameraPawn = Cast<AApartmentLifeCameraPawn>(OwnerController->GetPawn()))
+		{
+			CameraPawn->OnPhotoModeUIVisibilityChanged.AddDynamic(
+				this, &UApartmentLifeUiBridgeComponent::HandlePhotoModeUiVisibilityChanged);
+		}
+	}
+
+	bImmersionBindingsComplete = true;
+}
+
+void UApartmentLifeUiBridgeComponent::RefreshImmersionFromGameTime()
+{
+	if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+	{
+		if (UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem())
+		{
+			const FApartmentLifeGameTime& Time = TimeSubsystem->GetCurrentTime();
+			Immersion->UpdateFromGameTime(Time.Hour, TimeSubsystem->GetCurrentWeather().Weather);
+		}
+	}
+}
+
+void UApartmentLifeUiBridgeComponent::SyncImmersionSettingsFromSubsystem()
+{
+	UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem();
+	UApartmentLifeUiSubsystem* Ui = GetUiSubsystem();
+	if (!Immersion || !Ui)
+	{
+		return;
+	}
+
+	const FApartmentLifeImmersionUserSettings& ImmSettings = Immersion->GetUserSettings();
+	FApartmentLifeUiSettingsState& UiSettings = Ui->GetMutableSettings();
+	UiSettings.MasterVolume = ImmSettings.Audio.MasterVolume;
+	UiSettings.MusicVolume = ImmSettings.Audio.MusicVolume;
+	UiSettings.EffectsVolume = ImmSettings.Audio.EffectsVolume;
+	UiSettings.UiVolume = ImmSettings.Audio.UiVolume;
+	UiSettings.bSubtitlesEnabled = ImmSettings.Accessibility.bSubtitlesEnabled;
+	UiSettings.SubtitleScale = ImmSettings.Accessibility.SubtitleScale;
+	UiSettings.bReduceMotion = ImmSettings.Accessibility.bReduceMotion;
+	UiSettings.CameraSensitivity = ImmSettings.Accessibility.CameraSensitivityScale;
+	UiSettings.GraphicsQuality = static_cast<int32>(ImmSettings.Graphics.QualityPreset);
+	UiSettings.bHighQualityEffects = ImmSettings.Graphics.bHighQualityEffects;
+}
+
+void UApartmentLifeUiBridgeComponent::ApplyImmersionSettings()
+{
+	UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem();
+	UApartmentLifeUiSubsystem* Ui = GetUiSubsystem();
+	if (!Immersion || !Ui)
+	{
+		return;
+	}
+
+	const FApartmentLifeUiSettingsState& UiSettings = Ui->GetSettings();
+	FApartmentLifeImmersionUserSettings ImmSettings = Immersion->GetUserSettings();
+	ImmSettings.Audio.MasterVolume = UiSettings.MasterVolume;
+	ImmSettings.Audio.MusicVolume = UiSettings.MusicVolume;
+	ImmSettings.Audio.EffectsVolume = UiSettings.EffectsVolume;
+	ImmSettings.Audio.UiVolume = UiSettings.UiVolume;
+	ImmSettings.Accessibility.bSubtitlesEnabled = UiSettings.bSubtitlesEnabled;
+	ImmSettings.Accessibility.SubtitleScale = UiSettings.SubtitleScale;
+	ImmSettings.Accessibility.bReduceMotion = UiSettings.bReduceMotion;
+	ImmSettings.Accessibility.CameraSensitivityScale = UiSettings.CameraSensitivity;
+	ImmSettings.Graphics.QualityPreset = static_cast<EApartmentLifeGraphicsQuality>(
+		FMath::Clamp(UiSettings.GraphicsQuality, 0, 3));
+	ImmSettings.Graphics.bHighQualityEffects = UiSettings.bHighQualityEffects;
+	Immersion->ApplyUserSettings(ImmSettings);
+	ApplySettingsToCamera();
+}
+
+void UApartmentLifeUiBridgeComponent::ApplyMusicForScreen(EApartmentLifeUiScreen Screen)
+{
+	UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem();
+	if (!Immersion)
+	{
+		return;
+	}
+
+	switch (Screen)
+	{
+	case EApartmentLifeUiScreen::MainMenu:
+		Immersion->SetMusicCategory(EApartmentLifeMusicCategory::MainMenu, true);
+		break;
+	case EApartmentLifeUiScreen::CharacterCreator:
+		Immersion->SetMusicCategory(EApartmentLifeMusicCategory::CharacterCreator, true);
+		break;
+	case EApartmentLifeUiScreen::Wardrobe:
+		Immersion->SetMusicCategory(EApartmentLifeMusicCategory::Wardrobe, true);
+		break;
+	case EApartmentLifeUiScreen::BuildMode:
+		Immersion->SetMusicCategory(EApartmentLifeMusicCategory::BuildMode, true);
+		break;
+	case EApartmentLifeUiScreen::Yoga:
+		Immersion->SetMusicCategory(EApartmentLifeMusicCategory::Yoga, true);
+		break;
+	case EApartmentLifeUiScreen::Gameplay:
+		RefreshImmersionFromGameTime();
+		break;
+	default:
+		break;
+	}
+}
+
+void UApartmentLifeUiBridgeComponent::ApplyMicroAnimationFromSimulation()
+{
+	if (!GirlCharacter.IsValid())
+	{
+		return;
+	}
+
+	UApartmentLifeNPCSimulationComponent* Sim = GetGirlSimulation();
+	UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem();
+	if (!Sim || !Immersion)
+	{
+		return;
+	}
+
+	const bool bIsSitting = Sim->GetCurrentActivityId().ToString().Contains(TEXT("sit"))
+		|| Sim->GetCurrentActivityId().ToString().Contains(TEXT("read"))
+		|| Sim->GetCurrentActivityId().ToString().Contains(TEXT("computer"));
+	Immersion->UpdateMicroAnimation(Sim->Mood.OverallMood, Sim->Mood.Energy, Sim->Mood.Comfort, bIsSitting);
+
+	if (Immersion->GetUserSettings().Accessibility.bReduceMotion)
+	{
+		return;
+	}
+
+	UApartmentLifeAnimationComponent* Animation = GirlCharacter->FindComponentByClass<UApartmentLifeAnimationComponent>();
+	if (!Animation)
+	{
+		return;
+	}
+
+	const EApartmentLifeMicroAnimationCue Cue = Immersion->GetImmersionState().ActiveMicroAnimation;
+	const FName MontageId = UApartmentLifeImmersionLibrary::GetMontageIdForMicroCue(Cue);
+	if (!MontageId.IsNone())
+	{
+		Animation->SetMontageId(MontageId);
+	}
+	Animation->SetFacialExpression(MapMicroCueToFacialExpression(Cue));
 }
 
 UApartmentLifeInteractionSelectionComponent* UApartmentLifeUiBridgeComponent::GetSelection() const
@@ -235,6 +426,18 @@ void UApartmentLifeUiBridgeComponent::TickComponent(float DeltaTime, ELevelTick 
 		RefreshHud();
 		RefreshActiveScreen();
 	}
+
+	if (UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem())
+	{
+		Immersion->UpdateCrossfade(DeltaTime);
+	}
+
+	MicroAnimationAccumulator += DeltaTime;
+	if (MicroAnimationAccumulator >= 3.f)
+	{
+		MicroAnimationAccumulator = 0.f;
+		ApplyMicroAnimationFromSimulation();
+	}
 }
 
 void UApartmentLifeUiBridgeComponent::RefreshMainMenuSlots()
@@ -304,6 +507,8 @@ void UApartmentLifeUiBridgeComponent::RefreshHud()
 	if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
 	{
 		Hud.TimeLabel = TimeSubsystem->GetCurrentTime().ToDisplayString();
+		Hud.WeatherLabel = UApartmentLifeImmersionLibrary::GetWeatherDisplayString(
+			TimeSubsystem->GetCurrentWeather().Weather);
 	}
 
 	Hud.Savings = Sim->Finance.Savings;
@@ -825,7 +1030,13 @@ void UApartmentLifeUiBridgeComponent::PushSettingsPanel()
 	AddValue(TEXT("Photo FOV"), Settings.PhotoFov);
 	AddValue(TEXT("Master Volume"), Settings.MasterVolume);
 	AddValue(TEXT("Music Volume"), Settings.MusicVolume);
+	AddValue(TEXT("Effects Volume"), Settings.EffectsVolume);
 	AddValue(TEXT("UI Volume"), Settings.UiVolume);
+	AddToggle(TEXT("Subtitles"), Settings.bSubtitlesEnabled);
+	AddValue(TEXT("Subtitle Scale"), Settings.SubtitleScale);
+	AddToggle(TEXT("Reduce Motion"), Settings.bReduceMotion);
+	AddValue(TEXT("Graphics Quality"), static_cast<float>(Settings.GraphicsQuality));
+	AddToggle(TEXT("High Quality Effects"), Settings.bHighQualityEffects);
 	AddToggle(TEXT("Autosave"), Settings.bAutosaveEnabled);
 	AddToggle(TEXT("HUD Visible"), Settings.bHudVisible);
 
@@ -957,6 +1168,8 @@ void UApartmentLifeUiBridgeComponent::SyncSettingsFromCamera()
 	{
 		Ui->GetMutableSettings().bAutosaveEnabled = SaveSubsystem->IsAutosaveEnabled();
 	}
+
+	SyncImmersionSettingsFromSubsystem();
 }
 
 void UApartmentLifeUiBridgeComponent::ApplySettingsToCamera()
@@ -991,6 +1204,8 @@ void UApartmentLifeUiBridgeComponent::ApplySettingsToCamera()
 	{
 		SaveSubsystem->SetAutosaveEnabled(Settings.bAutosaveEnabled);
 	}
+
+	ApplyImmersionSettings();
 }
 
 void UApartmentLifeUiBridgeComponent::OpenSaveLoadScreen()
@@ -1099,7 +1314,27 @@ void UApartmentLifeUiBridgeComponent::HandleUiBack()
 
 void UApartmentLifeUiBridgeComponent::HandleScreenChanged(EApartmentLifeUiScreen NewScreen)
 {
+	ApplyMusicForScreen(NewScreen);
 	RefreshActiveScreen();
+}
+
+void UApartmentLifeUiBridgeComponent::HandleGameHourAdvanced(const FApartmentLifeGameTime& NewTime)
+{
+	if (UApartmentLifeImmersionSubsystem* Immersion = GetImmersionSubsystem())
+	{
+		if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = GetWorld()->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+		{
+			Immersion->UpdateFromGameTime(NewTime.Hour, TimeSubsystem->GetCurrentWeather().Weather);
+		}
+	}
+}
+
+void UApartmentLifeUiBridgeComponent::HandlePhotoModeUiVisibilityChanged(bool bHideUI)
+{
+	if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())
+	{
+		Ui->SetHudSuppressed(bHideUI);
+	}
 }
 
 void UApartmentLifeUiBridgeComponent::HandleListItemActivated(EApartmentLifeUiScreen Screen, int32 Index)
@@ -1297,12 +1532,19 @@ void UApartmentLifeUiBridgeComponent::HandleListItemActivated(EApartmentLifeUiSc
 			case 2: Settings.PhotoFov = FMath::Clamp(Settings.PhotoFov + 2.f, 30.f, 90.f); break;
 			case 3: Settings.MasterVolume = FMath::Clamp(Settings.MasterVolume + 0.1f, 0.f, 1.f); break;
 			case 4: Settings.MusicVolume = FMath::Clamp(Settings.MusicVolume + 0.1f, 0.f, 1.f); break;
-			case 5: Settings.UiVolume = FMath::Clamp(Settings.UiVolume + 0.1f, 0.f, 1.f); break;
-			case 6: Settings.bAutosaveEnabled = !Settings.bAutosaveEnabled; break;
-			case 7: Settings.bHudVisible = !Settings.bHudVisible; break;
+			case 5: Settings.EffectsVolume = FMath::Clamp(Settings.EffectsVolume + 0.1f, 0.f, 1.f); break;
+			case 6: Settings.UiVolume = FMath::Clamp(Settings.UiVolume + 0.1f, 0.f, 1.f); break;
+			case 7: Settings.bSubtitlesEnabled = !Settings.bSubtitlesEnabled; break;
+			case 8: Settings.SubtitleScale = FMath::Clamp(Settings.SubtitleScale + 0.1f, 0.5f, 2.f); break;
+			case 9: Settings.bReduceMotion = !Settings.bReduceMotion; break;
+			case 10: Settings.GraphicsQuality = (Settings.GraphicsQuality + 1) % 4; break;
+			case 11: Settings.bHighQualityEffects = !Settings.bHighQualityEffects; break;
+			case 12: Settings.bAutosaveEnabled = !Settings.bAutosaveEnabled; break;
+			case 13: Settings.bHudVisible = !Settings.bHudVisible; break;
 			default: break;
 			}
-			ApplySettingsToCamera();
+			ApplyImmersionSettings();
+			Ui->RefreshView();
 			PushSettingsPanel();
 		}
 		break;

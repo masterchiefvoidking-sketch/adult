@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ApartmentLifeTypes.h"
 #include "ApartmentLifeProgressionTypes.h"
 #include "ApartmentLifeUiBridgeComponent.generated.h"
 
@@ -17,6 +18,7 @@ class UApartmentLifeUiSubsystem;
 class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWorkUiController;
 class UApartmentLifeCharacterCreatorUiController;
+class UApartmentLifeImmersionSubsystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApartmentLifeUiBridgePostLoadRequested);
 
@@ -58,6 +60,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
 	void ToggleHud();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
+	void SyncImmersionSettingsFromSubsystem();
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|UI")
 	FOnApartmentLifeUiBridgePostLoadRequested OnPostLoadRequested;
 
@@ -84,6 +89,19 @@ protected:
 	void PushCharacterCreatorPanel();
 	void SyncSettingsFromCamera();
 	void ApplySettingsToCamera();
+	void ApplyImmersionSettings();
+	void BindImmersionDelegates();
+	void RefreshImmersionFromGameTime();
+	void ApplyMusicForScreen(EApartmentLifeUiScreen Screen);
+	void ApplyMicroAnimationFromSimulation();
+
+	UFUNCTION()
+	void HandleGameHourAdvanced(const FApartmentLifeGameTime& NewTime);
+
+	UFUNCTION()
+	void HandlePhotoModeUiVisibilityChanged(bool bHideUI);
+
+	UApartmentLifeImmersionSubsystem* GetImmersionSubsystem() const;
 
 	UFUNCTION()
 	void HandleScreenChanged(EApartmentLifeUiScreen NewScreen);
@@ -157,7 +175,9 @@ protected:
 	bool bBindingsComplete = false;
 	EApartmentLifeShopCategory ActiveShopCategory = EApartmentLifeShopCategory::Furniture;
 	float HudRefreshAccumulator = 0.f;
+	float MicroAnimationAccumulator = 0.f;
 	int32 ActiveRoutineOffset = 0;
+	bool bImmersionBindingsComplete = false;
 
 	static constexpr int32 MaxSaveSlots = 3;
 	static constexpr int32 SaveLoadSlotStride = 10;

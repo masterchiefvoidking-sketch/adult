@@ -27,6 +27,9 @@
 #include "ApartmentLifeUiSubsystem.h"
 #include "ApartmentLifeCharacterCreatorUiController.h"
 #include "ApartmentLifeCharacterCreatorComponent.h"
+#include "ApartmentLifeImmersionSubsystem.h"
+#include "ApartmentLifeImmersionTypes.h"
+#include "ApartmentLifeGameTimeSubsystem.h"
 #include "Engine/World.h"
 
 AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlayerController()
@@ -154,6 +157,10 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("FocusGirlShoes"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlShoes);
 	InputComponent->BindAction(TEXT("PhotoFovUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoFovUp);
 	InputComponent->BindAction(TEXT("PhotoFovDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoFovDown);
+	InputComponent->BindAction(TEXT("PhotoApertureUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoApertureUp);
+	InputComponent->BindAction(TEXT("PhotoApertureDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoApertureDown);
+	InputComponent->BindAction(TEXT("PhotoScreenshot"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoScreenshot);
+	InputComponent->BindAction(TEXT("PhotoSaveBookmark"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoSaveBookmark);
 	InputComponent->BindAction(TEXT("ToggleBuildMode"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode);
 	InputComponent->BindAction(TEXT("BuildTopDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnBuildTopDown);
 	InputComponent->BindAction(TEXT("OpenWardrobe"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe);
@@ -395,6 +402,56 @@ void AApartmentLifeSingleCharacterPlayerController::OnPhotoFovDown()
 	}
 }
 
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoApertureUp()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->AdjustPhotoAperture(-0.2f);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoApertureDown()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->AdjustPhotoAperture(0.2f);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoScreenshot()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->TakeHighResScreenshot();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoSaveBookmark()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (UApartmentLifeImmersionSubsystem* Immersion = GI->GetSubsystem<UApartmentLifeImmersionSubsystem>())
+			{
+				FApartmentLifePhotoBookmark Bookmark;
+				Bookmark.BookmarkId = FName(*FString::Printf(TEXT("photo.bookmark.%d"),
+					Immersion->GetUserSettings().PhotoBookmarks.Num()));
+				Bookmark.DisplayName = FText::FromString(FString::Printf(TEXT("Bookmark %d"),
+					Immersion->GetUserSettings().PhotoBookmarks.Num() + 1));
+				Bookmark.Location = CameraPawn->GetActorLocation();
+				Bookmark.Rotation = CameraPawn->GetActorRotation();
+				const FApartmentLifeCameraUserSettings CamSettings = CameraPawn->BuildUserSettings();
+				Bookmark.FieldOfView = CamSettings.PhotoSettings.FieldOfView;
+				Bookmark.Aperture = CamSettings.PhotoSettings.Aperture;
+				Bookmark.TimeOfDayHour = CamSettings.PhotoSettings.TimeOfDayHour;
+				Bookmark.LightingPreset = static_cast<EApartmentLifeLightingPreset>(CamSettings.PhotoSettings.LightingPresetIndex);
+				Immersion->SavePhotoBookmark(Bookmark);
+			}
+		}
+	}
+}
+
 void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FName ActivityId)
 {
 	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
@@ -610,6 +667,23 @@ void AApartmentLifeSingleCharacterPlayerController::ApplyPostLoadState()
 			{
 				CameraSettings->ApplySettingsToPawn(CameraPawn);
 			}
+		}
+
+		if (UApartmentLifeImmersionSubsystem* Immersion = GI->GetSubsystem<UApartmentLifeImmersionSubsystem>())
+		{
+			if (UWorld* World = GetWorld())
+			{
+				if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+				{
+					const FApartmentLifeGameTime& Time = TimeSubsystem->GetCurrentTime();
+					Immersion->UpdateFromGameTime(Time.Hour, TimeSubsystem->GetCurrentWeather().Weather);
+				}
+			}
+		}
+
+		if (UiBridgeComponent)
+		{
+			UiBridgeComponent->SyncImmersionSettingsFromSubsystem();
 		}
 	}
 

@@ -9,6 +9,8 @@
 #include "ApartmentLifeWorldSimLibrary.h"
 #include "ApartmentLifeActivityCameraLibrary.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
+#include "ApartmentLifeWorkLibrary.h"
+#include "ApartmentLifeProgressionComponent.h"
 
 bool UApartmentLifeActivityLibrary::TryGetDefinition(FName ActivityId, FApartmentLifeActivityDefinition& OutDefinition)
 {
@@ -110,10 +112,17 @@ FApartmentLifeActivityCompletionResult UApartmentLifeActivityLibrary::ApplyActiv
 	if (S.OrganizationXPDelta > 0.f) Simulation->Skills.GainSkill(EApartmentLifeSkill::Organization, S.OrganizationXPDelta);
 	if (S.CreativityXPDelta > 0.f) Simulation->Skills.GainSkill(EApartmentLifeSkill::Creativity, S.CreativityXPDelta);
 
-	if (Def.bUsesIncomeFormula && UApartmentLifeGirlLifeLibrary::IsComputerWorkActivity(ActivityId))
+	if (Def.bUsesIncomeFormula && UApartmentLifeWorkLibrary::IsComputerWorkActivity(ActivityId))
 	{
-		Result.MoneyEarned = UApartmentLifeGirlLifeLibrary::ComputeComputerWorkPayout(Simulation, ActivityId);
-		Simulation->Finance.Savings += Result.MoneyEarned;
+		UApartmentLifeProgressionComponent* Progression = nullptr;
+		if (AActor* Owner = Simulation->GetOwner())
+		{
+			Progression = Owner->FindComponentByClass<UApartmentLifeProgressionComponent>();
+		}
+
+		const FApartmentLifeWorkSessionResult WorkResult = UApartmentLifeWorkLibrary::ComputeWorkSessionResult(Simulation, Progression, ActivityId);
+		UApartmentLifeWorkLibrary::ApplyWorkSessionResult(Simulation, Progression, WorkResult);
+		Result.MoneyEarned = WorkResult.TotalIncome;
 	}
 	else if (Def.MoneyEffect != 0.f)
 	{

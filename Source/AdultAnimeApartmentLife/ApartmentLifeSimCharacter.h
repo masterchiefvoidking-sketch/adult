@@ -21,6 +21,7 @@ class UApartmentLifeBedroomRoutineComponent;
 struct FApartmentLifeGameTime;
 struct FApartmentLifeBodyFitProfile;
 class UApartmentLifeRoutineChainComponent;
+class UApartmentLifeProgressionComponent;
 
 /** Fully composed sim character with world simulation, wardrobe, activities, and character pipeline. */
 UCLASS()
@@ -70,6 +71,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeRoutineChainComponent* GetRoutineChainComponent() const { return RoutineChainComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life")
+	UApartmentLifeProgressionComponent* GetProgressionComponent() const { return ProgressionComponent; }
+
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life")
 	bool StartMorningRoutine();
 
@@ -90,6 +94,9 @@ protected:
 
 	UFUNCTION()
 	void HandleScheduleOccasion(const FApartmentLifeGameTime& NewTime);
+
+	UFUNCTION()
+	void HandleDayAdvanced(const FApartmentLifeGameTime& NewTime);
 
 	UFUNCTION()
 	void HandleCreatorStateUpdated(const struct FApartmentLifeCharacterCreatorState& State);
@@ -144,4 +151,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeRoutineChainComponent> RoutineChainComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeProgressionComponent> ProgressionComponent;
 };

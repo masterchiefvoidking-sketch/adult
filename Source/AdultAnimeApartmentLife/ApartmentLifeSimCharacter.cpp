@@ -19,6 +19,8 @@
 #include "ApartmentLifeRoutineChainComponent.h"
 #include "ApartmentLifeWardrobeLibrary.h"
 #include "ApartmentLifeWardrobeCatalogLibrary.h"
+#include "ApartmentLifeProgressionComponent.h"
+#include "ApartmentLifeFinanceLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
@@ -38,6 +40,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	InteractionSelectionComponent = CreateDefaultSubobject<UApartmentLifeInteractionSelectionComponent>(TEXT("InteractionSelection"));
 	BedroomRoutineComponent = CreateDefaultSubobject<UApartmentLifeBedroomRoutineComponent>(TEXT("BedroomRoutine"));
 	RoutineChainComponent = CreateDefaultSubobject<UApartmentLifeRoutineChainComponent>(TEXT("RoutineChain"));
+	ProgressionComponent = CreateDefaultSubobject<UApartmentLifeProgressionComponent>(TEXT("Progression"));
 }
 
 void AApartmentLifeSimCharacter::BeginPlay()
@@ -77,6 +80,7 @@ void AApartmentLifeSimCharacter::BeginPlay()
 		if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
 		{
 			TimeSubsystem->OnHourAdvanced.AddDynamic(this, &AApartmentLifeSimCharacter::HandleScheduleOccasion);
+			TimeSubsystem->OnDayAdvanced.AddDynamic(this, &AApartmentLifeSimCharacter::HandleDayAdvanced);
 		}
 	}
 
@@ -252,6 +256,15 @@ void AApartmentLifeSimCharacter::HandleScheduleOccasion(const FApartmentLifeGame
 	}
 
 	RefreshNPCStyleFromSimulation();
+}
+
+void AApartmentLifeSimCharacter::HandleDayAdvanced(const FApartmentLifeGameTime& NewTime)
+{
+	(void)NewTime;
+	if (ProgressionComponent && SimulationComponent)
+	{
+		UApartmentLifeFinanceLibrary::AdvanceDailyBudget(ProgressionComponent, SimulationComponent);
+	}
 }
 
 void AApartmentLifeSimCharacter::HandleCreatorStateUpdated(const FApartmentLifeCharacterCreatorState& State)

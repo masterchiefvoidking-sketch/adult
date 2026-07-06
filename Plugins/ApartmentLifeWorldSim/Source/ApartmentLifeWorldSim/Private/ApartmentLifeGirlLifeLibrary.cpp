@@ -4,6 +4,8 @@
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeWorldSimLibrary.h"
 #include "ApartmentLifeActivityFallbackLibrary.h"
+#include "ApartmentLifeWorkLibrary.h"
+#include "ApartmentLifeProgressionComponent.h"
 
 static const FName PlayerCharacterId(TEXT("player"));
 
@@ -18,7 +20,11 @@ void UApartmentLifeGirlLifeLibrary::ApplyActivitySkillGain(FApartmentLifeSkillSe
 	if (Id.Contains(TEXT("cook"))) Skills.GainSkill(EApartmentLifeSkill::Cooking, 0.5f);
 	if (Id.Contains(TEXT("exercise")) || Id.Contains(TEXT("yoga")) || Id.Contains(TEXT("gym"))) Skills.GainSkill(EApartmentLifeSkill::Fitness, 0.5f);
 	if (Id.Contains(TEXT("clean"))) Skills.GainSkill(EApartmentLifeSkill::HomeMaintenance, 0.3f);
-	if (Id.Contains(TEXT("work")) || Id.Contains(TEXT("office")) || Id.Contains(TEXT("computer"))) Skills.GainSkill(EApartmentLifeSkill::Organization, 0.2f);
+	if (Id.Contains(TEXT("work.programming"))) Skills.GainSkill(EApartmentLifeSkill::Programming, 0.5f);
+	if (Id.Contains(TEXT("digital_art")) || Id.Contains(TEXT("design"))) Skills.GainSkill(EApartmentLifeSkill::Art, 0.5f);
+	if (Id.Contains(TEXT("tutoring"))) Skills.GainSkill(EApartmentLifeSkill::Communication, 0.4f);
+	if (Id.Contains(TEXT("writing"))) Skills.GainSkill(EApartmentLifeSkill::Creativity, 0.4f);
+	if (Id.Contains(TEXT("content_edit")) || Id.Contains(TEXT("data_entry")) || Id.Contains(TEXT("virtual_assistant"))) Skills.GainSkill(EApartmentLifeSkill::Organization, 0.3f);
 	if (Id.Contains(TEXT("social")) || Id.Contains(TEXT("talk"))) Skills.GainSkill(EApartmentLifeSkill::Communication, 0.3f);
 	if (Id.Contains(TEXT("game"))) Skills.GainSkill(EApartmentLifeSkill::Creativity, 0.2f);
 	if (Id.Contains(TEXT("read"))) Skills.GainSkill(EApartmentLifeSkill::Creativity, 0.2f);
@@ -26,25 +32,26 @@ void UApartmentLifeGirlLifeLibrary::ApplyActivitySkillGain(FApartmentLifeSkillSe
 
 bool UApartmentLifeGirlLifeLibrary::IsComputerWorkActivity(FName ActivityId)
 {
-	const FString Id = ActivityId.ToString().ToLower();
-	return Id.Contains(TEXT("work.computer"))
-		|| Id.Contains(TEXT("work.remote"))
-		|| Id.Contains(TEXT("study.read"));
+	return UApartmentLifeWorkLibrary::IsComputerWorkActivity(ActivityId);
 }
 
 float UApartmentLifeGirlLifeLibrary::ComputeComputerWorkPayout(const UApartmentLifeNPCSimulationComponent* Simulation, FName ActivityId)
 {
-	if (!Simulation || !IsComputerWorkActivity(ActivityId))
+	if (!Simulation)
 	{
 		return 0.f;
 	}
 
-	const float HourlyRate = Simulation->Career.HourlyWage > 0.f
-		? Simulation->Career.HourlyWage
-		: 22.f;
-	const float DurationHours = GetBuiltinActivityDurationMinutes(ActivityId) / 60.f;
-	const float Productivity = Simulation->Mood.GetProductivityMultiplier();
-	return FMath::Max(0.f, HourlyRate * DurationHours * Productivity);
+	const UApartmentLifeProgressionComponent* Progression = nullptr;
+	if (const AActor* Owner = Simulation->GetOwner())
+	{
+		Progression = Owner->FindComponentByClass<UApartmentLifeProgressionComponent>();
+	}
+
+	return UApartmentLifeWorkLibrary::ComputeWorkSessionResult(
+		const_cast<UApartmentLifeNPCSimulationComponent*>(Simulation),
+		const_cast<UApartmentLifeProgressionComponent*>(Progression),
+		ActivityId).TotalIncome;
 }
 
 void UApartmentLifeGirlLifeLibrary::ConfigureRemoteWorkCareer(UApartmentLifeNPCSimulationComponent* Simulation, FName WorkTypeId)
@@ -153,16 +160,11 @@ void UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(UApartmentLifeNPCSim
 
 	if (IsComputerWorkActivity(ActivityId))
 	{
-		const float Payout = ComputeComputerWorkPayout(Simulation, ActivityId);
-		Simulation->Finance.Savings += Payout;
+		// Income handled by ActivityLibrary via WorkLibrary when catalog activity completes.
 		Simulation->Mood.Energy = FMath::Clamp(Simulation->Mood.Energy - 10.f, 0.f, 100.f);
 		Simulation->Mood.Stress = FMath::Clamp(Simulation->Mood.Stress + 5.f, 0.f, 100.f);
 		Simulation->MoodInfluences.WorkSatisfaction = FMath::Clamp(Simulation->MoodInfluences.WorkSatisfaction + 8.f, 0.f, 100.f);
 		Simulation->Mood.Motivation = FMath::Clamp(Simulation->Mood.Motivation + 4.f, 0.f, 100.f);
-		if (Payout > 0.f)
-		{
-			Simulation->MoodInfluences.FinancialSecurity = FMath::Clamp(Simulation->MoodInfluences.FinancialSecurity + 3.f, 0.f, 100.f);
-		}
 	}
 
 	Simulation->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(

@@ -15,6 +15,8 @@ class UApartmentLifeBuildModeComponent;
 class UApartmentLifeDebugMenuComponent;
 class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWardrobeShoppingComponent;
+class UApartmentLifeWorkUiController;
+class UApartmentLifeFinanceUiController;
 
 /**
  * Player camera controller for the single-girl private build.
@@ -52,6 +54,14 @@ protected:
 	void OnToggleBuildMode();
 	void OnBuildTopDown();
 	void OnOpenWardrobe();
+	void OnOpenWorkMenu();
+	void OnToggleBudget();
+	void OnOpenApartmentShop();
+	void OnStartSelectedWork();
+	void OnSelectWork1();
+	void OnSelectWork2();
+	void OnSelectWork3();
+	void OnSelectWork4();
 	void OnBuildUndo();
 	void OnBuildRedo();
 	void OnQuickSave();
@@ -87,6 +97,7 @@ protected:
 
 	void FocusCameraOnInteractable(AActor* Target, const FVector& FocusOffset = FVector::ZeroVector);
 	void FocusCameraForActivity(FName ActivityId, AActor* ContextActor = nullptr);
+	void SelectWorkByIndex(int32 Index);
 
 	UFUNCTION()
 	void HandleGirlActivityStarted(FName ActivityId);
@@ -102,6 +113,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Single Character|Wardrobe")
 	TObjectPtr<UApartmentLifeWardrobeShoppingComponent> WardrobeShoppingComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Progression")
+	TObjectPtr<UApartmentLifeWorkUiController> WorkUiController;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Progression")
+	TObjectPtr<UApartmentLifeFinanceUiController> FinanceUiController;
 
 	UPROPERTY()
 	TWeakObjectPtr<AApartmentLifeApartmentUnit> ApartmentUnit;

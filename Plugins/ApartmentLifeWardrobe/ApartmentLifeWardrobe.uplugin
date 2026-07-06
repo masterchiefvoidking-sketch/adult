@@ -1,0 +1,27 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life Wardrobe",
+	"Description": "Complete clothing system with layers, presets, laundry, seasonal selection, and physics hooks.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeWardrobe",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeCharacter",
+			"Enabled": true
+		}
+	]
+}

@@ -1,0 +1,56 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.6",
+	"Category": "",
+	"Description": "Premium single-player anime-inspired adult life simulator with cohabitation, careers, relationships, and apartment customization.",
+	"Modules": [
+		{
+			"Name": "AdultAnimeApartmentLife",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeCamera",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeCharacter",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeWardrobe",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeApartment",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeAI",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeActivities",
+			"Enabled": true
+		}
+	],
+	"TargetPlatforms": [
+		"Windows",
+		"Linux",
+		"Android",
+		"IOS"
+	]
+}

@@ -49,6 +49,10 @@
 		{
 			"Name": "ApartmentLifeWorldSim",
 			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeCharacterPipeline",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

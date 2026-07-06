@@ -17,7 +17,22 @@ enum class EApartmentLifeCameraMode : uint8
 	Free		UMETA(DisplayName = "Free Camera"),
 	Photo		UMETA(DisplayName = "Photo Mode"),
 	TopDown		UMETA(DisplayName = "Top Down"),
-	RoomFocus	UMETA(DisplayName = "Room Focus")
+	RoomFocus	UMETA(DisplayName = "Room Focus"),
+	CharacterFace		UMETA(DisplayName = "Character Face"),
+	CharacterOutfit		UMETA(DisplayName = "Character Outfit"),
+	CharacterFullBody	UMETA(DisplayName = "Character Full Body"),
+	PosePreview			UMETA(DisplayName = "Pose Preview"),
+	AnimationPreview	UMETA(DisplayName = "Animation Preview")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeCharacterFocusMode : uint8
+{
+	FullBody	UMETA(DisplayName = "Full Body"),
+	Face		UMETA(DisplayName = "Face"),
+	Outfit		UMETA(DisplayName = "Outfit"),
+	PosePreview	UMETA(DisplayName = "Pose Preview"),
+	AnimationPreview UMETA(DisplayName = "Animation Preview")
 };
 
 /**
@@ -68,6 +83,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void FocusRoom(const FBox& RoomBounds);
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void FocusCharacter(AActor* Character, EApartmentLifeCharacterFocusMode FocusMode);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void SetCharacterPreviewRotationEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void RotateFocusedCharacter(float YawDelta);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Camera")
+	bool IsCharacterPreviewRotationEnabled() const { return bRotateCharacterInsteadOfCamera; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -76,6 +103,9 @@ protected:
 	void UpdateOrbitPivot();
 	void ApplyFreeCameraMovement(float DeltaSeconds);
 	void BindLegacyInput(UInputComponent* PlayerInputComponent);
+	void ApplyCharacterFocusFraming(EApartmentLifeCharacterFocusMode FocusMode);
+	FVector GetCharacterFocusPoint(AActor* Character, EApartmentLifeCharacterFocusMode FocusMode) const;
+	EApartmentLifeCameraMode GetCameraModeForFocus(EApartmentLifeCharacterFocusMode FocusMode) const;
 
 	void OnOrbitPressed();
 	void OnOrbitReleased();
@@ -115,8 +145,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Pan")
 	float PanSpeed = 4.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
+	float CharacterFaceArmLength = 120.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
+	float CharacterOutfitArmLength = 220.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
+	float CharacterFullBodyArmLength = 380.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
+	float PosePreviewArmLength = 300.f;
+
 	UPROPERTY()
 	TObjectPtr<AActor> FocusTarget;
+
+	EApartmentLifeCharacterFocusMode ActiveCharacterFocus = EApartmentLifeCharacterFocusMode::FullBody;
+	bool bRotateCharacterInsteadOfCamera = false;
 
 	EApartmentLifeCameraMode CameraMode = EApartmentLifeCameraMode::Orbit;
 	bool bFocusLockEnabled = true;

@@ -7,7 +7,25 @@
 #include "ApartmentLifeWardrobeTypes.h"
 #include "ApartmentLifeClothingItemData.generated.h"
 
-/** Data asset for a single clothing item. Meshes, physics, and seasonal tags are authored here. */
+USTRUCT(BlueprintType)
+struct FApartmentLifeClothingFitData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fit")
+	float MinShoulderWidth = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fit")
+	float MaxShoulderWidth = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fit")
+	float SleeveAdjustMin = -2.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Fit")
+	float SleeveAdjustMax = 2.f;
+};
+
+/** Data asset for a single clothing item with fit, physics, and style metadata. */
 UCLASS(BlueprintType)
 class APARTMENTLIFEWARDROBE_API UApartmentLifeClothingItemData : public UApartmentLifePrimaryDataAsset
 {
@@ -17,10 +35,10 @@ public:
 	virtual FName GetPrimaryAssetType() const override { return FName(TEXT("ClothingItem")); }
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
-	EApartmentLifeClothingCategory Category = EApartmentLifeClothingCategory::Casual;
+	EApartmentLifeClothingCategory Category = EApartmentLifeClothingCategory::Tops;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
-	EApartmentLifeClothingLayer Layer = EApartmentLifeClothingLayer::Base;
+	EApartmentLifeClothingLayer Layer = EApartmentLifeClothingLayer::Tops;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
 	USkeletalMesh* ClothingMesh = nullptr;
@@ -29,16 +47,37 @@ public:
 	bool bEnableClothPhysics = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	bool bEnableHairCollision = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	float Price = 50.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	TArray<FName> StyleTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	TArray<FName> ColorVariantIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	TArray<FName> MaterialVariantIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	FApartmentLifeClothingFitData FitData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
 	TArray<EApartmentLifeSeason> SeasonalTags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
 	TArray<EApartmentLifeOccasion> SuitableOccasions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
+	TArray<EApartmentLifeOutfitContext> SuitableContexts;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
 	float WarmthRating = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Clothing")
-	bool bRequiresMatureContent = false;
+	bool bYogaCompatible = false;
 };
 
 UCLASS(BlueprintType)
@@ -51,6 +90,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Outfit")
 	TArray<FApartmentLifeEquippedClothingSlot> Slots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Outfit")
+	EApartmentLifeOutfitContext Context = EApartmentLifeOutfitContext::Everyday;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Outfit")
 	EApartmentLifeOccasion DefaultOccasion = EApartmentLifeOccasion::Everyday;

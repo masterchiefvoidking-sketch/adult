@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
 	const FApartmentLifeCareerState& GetCareer() const { return Career; }
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	bool HasCloseRelationship() const;
+
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
 	void SetCareerData(UApartmentLifeCareerData* InCareerData);
 

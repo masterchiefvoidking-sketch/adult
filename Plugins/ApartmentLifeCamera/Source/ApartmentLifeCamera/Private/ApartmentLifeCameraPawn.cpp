@@ -37,7 +37,10 @@ void AApartmentLifeCameraPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (CameraMode == EApartmentLifeCameraMode::Orbit || CameraMode == EApartmentLifeCameraMode::Photo || CameraMode == EApartmentLifeCameraMode::RoomFocus)
+	if (CameraMode == EApartmentLifeCameraMode::Orbit || CameraMode == EApartmentLifeCameraMode::Photo || CameraMode == EApartmentLifeCameraMode::RoomFocus
+		|| CameraMode == EApartmentLifeCameraMode::CharacterFace || CameraMode == EApartmentLifeCameraMode::CharacterOutfit
+		|| CameraMode == EApartmentLifeCameraMode::CharacterFullBody || CameraMode == EApartmentLifeCameraMode::PosePreview
+		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview)
 	{
 		UpdateOrbitPivot();
 		const FRotator OrbitRotation(CurrentPitch, CurrentYaw, 0.f);
@@ -125,6 +128,12 @@ void AApartmentLifeCameraPawn::AddYawInput(float YawDelta)
 		return;
 	}
 
+	if (bRotateCharacterInsteadOfCamera && FocusTarget)
+	{
+		RotateFocusedCharacter(YawDelta * OrbitSensitivity);
+		return;
+	}
+
 	if (CameraMode == EApartmentLifeCameraMode::Free)
 	{
 		CurrentYaw += YawDelta * OrbitSensitivity;
@@ -198,7 +207,14 @@ void AApartmentLifeCameraPawn::UpdateOrbitPivot()
 		return;
 	}
 
-	const FVector TargetLocation = FocusTarget->GetActorLocation();
+	const FVector TargetLocation = (CameraMode == EApartmentLifeCameraMode::CharacterFace
+		|| CameraMode == EApartmentLifeCameraMode::CharacterOutfit
+		|| CameraMode == EApartmentLifeCameraMode::CharacterFullBody
+		|| CameraMode == EApartmentLifeCameraMode::PosePreview
+		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview)
+		? GetCharacterFocusPoint(FocusTarget, ActiveCharacterFocus)
+		: FocusTarget->GetActorLocation();
+
 	PivotComponent->SetWorldLocation(FMath::VInterpTo(PivotComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), 8.f));
 }
 
@@ -248,6 +264,106 @@ void AApartmentLifeCameraPawn::FocusRoom(const FBox& RoomBounds)
 	CurrentArmLength = RoomBounds.GetExtent().GetMax() * 2.5f;
 	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
 	bFocusLockEnabled = false;
+}
+
+void AApartmentLifeCameraPawn::FocusCharacter(AActor* Character, EApartmentLifeCharacterFocusMode FocusMode)
+{
+	if (!Character)
+	{
+		return;
+	}
+
+	FocusTarget = Character;
+	ActiveCharacterFocus = FocusMode;
+	CameraMode = GetCameraModeForFocus(FocusMode);
+	bFocusLockEnabled = true;
+	ApplyCharacterFocusFraming(FocusMode);
+}
+
+void AApartmentLifeCameraPawn::SetCharacterPreviewRotationEnabled(bool bEnabled)
+{
+	bRotateCharacterInsteadOfCamera = bEnabled;
+}
+
+void AApartmentLifeCameraPawn::RotateFocusedCharacter(float YawDelta)
+{
+	if (!FocusTarget)
+	{
+		return;
+	}
+
+	const FRotator NewRotation = FocusTarget->GetActorRotation() + FRotator(0.f, YawDelta, 0.f);
+	FocusTarget->SetActorRotation(NewRotation);
+}
+
+void AApartmentLifeCameraPawn::ApplyCharacterFocusFraming(EApartmentLifeCharacterFocusMode FocusMode)
+{
+	if (!FocusTarget)
+	{
+		return;
+	}
+
+	PivotComponent->SetWorldLocation(GetCharacterFocusPoint(FocusTarget, FocusMode));
+
+	switch (FocusMode)
+	{
+	case EApartmentLifeCharacterFocusMode::Face:
+		CurrentArmLength = CharacterFaceArmLength;
+		CurrentPitch = -5.f;
+		break;
+	case EApartmentLifeCharacterFocusMode::Outfit:
+		CurrentArmLength = CharacterOutfitArmLength;
+		CurrentPitch = -10.f;
+		break;
+	case EApartmentLifeCharacterFocusMode::PosePreview:
+		CurrentArmLength = PosePreviewArmLength;
+		CurrentPitch = -15.f;
+		break;
+	case EApartmentLifeCharacterFocusMode::AnimationPreview:
+		CurrentArmLength = CharacterFullBodyArmLength;
+		CurrentPitch = -20.f;
+		break;
+	default:
+		CurrentArmLength = CharacterFullBodyArmLength;
+		CurrentPitch = -20.f;
+		break;
+	}
+
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+}
+
+FVector AApartmentLifeCameraPawn::GetCharacterFocusPoint(AActor* Character, EApartmentLifeCharacterFocusMode FocusMode) const
+{
+	if (!Character)
+	{
+		return FVector::ZeroVector;
+	}
+
+	FVector Origin;
+	FVector Extent;
+	Character->GetActorBounds(true, Origin, Extent);
+
+	switch (FocusMode)
+	{
+	case EApartmentLifeCharacterFocusMode::Face:
+		return Origin + FVector(0.f, 0.f, Extent.Z * 0.75f);
+	case EApartmentLifeCharacterFocusMode::Outfit:
+		return Origin + FVector(0.f, 0.f, Extent.Z * 0.35f);
+	default:
+		return Origin;
+	}
+}
+
+EApartmentLifeCameraMode AApartmentLifeCameraPawn::GetCameraModeForFocus(EApartmentLifeCharacterFocusMode FocusMode) const
+{
+	switch (FocusMode)
+	{
+	case EApartmentLifeCharacterFocusMode::Face: return EApartmentLifeCameraMode::CharacterFace;
+	case EApartmentLifeCharacterFocusMode::Outfit: return EApartmentLifeCameraMode::CharacterOutfit;
+	case EApartmentLifeCharacterFocusMode::PosePreview: return EApartmentLifeCameraMode::PosePreview;
+	case EApartmentLifeCharacterFocusMode::AnimationPreview: return EApartmentLifeCameraMode::AnimationPreview;
+	default: return EApartmentLifeCameraMode::CharacterFullBody;
+	}
 }
 
 void AApartmentLifeCameraPawn::OnOrbitPressed()

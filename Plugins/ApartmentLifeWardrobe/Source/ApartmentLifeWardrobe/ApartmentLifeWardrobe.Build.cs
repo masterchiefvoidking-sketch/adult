@@ -13,6 +13,8 @@ public class ApartmentLifeWardrobe : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"Json",
+			"JsonUtilities",
 			"ApartmentLifeCore",
 			"ApartmentLifeCharacter"
 		});

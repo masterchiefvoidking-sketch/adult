@@ -10,14 +10,9 @@
 
 class UApartmentLifeClothingItemData;
 class UApartmentLifeOutfitPresetData;
-class UApartmentLifeDataRegistrySubsystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWardrobeUpdated);
 
-/**
- * Manages equipped clothing, closet inventory, laundry state, and automatic outfit selection
- * based on weather, schedule, and occasion.
- */
 UCLASS(ClassGroup = Character, meta = (BlueprintSpawnableComponent))
 class APARTMENTLIFEWARDROBE_API UApartmentLifeWardrobeComponent : public UActorComponent, public IApartmentLifeSaveable
 {
@@ -36,7 +31,16 @@ public:
 	void ApplyOutfitPreset(UApartmentLifeOutfitPresetData* Preset);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void ApplyFavoriteOutfit(FName OutfitNameId);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void SaveCurrentAsFavorite(FName OutfitNameId, EApartmentLifeOutfitContext Context);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
 	void SelectOutfitForContext(EApartmentLifeOccasion Occasion, const FApartmentLifeWeatherState& Weather);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void SelectOutfitForOutfitContext(EApartmentLifeOutfitContext Context, const FApartmentLifeWeatherState& Weather);
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Wardrobe")
 	const TArray<FApartmentLifeEquippedClothingSlot>& GetEquippedSlots() const { return EquippedSlots; }
@@ -47,22 +51,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
 	void StartLaundryCycle();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void SetStyleProfile(const FApartmentLifeWardrobeStyleProfile& Profile);
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Wardrobe")
 	FOnWardrobeUpdated OnWardrobeUpdated;
 
-	// IApartmentLifeSaveable
 	virtual FString GetSaveId_Implementation() const override;
 	virtual void CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const override;
 	virtual void RestoreSaveData_Implementation(const TMap<FString, FString>& InData) override;
 
 protected:
+	void RefreshVisuals();
+	UApartmentLifeClothingItemData* ResolveClothingData(FName ClothingItemId) const;
+	float ScoreClothingForContext(const UApartmentLifeClothingItemData* Item, EApartmentLifeOccasion Occasion, const FApartmentLifeWeatherState& Weather) const;
+	float ScoreClothingForOutfitContext(const UApartmentLifeClothingItemData* Item, EApartmentLifeOutfitContext Context, const FApartmentLifeWeatherState& Weather) const;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wardrobe")
 	TArray<FApartmentLifeEquippedClothingSlot> EquippedSlots;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wardrobe")
+	TArray<FApartmentLifeFavoriteOutfit> FavoriteOutfits;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wardrobe")
 	TArray<FName> ClosetInventory;
 
-	void RefreshVisuals();
-	UApartmentLifeClothingItemData* ResolveClothingData(FName ClothingItemId) const;
-	float ScoreClothingForContext(const UApartmentLifeClothingItemData* Item, EApartmentLifeOccasion Occasion, const FApartmentLifeWeatherState& Weather) const;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wardrobe")
+	FApartmentLifeWardrobeStyleProfile StyleProfile;
 };

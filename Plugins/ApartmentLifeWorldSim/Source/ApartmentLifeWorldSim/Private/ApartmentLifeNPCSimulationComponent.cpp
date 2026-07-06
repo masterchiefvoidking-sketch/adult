@@ -18,6 +18,18 @@ UApartmentLifeNPCSimulationComponent::UApartmentLifeNPCSimulationComponent()
 	Finance.MonthlyRent = 950.f;
 }
 
+bool UApartmentLifeNPCSimulationComponent::HasCloseRelationship() const
+{
+	for (const FApartmentLifeRelationshipRecord& Relationship : Relationships)
+	{
+		if (Relationship.Friendship > 70.f && Relationship.Comfort > 60.f)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void UApartmentLifeNPCSimulationComponent::BeginPlay()
 {
 	Super::BeginPlay();

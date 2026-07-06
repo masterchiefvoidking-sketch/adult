@@ -2,6 +2,7 @@
 
 #include "ApartmentLifeSaveSubsystem.h"
 #include "ApartmentLifeSaveable.h"
+#include "ApartmentLifeSaveableRegistry.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
@@ -107,6 +108,19 @@ void UApartmentLifeSaveSubsystem::CollectSaveables(UApartmentLifeSaveGame* SaveG
 
 	SaveGame->SerializedActors.Empty();
 
+	for (UObject* Registered : FApartmentLifeSaveableRegistry::GetRegistered())
+	{
+		if (!Registered || !Registered->Implements<UApartmentLifeSaveable>())
+		{
+			continue;
+		}
+
+		FApartmentLifeSerializedActor Entry;
+		Entry.SaveId = IApartmentLifeSaveable::Execute_GetSaveId(Registered);
+		IApartmentLifeSaveable::Execute_CaptureSaveData(Registered, Entry.Data);
+		SaveGame->SerializedActors.Add(Entry);
+	}
+
 	for (FActorIterator It(World); It; ++It)
 	{
 		AActor* Actor = *It;
@@ -149,6 +163,24 @@ void UApartmentLifeSaveSubsystem::ApplySaveables(const UApartmentLifeSaveGame* S
 	for (const FApartmentLifeSerializedActor& Entry : SaveGame->SerializedActors)
 	{
 		bool bRestored = false;
+
+		for (UObject* Registered : FApartmentLifeSaveableRegistry::GetRegistered())
+		{
+			if (Registered && Registered->Implements<UApartmentLifeSaveable>())
+			{
+				if (IApartmentLifeSaveable::Execute_GetSaveId(Registered) == Entry.SaveId)
+				{
+					IApartmentLifeSaveable::Execute_RestoreSaveData(Registered, Entry.Data);
+					bRestored = true;
+					break;
+				}
+			}
+		}
+
+		if (bRestored)
+		{
+			continue;
+		}
 
 		for (FActorIterator It(World); It; ++It)
 		{

@@ -71,3 +71,12 @@ UApartmentLifeFurnitureItemData* UApartmentLifeFurniturePlacementComponent::Reso
 	}
 	return nullptr;
 }
+
+AApartmentLifeFurnitureActor* UApartmentLifeFurniturePlacementComponent::GetSpawnedFurnitureActor(const FGuid& InstanceId) const
+{
+	if (const TObjectPtr<AApartmentLifeFurnitureActor>* Found = SpawnedFurniture.Find(InstanceId))
+	{
+		return Found->Get();
+	}
+	return nullptr;
+}

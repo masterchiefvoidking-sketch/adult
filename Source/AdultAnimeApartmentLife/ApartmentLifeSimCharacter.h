@@ -10,6 +10,7 @@
 class UApartmentLifeNPCSimulationComponent;
 class UApartmentLifeWardrobeComponent;
 class UApartmentLifeActivityComponent;
+class UApartmentLifeInteractionComponent;
 class UApartmentLifeAnimationComponent;
 class UApartmentLifeYogaMinigameComponent;
 class UApartmentLifeGroomingRoutineComponent;
@@ -55,6 +56,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeConversationComponent* GetConversationComponent() const { return ConversationComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life")
+	UApartmentLifeInteractionComponent* GetInteractionComponent() const { return InteractionComponent; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -99,4 +103,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeConversationComponent> ConversationComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeInteractionComponent> InteractionComponent;
 };

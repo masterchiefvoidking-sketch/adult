@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeCitySubsystem.h"
+#include "ApartmentLifeSaveableRegistry.h"
 #include "ApartmentLifeCityLibrary.h"
 #include "ApartmentLifeCityDataAssets.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
@@ -46,6 +47,14 @@ void UApartmentLifeCitySubsystem::Initialize(FSubsystemCollectionBase& Collectio
 			bTimeBound = true;
 		}
 	}
+
+	FApartmentLifeSaveableRegistry::Register(this);
+}
+
+void UApartmentLifeCitySubsystem::Deinitialize()
+{
+	FApartmentLifeSaveableRegistry::Unregister(this);
+	Super::Deinitialize();
 }
 
 void UApartmentLifeCitySubsystem::RegisterDistrict(UApartmentLifeDistrictData* District)

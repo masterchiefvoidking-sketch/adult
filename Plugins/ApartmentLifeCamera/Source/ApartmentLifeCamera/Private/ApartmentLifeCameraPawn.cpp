@@ -40,13 +40,14 @@ void AApartmentLifeCameraPawn::Tick(float DeltaSeconds)
 	if (CameraMode == EApartmentLifeCameraMode::Orbit || CameraMode == EApartmentLifeCameraMode::Photo || CameraMode == EApartmentLifeCameraMode::RoomFocus
 		|| CameraMode == EApartmentLifeCameraMode::CharacterFace || CameraMode == EApartmentLifeCameraMode::CharacterOutfit
 		|| CameraMode == EApartmentLifeCameraMode::CharacterFullBody || CameraMode == EApartmentLifeCameraMode::PosePreview
-		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview)
+		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview || CameraMode == EApartmentLifeCameraMode::FurnitureFocus
+		|| CameraMode == EApartmentLifeCameraMode::CharacterCreator || CameraMode == EApartmentLifeCameraMode::BuildMode)
 	{
 		UpdateOrbitPivot();
 		const FRotator OrbitRotation(CurrentPitch, CurrentYaw, 0.f);
 		SpringArm->SetWorldRotation(OrbitRotation);
 	}
-	else if (CameraMode == EApartmentLifeCameraMode::TopDown)
+	else if (CameraMode == EApartmentLifeCameraMode::TopDown || CameraMode == EApartmentLifeCameraMode::BuildMode)
 	{
 		CurrentPitch = -89.f;
 		SpringArm->SetWorldRotation(FRotator(CurrentPitch, CurrentYaw, 0.f));
@@ -211,7 +212,8 @@ void AApartmentLifeCameraPawn::UpdateOrbitPivot()
 		|| CameraMode == EApartmentLifeCameraMode::CharacterOutfit
 		|| CameraMode == EApartmentLifeCameraMode::CharacterFullBody
 		|| CameraMode == EApartmentLifeCameraMode::PosePreview
-		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview)
+		|| CameraMode == EApartmentLifeCameraMode::AnimationPreview
+		|| CameraMode == EApartmentLifeCameraMode::CharacterCreator)
 		? GetCharacterFocusPoint(FocusTarget, ActiveCharacterFocus)
 		: FocusTarget->GetActorLocation();
 
@@ -249,10 +251,58 @@ void AApartmentLifeCameraPawn::SetBuildTopDownMode(bool bEnabled)
 		CurrentArmLength = FMath::Clamp(CurrentArmLength, 400.f, MaxArmLength);
 		SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
 	}
-	else
+	else if (CameraMode == EApartmentLifeCameraMode::TopDown || CameraMode == EApartmentLifeCameraMode::BuildMode)
 	{
 		CameraMode = EApartmentLifeCameraMode::Orbit;
 		CurrentPitch = -25.f;
+	}
+}
+
+void AApartmentLifeCameraPawn::FocusFurniture(AActor* Furniture)
+{
+	if (!Furniture)
+	{
+		return;
+	}
+
+	FocusTarget = Furniture;
+	CameraMode = EApartmentLifeCameraMode::FurnitureFocus;
+	bFocusLockEnabled = true;
+	CurrentArmLength = FurnitureFocusArmLength;
+	CurrentPitch = -20.f;
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+	UpdateOrbitPivot();
+}
+
+void AApartmentLifeCameraPawn::EnterCharacterCreatorMode(AActor* Character)
+{
+	if (!Character)
+	{
+		return;
+	}
+
+	FocusCharacter(Character, EApartmentLifeCharacterFocusMode::FullBody);
+	CameraMode = EApartmentLifeCameraMode::CharacterCreator;
+	bRotateCharacterInsteadOfCamera = true;
+	CurrentPitch = -10.f;
+}
+
+void AApartmentLifeCameraPawn::EnterBuildModeCamera(AActor* ApartmentActor)
+{
+	CameraMode = EApartmentLifeCameraMode::BuildMode;
+	CurrentPitch = -89.f;
+	CurrentArmLength = FMath::Clamp(650.f, MinArmLength, MaxArmLength);
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+
+	if (ApartmentActor)
+	{
+		FocusTarget = ApartmentActor;
+		bFocusLockEnabled = true;
+		PivotComponent->SetWorldLocation(ApartmentActor->GetActorLocation());
+	}
+	else
+	{
+		bFocusLockEnabled = false;
 	}
 }
 

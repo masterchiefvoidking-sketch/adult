@@ -11,6 +11,7 @@
 #include "ApartmentLifeCharacterCreatorComponent.h"
 #include "ApartmentLifeClothingFitComponent.h"
 #include "ApartmentLifeConversationComponent.h"
+#include "ApartmentLifeInteractionComponent.h"
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCitySubsystem.h"
 #include "ApartmentLifeWorldSimCityBridge.h"
@@ -28,6 +29,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	NPCStyleComponent = CreateDefaultSubobject<UApartmentLifeNPCStyleComponent>(TEXT("NPCStyle"));
 	ClothingFitComponent = CreateDefaultSubobject<UApartmentLifeClothingFitComponent>(TEXT("ClothingFit"));
 	ConversationComponent = CreateDefaultSubobject<UApartmentLifeConversationComponent>(TEXT("Conversation"));
+	InteractionComponent = CreateDefaultSubobject<UApartmentLifeInteractionComponent>(TEXT("Interaction"));
 }
 
 void AApartmentLifeSimCharacter::BeginPlay()

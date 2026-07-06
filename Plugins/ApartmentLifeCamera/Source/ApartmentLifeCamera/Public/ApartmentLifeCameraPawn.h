@@ -22,7 +22,10 @@ enum class EApartmentLifeCameraMode : uint8
 	CharacterOutfit		UMETA(DisplayName = "Character Outfit"),
 	CharacterFullBody	UMETA(DisplayName = "Character Full Body"),
 	PosePreview			UMETA(DisplayName = "Pose Preview"),
-	AnimationPreview	UMETA(DisplayName = "Animation Preview")
+	AnimationPreview	UMETA(DisplayName = "Animation Preview"),
+	FurnitureFocus		UMETA(DisplayName = "Furniture Focus"),
+	CharacterCreator	UMETA(DisplayName = "Character Creator"),
+	BuildMode			UMETA(DisplayName = "Build Mode")
 };
 
 UENUM(BlueprintType)
@@ -76,6 +79,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void AddPanInputY(float PanDelta);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void FocusFurniture(AActor* Furniture);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void EnterCharacterCreatorMode(AActor* Character);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void EnterBuildModeCamera(AActor* ApartmentActor = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void SetBuildTopDownMode(bool bEnabled);
@@ -153,6 +165,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
 	float CharacterFullBodyArmLength = 380.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Furniture")
+	float FurnitureFocusArmLength = 280.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Character")
 	float PosePreviewArmLength = 300.f;

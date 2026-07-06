@@ -41,6 +41,8 @@ Centered around realistic cohabitation, apartment customization, careers, relati
 | **ApartmentLifeCharacterPipeline** | Animation groups, yoga mini-game, grooming routines, NPC style AI |
 | **ApartmentLifeSocial** | Dialogue, relationships, memory, romance, reputation, NPC social autonomy |
 | **ApartmentLifeCity** | Districts, buildings, POIs, economy, transportation, world events, LOD |
+| **ApartmentLifeInteraction** | Universal interact framework: furniture → activity wiring |
+| **ApartmentLifeDevTools** | Private debug tools (non-shipping): time, money, spawn, save tests |
 
 See [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) for system diagrams and extension points.
 
@@ -49,6 +51,8 @@ See [Docs/APARTMENT_BUILDER.md](Docs/APARTMENT_BUILDER.md) for the apartment bui
 See [Docs/CHARACTER_PIPELINE.md](Docs/CHARACTER_PIPELINE.md) for character creator, wardrobe, and animation pipeline.
 See [Docs/SOCIAL_SIMULATION.md](Docs/SOCIAL_SIMULATION.md) for dialogue, relationships, and emotional AI.
 See [Docs/CITY_WORLD.md](Docs/CITY_WORLD.md) for city districts, careers, economy, and open world simulation.
+See [Docs/SOLO_BUILD.md](Docs/SOLO_BUILD.md) for the private solo-build pipeline and content workflow.
+See [Docs/VERTICAL_SLICE.md](Docs/VERTICAL_SLICE.md) for the first playable vertical slice.
 
 ## Key Classes
 
@@ -67,6 +71,12 @@ See [Docs/CITY_WORLD.md](Docs/CITY_WORLD.md) for city districts, careers, econom
 | `UApartmentLifeYogaMinigameComponent` | CharacterPipeline | Yoga pose matching mini-game |
 | `UApartmentLifeConversationComponent` | Social | Dialogue session and history |
 | `UApartmentLifeSocialSubsystem` | Social | Invitations, reputation, NPC friendship autonomy |
+| `UApartmentLifeCitySubsystem` | City | Districts, economy, events, background simulation |
+| `UApartmentLifeWorldSimCityBridge` | WorldSim | Commute, rent, skill gain, LOD bridge |
+| `UApartmentLifeInteractionComponent` | Interaction | Line-trace interact → activity start |
+| `AApartmentLifeVerticalSliceGameMode` | Game | Vertical slice bootstrap and auto-load |
+| `AApartmentLifeSlicePlayerController` | Game | Input: interact, build, wardrobe, save |
+| `UApartmentLifeDevToolsLibrary` | DevTools | Private debug helpers (non-shipping) |
 
 ## Content Pipeline
 
@@ -87,6 +97,10 @@ Animation uses Motion Matching, Full Body IK, Control Rig, and facial systems co
 | Photo mode | P |
 | Focus lock | L |
 | Interact | E |
+| Build mode | B |
+| Wardrobe | G |
+| Talk to partner | Q |
+| Quick save / load | F5 / F9 |
 
 ## Platform Targets
 

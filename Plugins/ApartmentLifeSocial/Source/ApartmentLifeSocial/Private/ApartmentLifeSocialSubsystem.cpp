@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeSocialSubsystem.h"
+#include "ApartmentLifeSaveableRegistry.h"
 #include "ApartmentLifeSocialLibrary.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeActivityComponent.h"
@@ -10,6 +11,13 @@
 void UApartmentLifeSocialSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	FApartmentLifeSaveableRegistry::Register(this);
+}
+
+void UApartmentLifeSocialSubsystem::Deinitialize()
+{
+	FApartmentLifeSaveableRegistry::Unregister(this);
+	Super::Deinitialize();
 }
 
 void UApartmentLifeSocialSubsystem::HandleHourAdvanced(const FApartmentLifeGameTime& CurrentTime)

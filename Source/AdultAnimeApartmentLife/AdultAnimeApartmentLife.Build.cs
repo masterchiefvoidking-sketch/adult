@@ -25,7 +25,9 @@ public class AdultAnimeApartmentLife : ModuleRules
 			"ApartmentLifeWorldSim",
 			"ApartmentLifeCharacterPipeline",
 			"ApartmentLifeSocial",
-			"ApartmentLifeCity"
+			"ApartmentLifeCity",
+			"ApartmentLifeInteraction",
+			"ApartmentLifeDevTools"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

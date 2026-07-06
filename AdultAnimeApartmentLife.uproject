@@ -61,6 +61,14 @@
 		{
 			"Name": "ApartmentLifeCity",
 			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeInteraction",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeDevTools",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

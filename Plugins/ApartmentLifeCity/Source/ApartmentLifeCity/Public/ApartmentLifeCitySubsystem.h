@@ -23,6 +23,7 @@ class APARTMENTLIFECITY_API UApartmentLifeCitySubsystem : public UWorldSubsystem
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|City")
 	void RegisterDistrict(UApartmentLifeDistrictData* District);

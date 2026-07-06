@@ -26,6 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Apartment")
 	void DestroyFurnitureInstance(const FGuid& InstanceId);
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Apartment")
+	AApartmentLifeFurnitureActor* GetSpawnedFurnitureActor(const FGuid& InstanceId) const;
+
 protected:
 	UPROPERTY()
 	TMap<FGuid, TObjectPtr<AApartmentLifeFurnitureActor>> SpawnedFurniture;

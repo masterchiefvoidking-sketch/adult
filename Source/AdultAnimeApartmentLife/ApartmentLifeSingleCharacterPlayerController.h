@@ -13,6 +13,8 @@ class UApartmentLifeInteractionSelectionComponent;
 class UApartmentLifeInteractionHudComponent;
 class UApartmentLifeBuildModeComponent;
 class UApartmentLifeDebugMenuComponent;
+class UApartmentLifeWardrobeUiController;
+class UApartmentLifeWardrobeShoppingComponent;
 
 /**
  * Player camera controller for the single-girl private build.
@@ -94,6 +96,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Single Character|Interaction")
 	TObjectPtr<UApartmentLifeInteractionHudComponent> InteractionHudComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Wardrobe")
+	TObjectPtr<UApartmentLifeWardrobeUiController> WardrobeUiController;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Wardrobe")
+	TObjectPtr<UApartmentLifeWardrobeShoppingComponent> WardrobeShoppingComponent;
 
 	UPROPERTY()
 	TWeakObjectPtr<AApartmentLifeApartmentUnit> ApartmentUnit;

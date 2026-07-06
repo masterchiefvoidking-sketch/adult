@@ -525,6 +525,8 @@ bool UApartmentLifeNPCSimulationComponent::ExecuteTopShoppingIntent()
 		Apartment.Cleanliness = FMath::Min(Apartment.Cleanliness + 5.f, 100.f);
 		break;
 	case EApartmentLifeShoppingCategory::Clothing:
+		Mood.Confidence = FMath::Clamp(Mood.Confidence + 2.f, 0.f, 100.f);
+		MoodInfluences.FinancialSecurity = FMath::Clamp(MoodInfluences.FinancialSecurity - 1.f, 0.f, 100.f);
 		break;
 	default:
 		Needs.Fun = FMath::Max(0.f, Needs.Fun - 30.f);

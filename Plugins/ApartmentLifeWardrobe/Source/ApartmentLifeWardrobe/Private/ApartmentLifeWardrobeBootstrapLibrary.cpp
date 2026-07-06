@@ -19,10 +19,12 @@ namespace
 		}
 	}
 
-	void SaveFavorite(
+	void SavePreset(
 		UApartmentLifeWardrobeComponent* Wardrobe,
 		FName OutfitNameId,
+		const FText& DisplayName,
 		EApartmentLifeOutfitContext Context,
+		EApartmentLifeOutfitPresetType PresetType,
 		const TArray<TPair<EApartmentLifeClothingLayer, FName>>& Slots)
 	{
 		if (!Wardrobe)
@@ -31,7 +33,7 @@ namespace
 		}
 
 		EquipOutfit(Wardrobe, Slots);
-		Wardrobe->SaveCurrentAsFavorite(OutfitNameId, Context);
+		Wardrobe->SaveOutfitPreset(OutfitNameId, DisplayName, Context, PresetType);
 	}
 }
 
@@ -83,76 +85,58 @@ void UApartmentLifeWardrobeBootstrapLibrary::SeedVerticalSliceWardrobe(UApartmen
 	const auto D = EApartmentLifeClothingLayer::Dress;
 	const auto J = EApartmentLifeClothingLayer::Jacket;
 
-	// 3 casual outfits
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.casual.day_a")), EApartmentLifeOutfitContext::Everyday, {
+	SavePreset(Wardrobe, FName(TEXT("preset.morning")), FText::FromString(TEXT("Morning Outfit")), EApartmentLifeOutfitContext::Everyday, EApartmentLifeOutfitPresetType::Morning, {
 		{ T, FName(TEXT("clothing.casual.tshirt.pink")) },
 		{ B, FName(TEXT("clothing.casual.jeans.blue")) },
 		{ S, FName(TEXT("clothing.casual.sneakers.white")) }
 	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.casual.day_b")), EApartmentLifeOutfitContext::Everyday, {
-		{ T, FName(TEXT("clothing.casual.tshirt.white")) },
-		{ B, FName(TEXT("clothing.casual.skirt.denim")) },
-		{ S, FName(TEXT("clothing.casual.sandals.tan")) }
-	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.casual.day_c")), EApartmentLifeOutfitContext::Everyday, {
-		{ T, FName(TEXT("clothing.casual.blouse.floral")) },
-		{ B, FName(TEXT("clothing.casual.shorts.khaki")) },
-		{ S, FName(TEXT("clothing.casual.sandals.tan")) }
-	});
 
-	// 2 work outfits
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.work.office_a")), EApartmentLifeOutfitContext::Work, {
-		{ T, FName(TEXT("clothing.work.blouse.cream")) },
-		{ B, FName(TEXT("clothing.work.trousers.charcoal")) },
-		{ S, FName(TEXT("clothing.work.pumps.black")) }
-	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.work.office_b")), EApartmentLifeOutfitContext::Work, {
+	SavePreset(Wardrobe, FName(TEXT("preset.work")), FText::FromString(TEXT("Work Outfit")), EApartmentLifeOutfitContext::Work, EApartmentLifeOutfitPresetType::Work, {
 		{ J, FName(TEXT("clothing.work.blazer.navy")) },
 		{ T, FName(TEXT("clothing.work.blouse.cream")) },
 		{ B, FName(TEXT("clothing.work.trousers.charcoal")) },
 		{ S, FName(TEXT("clothing.work.pumps.black")) }
 	});
 
-	// 2 lounge outfits
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.lounge.cozy_a")), EApartmentLifeOutfitContext::Lounge, {
+	SavePreset(Wardrobe, FName(TEXT("preset.lounge")), FText::FromString(TEXT("Lounge Outfit")), EApartmentLifeOutfitContext::Lounge, EApartmentLifeOutfitPresetType::Lounge, {
 		{ T, FName(TEXT("clothing.lounge.hoodie.gray")) },
 		{ B, FName(TEXT("clothing.lounge.sweats.soft")) },
 		{ S, FName(TEXT("clothing.lounge.slippers.pink")) }
 	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.lounge.cozy_b")), EApartmentLifeOutfitContext::Lounge, {
+
+	SavePreset(Wardrobe, FName(TEXT("preset.sleep")), FText::FromString(TEXT("Sleep Outfit")), EApartmentLifeOutfitContext::Sleep, EApartmentLifeOutfitPresetType::Sleep, {
+		{ T, FName(TEXT("clothing.sleep.pajama.set")) },
+		{ S, FName(TEXT("clothing.sleep.slippers.fluffy")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("preset.yoga")), FText::FromString(TEXT("Yoga Outfit")), EApartmentLifeOutfitContext::Athletic, EApartmentLifeOutfitPresetType::Yoga, {
+		{ T, FName(TEXT("clothing.athletic.tank.mint")) },
+		{ B, FName(TEXT("clothing.athletic.leggings.teal")) },
+		{ S, FName(TEXT("clothing.casual.sneakers.white")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("preset.going_out")), FText::FromString(TEXT("Going Out Outfit")), EApartmentLifeOutfitContext::Formal, EApartmentLifeOutfitPresetType::GoingOut, {
+		{ D, FName(TEXT("clothing.formal.dress.evening")) },
+		{ S, FName(TEXT("clothing.formal.heels.silver")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.casual.day_b")), FText::FromString(TEXT("Sunny Day")), EApartmentLifeOutfitContext::Everyday, EApartmentLifeOutfitPresetType::Custom, {
+		{ T, FName(TEXT("clothing.casual.tshirt.white")) },
+		{ B, FName(TEXT("clothing.casual.skirt.denim")) },
+		{ S, FName(TEXT("clothing.casual.sandals.tan")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.lounge.cozy_b")), FText::FromString(TEXT("Cozy Evening")), EApartmentLifeOutfitContext::Lounge, EApartmentLifeOutfitPresetType::Custom, {
 		{ T, FName(TEXT("clothing.lounge.cardigan.cozy")) },
 		{ B, FName(TEXT("clothing.lounge.leggings.black")) },
 		{ S, FName(TEXT("clothing.lounge.slippers.pink")) }
 	});
 
-	// 2 sleepwear outfits
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.sleep.night_a")), EApartmentLifeOutfitContext::Sleep, {
-		{ T, FName(TEXT("clothing.sleep.pajama.set")) },
-		{ S, FName(TEXT("clothing.sleep.slippers.fluffy")) }
-	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.sleep.night_b")), EApartmentLifeOutfitContext::Sleep, {
-		{ D, FName(TEXT("clothing.sleep.nightgown.lace")) },
-		{ J, FName(TEXT("clothing.sleep.robe.silk")) },
-		{ S, FName(TEXT("clothing.sleep.slippers.fluffy")) }
-	});
-
-	// 2 athletic outfits
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.athletic.yoga_a")), EApartmentLifeOutfitContext::Athletic, {
-		{ T, FName(TEXT("clothing.athletic.tank.mint")) },
-		{ B, FName(TEXT("clothing.athletic.leggings.teal")) },
-		{ S, FName(TEXT("clothing.casual.sneakers.white")) }
-	});
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.athletic.yoga_b")), EApartmentLifeOutfitContext::Athletic, {
+	SavePreset(Wardrobe, FName(TEXT("outfit.athletic.yoga_b")), FText::FromString(TEXT("Power Yoga")), EApartmentLifeOutfitContext::Athletic, EApartmentLifeOutfitPresetType::Custom, {
 		{ T, FName(TEXT("clothing.athletic.sportsbra.black")) },
 		{ B, FName(TEXT("clothing.athletic.shorts.running")) },
 		{ S, FName(TEXT("clothing.casual.sneakers.white")) }
 	});
 
-	// 1 formal outfit
-	SaveFavorite(Wardrobe, FName(TEXT("outfit.formal.evening")), EApartmentLifeOutfitContext::Formal, {
-		{ D, FName(TEXT("clothing.formal.dress.evening")) },
-		{ S, FName(TEXT("clothing.formal.heels.silver")) }
-	});
-
-	Wardrobe->ApplyFavoriteOutfit(FName(TEXT("outfit.casual.day_a")));
+	Wardrobe->ApplyOutfitPresetByType(EApartmentLifeOutfitPresetType::Morning);
 }

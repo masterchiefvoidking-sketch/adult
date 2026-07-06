@@ -87,6 +87,12 @@ protected:
 	UFUNCTION()
 	void HandleBodyFitProfileUpdated(const FApartmentLifeBodyFitProfile& FitProfile);
 
+	UFUNCTION()
+	void HandlePurchasedItem(FName ItemId);
+
+	UFUNCTION()
+	void HandleWardrobeUpdated();
+
 	void RefreshClothingFitFromBody();
 	void RefreshNPCStyleFromSimulation();
 

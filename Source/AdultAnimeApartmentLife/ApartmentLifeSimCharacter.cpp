@@ -23,6 +23,7 @@
 #include "ApartmentLifeFinanceLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
+#include "ApartmentLifeAnimationLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 
 AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
@@ -64,6 +65,16 @@ void AApartmentLifeSimCharacter::BeginPlay()
 		ActivityComponent->OnActivityCompleted.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityCompleted);
 	}
 
+	if (GroomingComponent)
+	{
+		GroomingComponent->OnGroomingStepChanged.AddDynamic(this, &AApartmentLifeSimCharacter::HandleGroomingStepChanged);
+	}
+
+	if (RoutineChainComponent)
+	{
+		RoutineChainComponent->OnRoutineChainStepChanged.AddDynamic(this, &AApartmentLifeSimCharacter::HandleRoutineStepChanged);
+	}
+
 	if (CreatorComponent)
 	{
 		CreatorComponent->OnCreatorStateUpdated.AddDynamic(this, &AApartmentLifeSimCharacter::HandleCreatorStateUpdated);
@@ -73,6 +84,7 @@ void AApartmentLifeSimCharacter::BeginPlay()
 	{
 		BodyCustomizationComponent->OnBodyCustomizationUpdated.AddDynamic(this, &AApartmentLifeSimCharacter::HandleBodyFitProfileUpdated);
 		RefreshClothingFitFromBody();
+		RefreshMovementPersonalityFromBody();
 	}
 
 	if (UWorld* World = GetWorld())
@@ -102,23 +114,74 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 		ActivityComponent->StartActivity(ActivityId);
 	}
 
-	if (AnimationComponent)
-	{
-		AnimationComponent->SetAnimationGroup(UApartmentLifeActivityLibrary::GetAnimationGroupForActivity(ActivityId));
-	}
+	ApplyActivityAnimationForId(ActivityId);
 
 	if (SimulationComponent)
 	{
 		UApartmentLifeGirlLifeLibrary::ApplyActivitySkillGain(SimulationComponent->Skills, ActivityId);
 	}
+}
+
+void AApartmentLifeSimCharacter::ApplyActivityAnimationForId(FName ActivityId)
+{
+	if (!AnimationComponent || ActivityId.IsNone())
+	{
+		return;
+	}
+
+	UApartmentLifeAnimationLibrary::ApplyActivityAnimation(
+		AnimationComponent,
+		ActivityId,
+		GetInteractionContextActor(),
+		BodyCustomizationComponent,
+		SimulationComponent);
 
 	if (ActivityId.ToString().Contains(TEXT("social")) || ActivityId.ToString().Contains(TEXT("talk")))
 	{
-		if (AnimationComponent)
-		{
-			AnimationComponent->SetAnimationGroup(EApartmentLifeAnimationGroup::Conversation);
-		}
+		AnimationComponent->SetFacialExpression(EApartmentLifeFacialExpression::Happy);
+		AnimationComponent->TransitionToGroup(EApartmentLifeAnimationGroup::Conversation, EApartmentLifeAnimationTransitionKind::Blend);
 	}
+}
+
+AActor* AApartmentLifeSimCharacter::GetInteractionContextActor() const
+{
+	if (InteractionSelectionComponent && InteractionSelectionComponent->GetSelectedInteractable())
+	{
+		return InteractionSelectionComponent->GetSelectedInteractable();
+	}
+	if (InteractionComponent)
+	{
+		return InteractionComponent->GetFocusedInteractable();
+	}
+	return nullptr;
+}
+
+void AApartmentLifeSimCharacter::RefreshMovementPersonalityFromBody()
+{
+	if (!AnimationComponent || !BodyCustomizationComponent)
+	{
+		return;
+	}
+
+	AnimationComponent->ApplyMovementStyles(
+		UApartmentLifeAnimationLibrary::GetMovementPersonalityFromWalkStyle(BodyCustomizationComponent->GetBodyCustomization().WalkStyle),
+		BodyCustomizationComponent->GetWalkStyleId(),
+		BodyCustomizationComponent->GetIdleStyleId());
+}
+
+void AApartmentLifeSimCharacter::RestoreAnimationAfterLoad()
+{
+	if (AnimationComponent)
+	{
+		AnimationComponent->RestoreAnimationAfterLoad();
+	}
+
+	if (RoutineChainComponent && RoutineChainComponent->IsRoutineActive())
+	{
+		RoutineChainComponent->ResumeAfterLoad();
+	}
+
+	RefreshMovementPersonalityFromBody();
 }
 
 void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
@@ -147,7 +210,12 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 	{
 		if (YogaComponent)
 		{
-			YogaComponent->StartYogaSession(FName(TEXT("pose.builtin.stretch")), true);
+			const FName PoseId = FName(TEXT("pose.builtin.stretch"));
+			YogaComponent->StartYogaSession(PoseId, true);
+			if (AnimationComponent)
+			{
+				UApartmentLifeAnimationLibrary::ApplyYogaPoseAnimation(AnimationComponent, PoseId, NAME_None);
+			}
 		}
 	}
 	else if (Id.Contains(TEXT("brush")) || Id.Contains(TEXT("wash_face")) || Id.Contains(TEXT("skincare")) || Id.Contains(TEXT("hair")) || Id.Contains(TEXT("makeup")))
@@ -199,6 +267,28 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 			BedroomRoutineComponent->StartRoutine(EApartmentLifeBedroomRoutineType::Relax);
 		}
 	}
+
+	ApplyActivityAnimationForId(ActivityId);
+}
+
+void AApartmentLifeSimCharacter::HandleGroomingStepChanged(EApartmentLifeGroomingStep Step)
+{
+	if (AnimationComponent)
+	{
+		UApartmentLifeAnimationLibrary::ApplyGroomingStepAnimation(AnimationComponent, Step);
+	}
+}
+
+void AApartmentLifeSimCharacter::HandleRoutineStepChanged(int32 StepIndex)
+{
+	if (RoutineChainComponent && AnimationComponent)
+	{
+		const FName ActivityId = RoutineChainComponent->GetCurrentStepActivityId();
+		if (!ActivityId.IsNone())
+		{
+			ApplyActivityAnimationForId(ActivityId);
+		}
+	}
 }
 
 void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
@@ -217,6 +307,11 @@ void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 	if (YogaComponent && ActivityId.ToString().Contains(TEXT("yoga")))
 	{
 		YogaComponent->EndYogaSession();
+		if (AnimationComponent)
+		{
+			AnimationComponent->MarkCompletedAnimationEvent(ActivityId);
+			AnimationComponent->ResetToIdle();
+		}
 	}
 
 	if (GroomingComponent && (ActivityId.ToString().Contains(TEXT("shower")) || ActivityId.ToString().Contains(TEXT("groom")) || ActivityId.ToString().Contains(TEXT("hygiene"))))
@@ -271,6 +366,7 @@ void AApartmentLifeSimCharacter::HandleCreatorStateUpdated(const FApartmentLifeC
 {
 	RefreshClothingFitFromBody();
 	RefreshNPCStyleFromSimulation();
+	RefreshMovementPersonalityFromBody();
 }
 
 void AApartmentLifeSimCharacter::HandleBodyFitProfileUpdated(const FApartmentLifeBodyFitProfile& FitProfile)

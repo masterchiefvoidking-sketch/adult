@@ -7,6 +7,9 @@
 #include "ApartmentLifeGameTimeSubsystem.h"
 #include "ApartmentLifeSaveSubsystem.h"
 #include "ApartmentLifeAnimationComponent.h"
+#include "ApartmentLifeAnimationLibrary.h"
+#include "ApartmentLifeRoutineChainComponent.h"
+#include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSocialLibrary.h"
 #include "ApartmentLifeCharacterPipelineTypes.h"
@@ -20,6 +23,7 @@
 #include "ApartmentLifeProgressionTypes.h"
 #include "ApartmentLifeWorldSimLibrary.h"
 #include "ApartmentLifeCharacterCreatorComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
@@ -651,6 +655,115 @@ bool UApartmentLifeDevToolsLibrary::ResetCreatorBody(AActor* Character)
 	if (UApartmentLifeCharacterCreatorComponent* Creator = Character ? Character->FindComponentByClass<UApartmentLifeCharacterCreatorComponent>() : nullptr)
 	{
 		Creator->ResetBody();
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::PreviewMontage(AActor* Character, FName MontageId)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeAnimationComponent* Animation = Character ? Character->FindComponentByClass<UApartmentLifeAnimationComponent>() : nullptr)
+	{
+		Animation->SetMontageId(MontageId);
+		Animation->TransitionToGroup(Animation->GetAnimationState().CurrentGroup, EApartmentLifeAnimationTransitionKind::MontageBridge);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::PreviewRoutineChain(AActor* Character, FName ChainId)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeRoutineChainComponent* Routine = Character ? Character->FindComponentByClass<UApartmentLifeRoutineChainComponent>() : nullptr)
+	{
+		return Routine->StartRoutineChain(ChainId);
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ShowIkTargets(AActor* Character, float DurationSeconds)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (!Character || !Character->GetWorld())
+	{
+		return false;
+	}
+
+	const UApartmentLifeAnimationComponent* Animation = Character->FindComponentByClass<UApartmentLifeAnimationComponent>();
+	if (!Animation)
+	{
+		return false;
+	}
+
+	const FApartmentLifeAnimationIkTargets& Targets = Animation->GetAnimationState().IkTargets;
+	const float Duration = FMath::Max(DurationSeconds, 0.5f);
+	DrawDebugSphere(Character->GetWorld(), Targets.LeftFootTarget, 8.f, 8, FColor::Green, false, Duration);
+	DrawDebugSphere(Character->GetWorld(), Targets.RightFootTarget, 8.f, 8, FColor::Green, false, Duration);
+	DrawDebugSphere(Character->GetWorld(), Targets.LeftHandTarget, 6.f, 8, FColor::Cyan, false, Duration);
+	DrawDebugSphere(Character->GetWorld(), Targets.RightHandTarget, 6.f, 8, FColor::Cyan, false, Duration);
+	DrawDebugSphere(Character->GetWorld(), Targets.HeadLookAtTarget, 6.f, 8, FColor::Yellow, false, Duration);
+	return true;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ShowInteractionMarkers(AActor* FurnitureActor, float DurationSeconds)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	AApartmentLifeFurnitureActor* Furniture = Cast<AApartmentLifeFurnitureActor>(FurnitureActor);
+	if (!Furniture || !Furniture->GetWorld())
+	{
+		return false;
+	}
+
+	const float Duration = FMath::Max(DurationSeconds, 0.5f);
+	for (const FApartmentLifeInteractionPoint& Point : Furniture->GetInteractionPoints())
+	{
+		FApartmentLifeInteractionAlignmentSet Alignment;
+		if (UApartmentLifeAnimationLibrary::ResolveAlignmentFromFurniture(Furniture, Point.ActivityId, Alignment))
+		{
+			DrawDebugSphere(Furniture->GetWorld(), Alignment.EntryTransform.GetLocation(), 10.f, 8, FColor::Orange, false, Duration);
+			DrawDebugSphere(Furniture->GetWorld(), Alignment.SeatTarget, 8.f, 8, FColor::Blue, false, Duration);
+			DrawDebugSphere(Furniture->GetWorld(), Alignment.CameraFocusPoint, 6.f, 8, FColor::White, false, Duration);
+		}
+	}
+	return true;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ForceFacialExpression(AActor* Character, EApartmentLifeFacialExpression Expression)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeAnimationComponent* Animation = Character ? Character->FindComponentByClass<UApartmentLifeAnimationComponent>() : nullptr)
+	{
+		Animation->SetFacialExpression(Expression);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ResetAnimationState(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeAnimationComponent* Animation = Character ? Character->FindComponentByClass<UApartmentLifeAnimationComponent>() : nullptr)
+	{
+		Animation->ResetToIdle();
 		return true;
 	}
 	return false;

@@ -99,6 +99,8 @@ EApartmentLifeAnimationGroup UApartmentLifeCharacterPipelineLibrary::GetAnimatio
 	if (Id.Contains(TEXT("shower")) || Id.Contains(TEXT("hygiene"))) return EApartmentLifeAnimationGroup::ShowerRoutine;
 	if (Id.Contains(TEXT("mirror"))) return EApartmentLifeAnimationGroup::MirrorRoutine;
 	if (Id.Contains(TEXT("sleep"))) return EApartmentLifeAnimationGroup::Sleeping;
+	if (Id.Contains(TEXT("wake"))) return EApartmentLifeAnimationGroup::WakeUp;
+	if (Id.Contains(TEXT("stand"))) return EApartmentLifeAnimationGroup::Stand;
 	if (Id.Contains(TEXT("couch"))) return EApartmentLifeAnimationGroup::CouchSitting;
 	if (Id.Contains(TEXT("chair"))) return EApartmentLifeAnimationGroup::ChairSitting;
 	if (Id.Contains(TEXT("floor"))) return EApartmentLifeAnimationGroup::FloorSitting;
@@ -106,6 +108,7 @@ EApartmentLifeAnimationGroup UApartmentLifeCharacterPipelineLibrary::GetAnimatio
 	if (Id.Contains(TEXT("lie")) || Id.Contains(TEXT("lay"))) return EApartmentLifeAnimationGroup::LyingDown;
 	if (Id.Contains(TEXT("run"))) return EApartmentLifeAnimationGroup::Running;
 	if (Id.Contains(TEXT("walk"))) return EApartmentLifeAnimationGroup::Walking;
+	if (Id.Contains(TEXT("turn"))) return EApartmentLifeAnimationGroup::TurnInPlace;
 	if (Id.Contains(TEXT("talk")) || Id.Contains(TEXT("social"))) return EApartmentLifeAnimationGroup::Conversation;
 
 	return EApartmentLifeAnimationGroup::Idle;

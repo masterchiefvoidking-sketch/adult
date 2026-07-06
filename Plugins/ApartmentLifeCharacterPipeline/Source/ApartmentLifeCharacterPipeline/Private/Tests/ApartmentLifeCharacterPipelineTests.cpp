@@ -9,6 +9,8 @@
 #include "ApartmentLifeCharacterCreatorPresetLibrary.h"
 #include "ApartmentLifeCharacterCreatorComponent.h"
 #include "ApartmentLifeCharacterCreatorLibrary.h"
+#include "ApartmentLifeAnimationLibrary.h"
+#include "ApartmentLifeAnimationComponent.h"
 #include "ApartmentLifeAnimationData.h"
 #include "ApartmentLifeYogaMinigameComponent.h"
 
@@ -205,6 +207,66 @@ bool FApartmentLifeCreatorPreviewGroupsTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Preview groups populated"), Groups.Num() >= 6);
 	TestTrue(TEXT("Idle preview available"), Groups.Contains(FName(TEXT("Idle"))));
 	TestTrue(TEXT("Walk preview available"), Groups.Contains(FName(TEXT("Walking"))));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeAnimationTransitionTest,
+	"ApartmentLife.CharacterPipeline.AnimationTransition",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeAnimationTransitionTest::RunTest(const FString& Parameters)
+{
+	const EApartmentLifeAnimationTransitionKind SitTransition = UApartmentLifeAnimationLibrary::GetTransitionBetweenGroups(
+		EApartmentLifeAnimationGroup::Walking,
+		EApartmentLifeAnimationGroup::ChairSitting);
+	TestEqual(TEXT("Walk to chair uses montage bridge"), SitTransition, EApartmentLifeAnimationTransitionKind::MontageBridge);
+
+	const FName MontageId = UApartmentLifeAnimationLibrary::GetMontageIdForActivity(FName(TEXT("activity.cook.prepare")));
+	TestEqual(TEXT("Activity montage naming"), MontageId, FName(TEXT("montage.cook.prepare")));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeAnimationSaveRoundTripTest,
+	"ApartmentLife.CharacterPipeline.AnimationSaveRoundTrip",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeAnimationSaveRoundTripTest::RunTest(const FString& Parameters)
+{
+	UApartmentLifeAnimationComponent* Animation = NewObject<UApartmentLifeAnimationComponent>();
+	Animation->PlayActivityAnimation(
+		FName(TEXT("activity.work.computer")),
+		EApartmentLifeAnimationGroup::ComputerUse,
+		FApartmentLifeInteractionAlignmentSet(),
+		70.f,
+		60.f);
+
+	TMap<FString, FString> Saved;
+	Animation->CaptureSaveData(Saved);
+
+	UApartmentLifeAnimationComponent* Restored = NewObject<UApartmentLifeAnimationComponent>();
+	Restored->RestoreSaveData(Saved);
+	Restored->RestoreAnimationAfterLoad();
+
+	TestEqual(TEXT("Group restored"), Restored->GetAnimationState().CurrentGroup, EApartmentLifeAnimationGroup::ComputerUse);
+	TestEqual(TEXT("Activity restored"), Restored->GetAnimationState().ActiveActivityId, FName(TEXT("activity.work.computer")));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeFacialExpressionTest,
+	"ApartmentLife.CharacterPipeline.FacialExpression",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeFacialExpressionTest::RunTest(const FString& Parameters)
+{
+	TestEqual(TEXT("Sleep activity sleepy face"),
+		UApartmentLifeAnimationLibrary::GetFacialExpressionForActivity(FName(TEXT("activity.sleep.bed")), 60.f, 60.f),
+		EApartmentLifeFacialExpression::Sleepy);
+	TestEqual(TEXT("Low energy tired face"),
+		UApartmentLifeAnimationLibrary::GetFacialExpressionForActivity(FName(TEXT("activity.relax.sofa")), 60.f, 10.f),
+		EApartmentLifeFacialExpression::Tired);
 	return true;
 }
 

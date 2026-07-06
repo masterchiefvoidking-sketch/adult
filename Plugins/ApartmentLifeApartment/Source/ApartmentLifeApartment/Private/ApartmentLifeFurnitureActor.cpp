@@ -30,7 +30,8 @@ void AApartmentLifeFurnitureActor::InitializeFromInstance(const FApartmentLifePl
 			{
 				FApartmentLifeInteractionPoint Point;
 				Point.InteractionType = Interaction;
-				Point.ActivityId = FName(*FString::Printf(TEXT("activity.%s"), *UEnum::GetValueAsString(Interaction)));
+				Point.ActivityId = UApartmentLifeBuilderLibrary::GetActivityIdForInteraction(Interaction);
+				Point.SocketName = UApartmentLifeBuilderLibrary::GetDefaultSocketForInteraction(Interaction);
 				InteractionPoints.Add(Point);
 			}
 		}
@@ -83,6 +84,7 @@ void AApartmentLifeFurnitureActor::SetInteractionsForCategory(EApartmentLifeFurn
 		FApartmentLifeInteractionPoint Point;
 		Point.InteractionType = Interaction;
 		Point.ActivityId = UApartmentLifeBuilderLibrary::GetActivityIdForInteraction(Interaction);
+		Point.SocketName = UApartmentLifeBuilderLibrary::GetDefaultSocketForInteraction(Interaction);
 		InteractionPoints.Add(Point);
 	}
 }

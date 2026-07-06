@@ -211,6 +211,27 @@ struct APARTMENTLIFEAPARTMENT_API FApartmentLifeInteractionPoint
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FName ActivityId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector LocalOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FRotator LocalRotation = FRotator::ZeroRotator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector HandsTargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector FeetTargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector SeatTargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector CameraFocusOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FVector ExitOffset = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

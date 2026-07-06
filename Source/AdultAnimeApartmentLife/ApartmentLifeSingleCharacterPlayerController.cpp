@@ -619,6 +619,8 @@ void AApartmentLifeSingleCharacterPlayerController::ApplyPostLoadState()
 		{
 			Progression->ReapplyOwnedUpgrades();
 		}
+
+		GirlCharacter->RestoreAnimationAfterLoad();
 	}
 }
 

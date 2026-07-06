@@ -57,6 +57,22 @@ void UApartmentLifeRoutineChainComponent::CancelRoutineChain()
 	}
 }
 
+void UApartmentLifeRoutineChainComponent::ResumeAfterLoad()
+{
+	if (!bRoutineActive)
+	{
+		return;
+	}
+
+	if (UApartmentLifeActivityComponent* Activity = GetActivityComponent())
+	{
+		Activity->OnActivityCompleted.RemoveDynamic(this, &UApartmentLifeRoutineChainComponent::HandleActivityCompleted);
+		Activity->OnActivityCompleted.AddDynamic(this, &UApartmentLifeRoutineChainComponent::HandleActivityCompleted);
+	}
+
+	StartCurrentStep();
+}
+
 FName UApartmentLifeRoutineChainComponent::GetCurrentStepActivityId() const
 {
 	return ActiveChain.ActivityIds.IsValidIndex(CurrentStepIndex) ? ActiveChain.ActivityIds[CurrentStepIndex] : NAME_None;

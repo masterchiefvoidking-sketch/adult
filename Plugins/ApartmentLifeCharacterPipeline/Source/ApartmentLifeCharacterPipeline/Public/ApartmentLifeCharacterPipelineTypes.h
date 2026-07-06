@@ -11,13 +11,16 @@ enum class EApartmentLifeAnimationGroup : uint8
 {
 	Idle			UMETA(DisplayName = "Idle"),
 	Walking			UMETA(DisplayName = "Walking"),
+	TurnInPlace		UMETA(DisplayName = "Turn In Place"),
 	Running			UMETA(DisplayName = "Running"),
+	Stand			UMETA(DisplayName = "Stand"),
 	Sitting			UMETA(DisplayName = "Sitting"),
 	CouchSitting	UMETA(DisplayName = "Couch Sitting"),
 	ChairSitting	UMETA(DisplayName = "Chair Sitting"),
 	FloorSitting	UMETA(DisplayName = "Floor Sitting"),
 	LyingDown		UMETA(DisplayName = "Lying Down"),
 	Sleeping		UMETA(DisplayName = "Sleeping"),
+	WakeUp			UMETA(DisplayName = "Wake Up"),
 	Cooking			UMETA(DisplayName = "Cooking"),
 	Eating			UMETA(DisplayName = "Eating"),
 	Cleaning		UMETA(DisplayName = "Cleaning"),
@@ -38,6 +41,52 @@ enum class EApartmentLifeAnimationGroup : uint8
 };
 
 UENUM(BlueprintType)
+enum class EApartmentLifeFacialExpression : uint8
+{
+	Neutral		UMETA(DisplayName = "Neutral"),
+	Happy		UMETA(DisplayName = "Happy"),
+	Tired		UMETA(DisplayName = "Tired"),
+	Focused		UMETA(DisplayName = "Focused"),
+	Relaxed		UMETA(DisplayName = "Relaxed"),
+	Stressed	UMETA(DisplayName = "Stressed"),
+	Embarrassed UMETA(DisplayName = "Embarrassed"),
+	Confident	UMETA(DisplayName = "Confident"),
+	Sleepy		UMETA(DisplayName = "Sleepy")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeMovementPersonality : uint8
+{
+	Soft		UMETA(DisplayName = "Soft"),
+	Confident	UMETA(DisplayName = "Confident"),
+	Energetic	UMETA(DisplayName = "Energetic"),
+	Relaxed		UMETA(DisplayName = "Relaxed"),
+	Shy			UMETA(DisplayName = "Shy"),
+	Elegant		UMETA(DisplayName = "Elegant"),
+	Sporty		UMETA(DisplayName = "Sporty")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeAnimationTransitionKind : uint8
+{
+	Instant			UMETA(DisplayName = "Instant"),
+	Blend			UMETA(DisplayName = "Blend"),
+	MontageBridge	UMETA(DisplayName = "Montage Bridge")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeInteractionMarkerType : uint8
+{
+	Entry			UMETA(DisplayName = "Entry"),
+	Facing			UMETA(DisplayName = "Facing"),
+	HandsTarget		UMETA(DisplayName = "Hands Target"),
+	FeetTarget		UMETA(DisplayName = "Feet Target"),
+	SeatTarget		UMETA(DisplayName = "Seat Target"),
+	CameraFocus		UMETA(DisplayName = "Camera Focus"),
+	Exit			UMETA(DisplayName = "Exit")
+};
+
+UENUM(BlueprintType)
 enum class EApartmentLifeGroomingStep : uint8
 {
 	Shower		UMETA(DisplayName = "Shower"),
@@ -50,6 +99,75 @@ enum class EApartmentLifeGroomingStep : uint8
 	MirrorCheck	UMETA(DisplayName = "Mirror Check"),
 	Laundry		UMETA(DisplayName = "Laundry"),
 	ClosetOrg	UMETA(DisplayName = "Closet Organization")
+};
+
+USTRUCT(BlueprintType)
+struct APARTMENTLIFECHARACTERPIPELINE_API FApartmentLifeAnimationIkTargets
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	bool bEnableFootIk = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	bool bEnableHandIk = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	bool bEnableHeadLookAt = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	bool bEnableEyeTracking = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FVector LeftFootTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FVector RightFootTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FVector LeftHandTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FVector RightHandTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "IK")
+	FVector HeadLookAtTarget = FVector::ZeroVector;
+};
+
+USTRUCT(BlueprintType)
+struct APARTMENTLIFECHARACTERPIPELINE_API FApartmentLifeInteractionAlignmentSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	bool bHasAlignment = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FTransform EntryTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FTransform ExitTransform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FVector FacingDirection = FVector::ForwardVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FVector HandsTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FVector FeetTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FVector SeatTarget = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FVector CameraFocusPoint = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FName FurnitureActorName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alignment")
+	FName InteractionSocketName;
 };
 
 USTRUCT(BlueprintType)
@@ -74,6 +192,42 @@ struct APARTMENTLIFECHARACTERPIPELINE_API FApartmentLifeAnimationState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	bool bEnableEyeTracking = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	EApartmentLifeFacialExpression FacialExpression = EApartmentLifeFacialExpression::Neutral;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	EApartmentLifeMovementPersonality MovementPersonality = EApartmentLifeMovementPersonality::Soft;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FName WalkStyleId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FName IdleStyleId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FName ActiveActivityId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FName TransitionMontageId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	EApartmentLifeAnimationTransitionKind TransitionKind = EApartmentLifeAnimationTransitionKind::Blend;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FApartmentLifeInteractionAlignmentSet Alignment;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FApartmentLifeAnimationIkTargets IkTargets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	bool bPhysicsHairEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	bool bPhysicsClothEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	FName LastCompletedAnimationEvent;
 };
 
 USTRUCT(BlueprintType)

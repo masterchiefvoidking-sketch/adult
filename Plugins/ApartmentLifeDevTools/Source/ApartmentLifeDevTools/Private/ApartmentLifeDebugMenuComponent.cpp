@@ -51,6 +51,7 @@ void UApartmentLifeDebugMenuComponent::ShowMenuOverlay() const
 		"[/] Mood (creator: adjust slider) | ;' Energy | -= Hygiene | ,. Stress | <> Hunger | \\ / Comfort\n"
 		"O Outfit | U Unlock clothes | I Unlock shop | X Complete activity | Y Yoga\n"
 		"Shift+P Print creator | Shift+F Reset creator face | Shift+B Reset creator body\n"
+		"Shift+A Reset animation | Shift+I Show IK targets | Shift+O Show furniture markers\n"
 		"3-7 Teleport rooms | S Save | L Load | Shift+S Delete | Shift+L Clear saves\n"
 		"R Reset apartment | Shift+R Reset character | F4 Spawn desk");
 
@@ -270,6 +271,18 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 	else if (Action == TEXT("ResetCreatorBody"))
 	{
 		UApartmentLifeDevToolsLibrary::ResetCreatorBody(Girl);
+	}
+	else if (Action == TEXT("ResetAnimation"))
+	{
+		UApartmentLifeDevToolsLibrary::ResetAnimationState(Girl);
+	}
+	else if (Action == TEXT("ShowIkTargets"))
+	{
+		UApartmentLifeDevToolsLibrary::ShowIkTargets(Girl, 8.f);
+	}
+	else if (Action == TEXT("PreviewMorningRoutine"))
+	{
+		UApartmentLifeDevToolsLibrary::PreviewRoutineChain(Girl, FName(TEXT("routine.morning")));
 	}
 
 	ShowMenuOverlay();

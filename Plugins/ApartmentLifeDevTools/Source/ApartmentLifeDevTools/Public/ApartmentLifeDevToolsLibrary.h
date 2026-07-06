@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "ApartmentLifeApartmentTypes.h"
 #include "ApartmentLifeWardrobeTypes.h"
+#include "ApartmentLifeCharacterPipelineTypes.h"
 #include "ApartmentLifeDevToolsLibrary.generated.h"
 
 class AApartmentLifeApartmentUnit;
@@ -126,6 +127,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
 	static bool ResetCreatorBody(AActor* Character);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool PreviewMontage(AActor* Character, FName MontageId);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool PreviewRoutineChain(AActor* Character, FName ChainId);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ShowIkTargets(AActor* Character, float DurationSeconds = 5.f);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ShowInteractionMarkers(AActor* FurnitureActor, float DurationSeconds = 5.f);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ForceFacialExpression(AActor* Character, EApartmentLifeFacialExpression Expression);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ResetAnimationState(AActor* Character);
 
 	static UApartmentLifeNPCSimulationComponent* GetSimulation(AActor* Character);
 };

@@ -6,6 +6,7 @@
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "ApartmentLifeClothingItemData.h"
 #include "ApartmentLifeWardrobeComponent.h"
+#include "JsonObjectConverter.h"
 
 bool UApartmentLifeYogaMinigameComponent::StartYogaSession(FName PoseId, bool bOnMat)
 {
@@ -49,4 +50,30 @@ void UApartmentLifeYogaMinigameComponent::EndYogaSession()
 	ActivePose = nullptr;
 	SessionState = FApartmentLifeYogaSessionState();
 	OnYogaSessionUpdated.Broadcast(SessionState);
+}
+
+FString UApartmentLifeYogaMinigameComponent::GetSaveId_Implementation() const
+{
+	if (const AActor* Owner = GetOwner()) return FString::Printf(TEXT("yoga_%s"), *Owner->GetName());
+	return TEXT("yoga_unknown");
+}
+
+void UApartmentLifeYogaMinigameComponent::CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const
+{
+	FString SessionJson;
+	FJsonObjectConverter::UStructToJsonObjectString(SessionState, SessionJson);
+	OutData.Add(TEXT("SessionState"), SessionJson);
+	OutData.Add(TEXT("ActivePoseId"), SessionState.CurrentPoseId.ToString());
+}
+
+void UApartmentLifeYogaMinigameComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
+{
+	if (const FString* SessionJson = InData.Find(TEXT("SessionState")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*SessionJson, &SessionState);
+	}
+	if (const FString* PoseId = InData.Find(TEXT("ActivePoseId")))
+	{
+		SessionState.CurrentPoseId = FName(**PoseId);
+	}
 }

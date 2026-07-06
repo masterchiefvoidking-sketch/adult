@@ -20,6 +20,30 @@ struct FApartmentLifeSerializedActor
 	TMap<FString, FString> Data;
 };
 
+USTRUCT(BlueprintType)
+struct FApartmentLifeSaveSlotMetadata
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString SlotDisplayName;
+
+	UPROPERTY()
+	FString GameVersion;
+
+	UPROPERTY()
+	FDateTime CreatedTimestamp;
+
+	UPROPERTY()
+	FDateTime LastPlayedTimestamp;
+
+	UPROPERTY()
+	FName CharacterId;
+
+	UPROPERTY()
+	FName ApartmentId;
+};
+
 /**
  * Versioned save game container. Aggregates all IApartmentLifeSaveable state plus world time.
  */
@@ -29,10 +53,13 @@ class APARTMENTLIFECORE_API UApartmentLifeSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	static constexpr int32 CurrentSaveVersion = 2;
+	static constexpr int32 CurrentSaveVersion = 3;
 
 	UPROPERTY()
 	int32 SaveVersion = CurrentSaveVersion;
+
+	UPROPERTY()
+	FApartmentLifeSaveSlotMetadata Metadata;
 
 	UPROPERTY()
 	FApartmentLifeGameTime WorldTime;

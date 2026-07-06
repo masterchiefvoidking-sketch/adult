@@ -47,8 +47,11 @@ void UApartmentLifeDebugMenuComponent::ShowMenuOverlay() const
 
 	const FString Summary = UApartmentLifeDevToolsLibrary::BuildCharacterDebugSummary(GetGirlActor());
 	const FString Help = TEXT(
-		"[F1] Close | M +$500 | H +1hr | Shift+H 8am | [/] Mood | ;' Energy | -= Hygiene\n"
-		"O Outfit | 3 Bed | 4 Bath | 5 Living | 6 Kitchen | 7 Office | Y Yoga | S Save | L Load | R Reset");
+		"[F1] Close | M +$500 | Shift+M -$200 | H +1hr | Shift+H 8am\n"
+		"[/] Mood | ;' Energy | -= Hygiene | ,. Stress | <> Hunger | \\ / Comfort\n"
+		"O Outfit | U Unlock clothes | I Unlock shop | X Complete activity | Y Yoga\n"
+		"3-7 Teleport rooms | S Save | L Load | Shift+S Delete | Shift+L Clear saves\n"
+		"R Reset apartment | Shift+R Reset character | F4 Spawn desk");
 
 	GEngine->AddOnScreenDebugMessage(9001, 8.f, FColor::Cyan, TEXT("=== Apartment Life Debug (F1) ==="));
 	GEngine->AddOnScreenDebugMessage(9002, 8.f, FColor::White, Summary);
@@ -69,6 +72,10 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 	if (Action == TEXT("AddMoney"))
 	{
 		UApartmentLifeDevToolsLibrary::AddMoney(Controller, Girl, 500.f);
+	}
+	else if (Action == TEXT("RemoveMoney"))
+	{
+		UApartmentLifeDevToolsLibrary::RemoveMoney(Controller, Girl, 200.f);
 	}
 	else if (Action == TEXT("AdvanceHour"))
 	{
@@ -128,6 +135,48 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 			UApartmentLifeDevToolsLibrary::SetHygiene(Girl, Sim->Needs.Hygiene - 10.f);
 		}
 	}
+	else if (Action == TEXT("StressUp"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetStress(Girl, Sim->GetMood().Stress + 10.f);
+		}
+	}
+	else if (Action == TEXT("StressDown"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetStress(Girl, Sim->GetMood().Stress - 10.f);
+		}
+	}
+	else if (Action == TEXT("HungerUp"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetHunger(Girl, Sim->Needs.Hunger + 10.f);
+		}
+	}
+	else if (Action == TEXT("HungerDown"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetHunger(Girl, Sim->Needs.Hunger - 10.f);
+		}
+	}
+	else if (Action == TEXT("ComfortUp"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetComfort(Girl, Sim->GetMood().Comfort + 10.f);
+		}
+	}
+	else if (Action == TEXT("ComfortDown"))
+	{
+		if (UApartmentLifeNPCSimulationComponent* Sim = UApartmentLifeDevToolsLibrary::GetSimulation(Girl))
+		{
+			UApartmentLifeDevToolsLibrary::SetComfort(Girl, Sim->GetMood().Comfort - 10.f);
+		}
+	}
 	else if (Action == TEXT("CycleOutfit"))
 	{
 		static const EApartmentLifeOutfitContext Contexts[] = {
@@ -140,6 +189,23 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 		};
 		OutfitContextIndex = (OutfitContextIndex + 1) % UE_ARRAY_COUNT(Contexts);
 		UApartmentLifeDevToolsLibrary::EquipOutfitContext(Girl, Contexts[OutfitContextIndex]);
+	}
+	else if (Action == TEXT("UnlockAllClothing"))
+	{
+		UApartmentLifeDevToolsLibrary::UnlockAllClothing(Girl);
+	}
+	else if (Action == TEXT("UnlockAllShop"))
+	{
+		UApartmentLifeDevToolsLibrary::UnlockAllShopItems(Girl);
+	}
+	else if (Action == TEXT("CompleteActivity"))
+	{
+		UApartmentLifeDevToolsLibrary::CompleteCurrentActivity(Girl);
+	}
+	else if (Action == TEXT("SpawnDesk"))
+	{
+		UApartmentLifeDevToolsLibrary::SpawnFurnitureAtCursor(
+			Controller, ApartmentUnit.Get(), FName(TEXT("furniture.desk.default")), EApartmentLifeRoomType::Office);
 	}
 	else if (Action == TEXT("TeleportBedroom"))
 	{
@@ -173,9 +239,21 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 	{
 		UApartmentLifeDevToolsLibrary::LoadTest(Controller, DebugSaveSlot);
 	}
+	else if (Action == TEXT("DeleteSave"))
+	{
+		UApartmentLifeDevToolsLibrary::DeleteSaveTest(Controller, DebugSaveSlot);
+	}
+	else if (Action == TEXT("ClearSaves"))
+	{
+		UApartmentLifeDevToolsLibrary::ClearAllSaveSlots(Controller, 8);
+	}
 	else if (Action == TEXT("ResetApartment"))
 	{
 		UApartmentLifeDevToolsLibrary::ResetApartmentLayout(ApartmentUnit.Get());
+	}
+	else if (Action == TEXT("ResetCharacter"))
+	{
+		UApartmentLifeDevToolsLibrary::ResetCharacterState(Girl);
 	}
 
 	ShowMenuOverlay();

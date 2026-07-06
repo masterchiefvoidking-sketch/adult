@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Single Character")
 	AApartmentLifeSimCharacter* GetGirlCharacter() const { return GirlCharacter.Get(); }
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Single Character")
+	void ApplyPostLoadState();
+
 protected:
 	virtual void SetupInputComponent() override;
 
@@ -90,6 +93,20 @@ protected:
 	void OnDebugSaveNow();
 	void OnDebugLoadNow();
 	void OnDebugResetApartment();
+	void OnDebugResetCharacter();
+	void OnDebugRemoveMoney();
+	void OnDebugStressUp();
+	void OnDebugStressDown();
+	void OnDebugHungerUp();
+	void OnDebugHungerDown();
+	void OnDebugComfortUp();
+	void OnDebugComfortDown();
+	void OnDebugUnlockClothing();
+	void OnDebugUnlockShop();
+	void OnDebugCompleteActivity();
+	void OnDebugSpawnDesk();
+	void OnDebugDeleteSave();
+	void OnDebugClearSaves();
 
 	UApartmentLifeBuildModeComponent* GetBuildMode() const;
 	UApartmentLifeInteractionComponent* GetGirlInteraction() const;

@@ -12,6 +12,12 @@
 #include "ApartmentLifeCharacterPipelineTypes.h"
 #include "ApartmentLifeActivityComponent.h"
 #include "ApartmentLifeWardrobeComponent.h"
+#include "ApartmentLifeWardrobeCatalogLibrary.h"
+#include "ApartmentLifeProgressionComponent.h"
+#include "ApartmentLifeShoppingCatalogLibrary.h"
+#include "ApartmentLifeUnlockLibrary.h"
+#include "ApartmentLifeWorkLibrary.h"
+#include "ApartmentLifeProgressionTypes.h"
 #include "ApartmentLifeWorldSimLibrary.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
@@ -36,6 +42,16 @@ bool UApartmentLifeDevToolsLibrary::AddMoney(UObject* WorldContextObject, AActor
 #endif
 }
 
+bool UApartmentLifeDevToolsLibrary::RemoveMoney(UObject* WorldContextObject, AActor* Character, float Amount)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	(void)WorldContextObject;
+	return AddMoney(nullptr, Character, -FMath::Abs(Amount));
+#endif
+}
+
 bool UApartmentLifeDevToolsLibrary::SetGameHour(UObject* WorldContextObject, int32 Hour)
 {
 #if UE_BUILD_SHIPPING
@@ -51,6 +67,29 @@ bool UApartmentLifeDevToolsLibrary::SetGameHour(UObject* WorldContextObject, int
 	{
 		FApartmentLifeGameTime Time = TimeSubsystem->GetCurrentTime();
 		Time.Hour = FMath::Clamp(Hour, 0, 23);
+		TimeSubsystem->SetCurrentTime(Time);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetGameTime(UObject* WorldContextObject, int32 Hour, int32 Minute)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
+	if (!World)
+	{
+		return false;
+	}
+
+	if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+	{
+		FApartmentLifeGameTime Time = TimeSubsystem->GetCurrentTime();
+		Time.Hour = FMath::Clamp(Hour, 0, 23);
+		Time.Minute = FMath::Clamp(Minute, 0, 59);
 		TimeSubsystem->SetCurrentTime(Time);
 		return true;
 	}
@@ -103,6 +142,79 @@ bool UApartmentLifeDevToolsLibrary::SetHygiene(AActor* Character, float Hygiene)
 #endif
 }
 
+bool UApartmentLifeDevToolsLibrary::SetHunger(AActor* Character, float Hunger)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Needs.Hunger = FMath::Clamp(Hunger, 0.f, 100.f);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetComfort(AActor* Character, float Comfort)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Mood.Comfort = FMath::Clamp(Comfort, 0.f, 100.f);
+		Sim->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(Sim->Mood, Sim->MoodInfluences, Sim->Personality);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetConfidence(AActor* Character, float Confidence)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Mood.Confidence = FMath::Clamp(Confidence, 0.f, 100.f);
+		Sim->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(Sim->Mood, Sim->MoodInfluences, Sim->Personality);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetStress(AActor* Character, float Stress)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Mood.Stress = FMath::Clamp(Stress, 0.f, 100.f);
+		Sim->Mood = UApartmentLifeWorldSimLibrary::RecalculateMood(Sim->Mood, Sim->MoodInfluences, Sim->Personality);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::SetAffection(AActor* Character, float Affection)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->AffectionTowardPlayer = FMath::Clamp(Affection, 0.f, 100.f);
+		return true;
+	}
+	return false;
+#endif
+}
+
 bool UApartmentLifeDevToolsLibrary::EquipOutfitContext(AActor* Character, EApartmentLifeOutfitContext Context)
 {
 #if UE_BUILD_SHIPPING
@@ -119,6 +231,57 @@ bool UApartmentLifeDevToolsLibrary::EquipOutfitContext(AActor* Character, EApart
 			}
 		}
 		Wardrobe->SelectOutfitForOutfitContext(Context, Weather);
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ResetEquippedOutfit(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	return EquipOutfitContext(Character, EApartmentLifeOutfitContext::Everyday);
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::UnlockAllClothing(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeWardrobeComponent* Wardrobe = Character ? Character->FindComponentByClass<UApartmentLifeWardrobeComponent>() : nullptr)
+	{
+		for (const FApartmentLifeBuiltinClothingItem& Item : UApartmentLifeWardrobeCatalogLibrary::GetBuiltinCatalog())
+		{
+			Wardrobe->AddOwnedClothing(Item.ItemId);
+		}
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::UnlockAllShopItems(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeProgressionComponent* Progression = Character ? Character->FindComponentByClass<UApartmentLifeProgressionComponent>() : nullptr)
+	{
+		for (const FApartmentLifeBuiltinShopItem& Item : UApartmentLifeShoppingCatalogLibrary::GetBuiltinCatalog())
+		{
+			Progression->UnlockShopItem(Item.ItemId);
+		}
+		for (uint8 Tier = 0; Tier <= static_cast<uint8>(EApartmentLifeFurnitureTier::Luxury); ++Tier)
+		{
+			Progression->UnlockShopTier(static_cast<EApartmentLifeFurnitureTier>(Tier));
+		}
+		for (const FApartmentLifeWorkTypeDefinition& Work : UApartmentLifeWorkLibrary::GetBuiltinWorkTypes())
+		{
+			Progression->UnlockWorkType(Work.WorkTypeId);
+		}
 		return true;
 	}
 	return false;
@@ -147,6 +310,20 @@ bool UApartmentLifeDevToolsLibrary::TriggerActivity(AActor* Character, FName Act
 	if (UApartmentLifeActivityComponent* Activity = Character->FindComponentByClass<UApartmentLifeActivityComponent>())
 	{
 		return Activity->StartActivity(ActivityId);
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::CompleteCurrentActivity(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeActivityComponent* Activity = Character ? Character->FindComponentByClass<UApartmentLifeActivityComponent>() : nullptr)
+	{
+		Activity->ForceCompleteActivity();
+		return true;
 	}
 	return false;
 #endif
@@ -262,6 +439,31 @@ bool UApartmentLifeDevToolsLibrary::ResetApartmentLayout(AApartmentLifeApartment
 #endif
 }
 
+bool UApartmentLifeDevToolsLibrary::ResetCharacterState(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeNPCSimulationComponent* Sim = GetSimulation(Character))
+	{
+		Sim->Finance = FApartmentLifeFinancialLedger();
+		Sim->Finance.Savings = 1500.f;
+		Sim->Mood = FApartmentLifeMoodState();
+		Sim->Needs = FApartmentLifeNPCNeeds();
+		Sim->Skills = FApartmentLifeSkillSet();
+		Sim->AffectionTowardPlayer = 55.f;
+		Sim->TrustTowardPlayer = 50.f;
+	}
+
+	if (UApartmentLifeProgressionComponent* Progression = Character ? Character->FindComponentByClass<UApartmentLifeProgressionComponent>() : nullptr)
+	{
+		Progression->SeedStarterUnlocks();
+	}
+
+	return ResetEquippedOutfit(Character);
+#endif
+}
+
 bool UApartmentLifeDevToolsLibrary::TeleportCharacter(AActor* Character, const FVector& Location, const FRotator& Rotation)
 {
 #if UE_BUILD_SHIPPING
@@ -367,6 +569,46 @@ bool UApartmentLifeDevToolsLibrary::LoadTest(UObject* WorldContextObject, int32 
 		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
 		{
 			return SaveSubsystem->LoadFromSlot(SlotIndex);
+		}
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::DeleteSaveTest(UObject* WorldContextObject, int32 SlotIndex)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UGameInstance* GI = GEngine ? GEngine->GetGameInstanceFromWorldContext(WorldContextObject) : nullptr)
+	{
+		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+		{
+			return SaveSubsystem->DeleteSaveSlot(SlotIndex);
+		}
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ClearAllSaveSlots(UObject* WorldContextObject, int32 MaxSlots)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UGameInstance* GI = GEngine ? GEngine->GetGameInstanceFromWorldContext(WorldContextObject) : nullptr)
+	{
+		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+		{
+			bool bAnyDeleted = false;
+			for (int32 Slot = 0; Slot < MaxSlots; ++Slot)
+			{
+				if (SaveSubsystem->DeleteSaveSlot(Slot))
+				{
+					bAnyDeleted = true;
+				}
+			}
+			return bAnyDeleted;
 		}
 	}
 	return false;

@@ -68,6 +68,9 @@ public:
 	void EvaluateUnlocks(UApartmentLifeNPCSimulationComponent* Simulation);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Progression")
+	void ReapplyOwnedUpgrades();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Progression")
 	void SeedStarterUnlocks();
 
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Progression")

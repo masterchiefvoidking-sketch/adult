@@ -9,6 +9,7 @@
 #include "ApartmentLifeBuilderLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
+#include "ApartmentLifeSaveSubsystem.h"
 #include "Components/SceneComponent.h"
 #include "JsonObjectConverter.h"
 
@@ -93,6 +94,17 @@ bool AApartmentLifeApartmentUnit::PlaceFurnitureInstance(const FApartmentLifePla
 	}
 
 	RecalculateRoomScores();
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				SaveSubsystem->RequestAutosave(SaveSubsystem->DefaultAutosaveSlot, FName(TEXT("furniture_place")));
+			}
+		}
+	}
 	return true;
 }
 
@@ -330,6 +342,18 @@ void AApartmentLifeApartmentUnit::RestoreSaveData_Implementation(const TMap<FStr
 	{
 		ApartmentId = FName(**Id);
 	}
+
+	TArray<FGuid> ExistingIds;
+	for (const FApartmentLifePlacedFurnitureInstance& Existing : PlacedFurniture)
+	{
+		ExistingIds.Add(Existing.InstanceId);
+	}
+	for (const FGuid& InstanceId : ExistingIds)
+	{
+		RemoveFurnitureInstance(InstanceId, false);
+	}
+	PlacedFurniture.Empty();
+
 	if (const FString* FurnitureJson = InData.Find(TEXT("PlacedFurniture")))
 	{
 		FJsonObjectConverter::JsonArrayStringToUStruct(*FurnitureJson, &PlacedFurniture);

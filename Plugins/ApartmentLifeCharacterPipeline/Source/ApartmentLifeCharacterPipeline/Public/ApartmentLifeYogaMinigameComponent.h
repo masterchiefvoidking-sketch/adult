@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "ApartmentLifeSaveable.h"
 #include "ApartmentLifeCharacterPipelineTypes.h"
 #include "ApartmentLifeYogaMinigameComponent.generated.h"
 
@@ -12,7 +13,7 @@ class UApartmentLifeYogaPoseData;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnYogaSessionUpdated, const FApartmentLifeYogaSessionState&, State);
 
 UCLASS(ClassGroup = Character, meta = (BlueprintSpawnableComponent))
-class APARTMENTLIFECHARACTERPIPELINE_API UApartmentLifeYogaMinigameComponent : public UActorComponent
+class APARTMENTLIFECHARACTERPIPELINE_API UApartmentLifeYogaMinigameComponent : public UActorComponent, public IApartmentLifeSaveable
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Yoga")
 	FOnYogaSessionUpdated OnYogaSessionUpdated;
+
+	virtual FString GetSaveId_Implementation() const override;
+	virtual void CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const override;
+	virtual void RestoreSaveData_Implementation(const TMap<FString, FString>& InData) override;
 
 protected:
 	UPROPERTY()

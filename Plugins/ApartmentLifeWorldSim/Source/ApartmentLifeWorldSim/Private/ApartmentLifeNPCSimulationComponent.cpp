@@ -577,13 +577,17 @@ FString UApartmentLifeNPCSimulationComponent::GetSaveId_Implementation() const
 void UApartmentLifeNPCSimulationComponent::CaptureSaveData_Implementation(TMap<FString, FString>& OutData) const
 {
 	OutData.Add(TEXT("CharacterId"), CharacterId.ToString());
-	OutData.Add(TEXT("Savings"), FString::SanitizeFloat(Finance.Savings));
-	OutData.Add(TEXT("CreditScore"), FString::FromInt(Finance.CreditScore));
-	OutData.Add(TEXT("CareerTier"), FString::FromInt(Career.PromotionTier));
 	OutData.Add(TEXT("CurrentActivity"), CurrentActivityId.ToString());
-	OutData.Add(TEXT("ApartmentTier"), FString::FromInt(Apartment.ApartmentTier));
 	OutData.Add(TEXT("AffectionTowardPlayer"), FString::SanitizeFloat(AffectionTowardPlayer));
 	OutData.Add(TEXT("TrustTowardPlayer"), FString::SanitizeFloat(TrustTowardPlayer));
+
+	FString FinanceJson, CareerJson, ApartmentJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Finance, FinanceJson);
+	FJsonObjectConverter::UStructToJsonObjectString(Career, CareerJson);
+	FJsonObjectConverter::UStructToJsonObjectString(Apartment, ApartmentJson);
+	OutData.Add(TEXT("Finance"), FinanceJson);
+	OutData.Add(TEXT("Career"), CareerJson);
+	OutData.Add(TEXT("Apartment"), ApartmentJson);
 
 	FString NeedsJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Needs, NeedsJson);
@@ -625,25 +629,40 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	{
 		CharacterId = FName(**Id);
 	}
-	if (const FString* Savings = InData.Find(TEXT("Savings")))
+	if (const FString* FinanceJson = InData.Find(TEXT("Finance")))
 	{
-		Finance.Savings = FCString::Atof(**Savings);
+		FJsonObjectConverter::JsonObjectStringToUStruct(*FinanceJson, &Finance);
 	}
-	if (const FString* Credit = InData.Find(TEXT("CreditScore")))
+	else
 	{
-		Finance.CreditScore = FCString::Atoi(**Credit);
+		if (const FString* Savings = InData.Find(TEXT("Savings")))
+		{
+			Finance.Savings = FCString::Atof(**Savings);
+		}
+		if (const FString* Credit = InData.Find(TEXT("CreditScore")))
+		{
+			Finance.CreditScore = FCString::Atoi(**Credit);
+		}
 	}
-	if (const FString* Tier = InData.Find(TEXT("CareerTier")))
+	if (const FString* CareerJson = InData.Find(TEXT("Career")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*CareerJson, &Career);
+	}
+	else if (const FString* Tier = InData.Find(TEXT("CareerTier")))
 	{
 		Career.PromotionTier = FCString::Atoi(**Tier);
+	}
+	if (const FString* ApartmentJson = InData.Find(TEXT("Apartment")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*ApartmentJson, &Apartment);
+	}
+	else if (const FString* AptTier = InData.Find(TEXT("ApartmentTier")))
+	{
+		Apartment.ApartmentTier = FCString::Atoi(**AptTier);
 	}
 	if (const FString* Activity = InData.Find(TEXT("CurrentActivity")))
 	{
 		CurrentActivityId = FName(**Activity);
-	}
-	if (const FString* AptTier = InData.Find(TEXT("ApartmentTier")))
-	{
-		Apartment.ApartmentTier = FCString::Atoi(**AptTier);
 	}
 	if (const FString* Affection = InData.Find(TEXT("AffectionTowardPlayer")))
 	{

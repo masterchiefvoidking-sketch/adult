@@ -4,6 +4,8 @@
 #include "ApartmentLifeClothingItemData.h"
 #include "ApartmentLifeWardrobeCatalogLibrary.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
+#include "ApartmentLifeProgressionComponent.h"
+#include "ApartmentLifeFinanceLibrary.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "JsonObjectConverter.h"
 
@@ -309,6 +311,13 @@ bool UApartmentLifeWardrobeComponent::PurchaseClothing(UApartmentLifeNPCSimulati
 	}
 
 	Simulation->Finance.Savings -= Item.Price;
+	if (AActor* Owner = GetOwner())
+	{
+		if (UApartmentLifeProgressionComponent* Progression = Owner->FindComponentByClass<UApartmentLifeProgressionComponent>())
+		{
+			UApartmentLifeFinanceLibrary::RecordSpending(Progression, EApartmentLifeShopCategory::Clothing, Item.Price);
+		}
+	}
 	if (Item.Price > StyleProfile.MonthlyClothingBudget)
 	{
 		Simulation->Mood.Stress = FMath::Clamp(Simulation->Mood.Stress + 2.f, 0.f, 100.f);

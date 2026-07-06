@@ -13,6 +13,9 @@
 #include "ApartmentLifeWardrobeTypes.h"
 #include "ApartmentLifeWardrobeUiController.h"
 #include "ApartmentLifeWardrobeShoppingComponent.h"
+#include "ApartmentLifeWorkUiController.h"
+#include "ApartmentLifeFinanceUiController.h"
+#include "ApartmentLifeProgressionTypes.h"
 #include "ApartmentLifeCameraPawn.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
@@ -27,6 +30,8 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 	InteractionHudComponent = CreateDefaultSubobject<UApartmentLifeInteractionHudComponent>(TEXT("InteractionHud"));
 	WardrobeUiController = CreateDefaultSubobject<UApartmentLifeWardrobeUiController>(TEXT("WardrobeUi"));
 	WardrobeShoppingComponent = CreateDefaultSubobject<UApartmentLifeWardrobeShoppingComponent>(TEXT("WardrobeShopping"));
+	WorkUiController = CreateDefaultSubobject<UApartmentLifeWorkUiController>(TEXT("WorkUi"));
+	FinanceUiController = CreateDefaultSubobject<UApartmentLifeFinanceUiController>(TEXT("FinanceUi"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -82,6 +87,21 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			InGirlCharacter->GetWardrobeComponent(),
 			InGirlCharacter->GetSimulationComponent());
 	}
+
+	if (WorkUiController && InGirlCharacter)
+	{
+		WorkUiController->InitializeContext(
+			InGirlCharacter->GetSimulationComponent(),
+			InGirlCharacter->GetProgressionComponent(),
+			InGirlCharacter->GetActivityComponent());
+	}
+
+	if (FinanceUiController && InGirlCharacter)
+	{
+		FinanceUiController->InitializeContext(
+			InGirlCharacter->GetSimulationComponent(),
+			InGirlCharacter->GetProgressionComponent());
+	}
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
@@ -103,6 +123,14 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("ToggleBuildMode"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode);
 	InputComponent->BindAction(TEXT("BuildTopDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnBuildTopDown);
 	InputComponent->BindAction(TEXT("OpenWardrobe"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe);
+	InputComponent->BindAction(TEXT("OpenWorkMenu"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenWorkMenu);
+	InputComponent->BindAction(TEXT("OpenBudget"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleBudget);
+	InputComponent->BindAction(TEXT("OpenApartmentShop"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenApartmentShop);
+	InputComponent->BindAction(TEXT("StartSelectedWork"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnStartSelectedWork);
+	InputComponent->BindAction(TEXT("SelectWork1"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnSelectWork1);
+	InputComponent->BindAction(TEXT("SelectWork2"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnSelectWork2);
+	InputComponent->BindAction(TEXT("SelectWork3"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnSelectWork3);
+	InputComponent->BindAction(TEXT("SelectWork4"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnSelectWork4);
 	InputComponent->BindAction(TEXT("BuildUndo"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnBuildUndo);
 	InputComponent->BindAction(TEXT("BuildRedo"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnBuildRedo);
 	InputComponent->BindAction(TEXT("QuickSave"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnQuickSave);
@@ -396,6 +424,60 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 		Activity->StartActivity(FName(TEXT("activity.dress.wardrobe")));
 	}
 }
+
+void AApartmentLifeSingleCharacterPlayerController::OnOpenWorkMenu()
+{
+	if (!WorkUiController)
+	{
+		return;
+	}
+
+	if (WorkUiController->IsWorkMenuOpen())
+	{
+		WorkUiController->CloseWorkSelection();
+	}
+	else
+	{
+		WorkUiController->OpenWorkSelection();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnToggleBudget()
+{
+	if (FinanceUiController)
+	{
+		FinanceUiController->ToggleBudgetOverlay();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnOpenApartmentShop()
+{
+	if (FinanceUiController)
+	{
+		FinanceUiController->ToggleShoppingOverlay(EApartmentLifeShopCategory::Furniture);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnStartSelectedWork()
+{
+	if (WorkUiController && WorkUiController->IsWorkMenuOpen())
+	{
+		WorkUiController->StartSelectedWork();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::SelectWorkByIndex(int32 Index)
+{
+	if (WorkUiController && WorkUiController->IsWorkMenuOpen())
+	{
+		WorkUiController->SelectWorkIndex(Index);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnSelectWork1() { SelectWorkByIndex(0); }
+void AApartmentLifeSingleCharacterPlayerController::OnSelectWork2() { SelectWorkByIndex(1); }
+void AApartmentLifeSingleCharacterPlayerController::OnSelectWork3() { SelectWorkByIndex(2); }
+void AApartmentLifeSingleCharacterPlayerController::OnSelectWork4() { SelectWorkByIndex(3); }
 
 void AApartmentLifeSingleCharacterPlayerController::OnBuildUndo()
 {

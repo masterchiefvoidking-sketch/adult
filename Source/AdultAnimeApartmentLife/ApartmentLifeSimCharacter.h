@@ -80,6 +80,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life")
 	bool StartEveningRoutine();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life")
+	void RestoreAnimationAfterLoad();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -110,6 +113,15 @@ protected:
 	UFUNCTION()
 	void HandleWardrobeUpdated();
 
+	UFUNCTION()
+	void HandleGroomingStepChanged(EApartmentLifeGroomingStep Step);
+
+	UFUNCTION()
+	void HandleRoutineStepChanged(int32 StepIndex);
+
+	void ApplyActivityAnimationForId(FName ActivityId);
+	AActor* GetInteractionContextActor() const;
+	void RefreshMovementPersonalityFromBody();
 	void RefreshClothingFitFromBody();
 	void RefreshNPCStyleFromSimulation();
 

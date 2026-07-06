@@ -63,5 +63,8 @@ public:
 	static FName GetActivityIdForInteraction(EApartmentLifeFurnitureInteraction Interaction);
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Builder")
+	static FName GetDefaultSocketForInteraction(EApartmentLifeFurnitureInteraction Interaction);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Builder")
 	static FText GetDisplayNameForInteraction(EApartmentLifeFurnitureInteraction Interaction);
 };

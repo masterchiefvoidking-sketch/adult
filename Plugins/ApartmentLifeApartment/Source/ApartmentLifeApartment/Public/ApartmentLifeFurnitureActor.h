@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Furniture")
 	void SetInteractionsForCategory(EApartmentLifeFurnitureCategory Category);
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Furniture")
+	const TArray<FApartmentLifeInteractionPoint>& GetInteractionPoints() const { return InteractionPoints; }
+
 	virtual TArray<EApartmentLifeFurnitureInteraction> GetAvailableInteractions_Implementation() const;
 	virtual bool ExecuteInteraction_Implementation(AActor* Interactor, EApartmentLifeFurnitureInteraction Interaction, FName& OutActivityId);
 	virtual FText GetInteractionPrompt_Implementation(EApartmentLifeFurnitureInteraction Interaction) const;

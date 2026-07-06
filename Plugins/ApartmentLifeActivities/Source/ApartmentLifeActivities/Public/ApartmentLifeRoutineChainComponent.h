@@ -29,6 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Routine")
 	void CancelRoutineChain();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Routine")
+	void ResumeAfterLoad();
+
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Routine")
 	bool IsRoutineActive() const { return bRoutineActive; }
 

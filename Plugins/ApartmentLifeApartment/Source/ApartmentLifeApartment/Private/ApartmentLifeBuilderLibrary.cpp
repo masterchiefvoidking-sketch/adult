@@ -359,6 +359,29 @@ FName UApartmentLifeBuilderLibrary::GetActivityIdForInteraction(EApartmentLifeFu
 	}
 }
 
+FName UApartmentLifeBuilderLibrary::GetDefaultSocketForInteraction(EApartmentLifeFurnitureInteraction Interaction)
+{
+	switch (Interaction)
+	{
+	case EApartmentLifeFurnitureInteraction::Sleep:
+	case EApartmentLifeFurnitureInteraction::Nap: return FName(TEXT("Socket_Lie"));
+	case EApartmentLifeFurnitureInteraction::Sit:
+	case EApartmentLifeFurnitureInteraction::Relax:
+	case EApartmentLifeFurnitureInteraction::WatchTV: return FName(TEXT("Socket_Sit"));
+	case EApartmentLifeFurnitureInteraction::UseComputer:
+	case EApartmentLifeFurnitureInteraction::WorkFromHome:
+	case EApartmentLifeFurnitureInteraction::Study: return FName(TEXT("Socket_Chair"));
+	case EApartmentLifeFurnitureInteraction::Groom: return FName(TEXT("Socket_Mirror"));
+	case EApartmentLifeFurnitureInteraction::ManageWardrobe:
+	case EApartmentLifeFurnitureInteraction::ChangeOutfit: return FName(TEXT("Socket_Closet"));
+	case EApartmentLifeFurnitureInteraction::Shower: return FName(TEXT("Socket_Shower"));
+	case EApartmentLifeFurnitureInteraction::Yoga: return FName(TEXT("Socket_Mat"));
+	case EApartmentLifeFurnitureInteraction::Cook:
+	case EApartmentLifeFurnitureInteraction::Eat: return FName(TEXT("Socket_Interact"));
+	default: return FName(TEXT("Socket_Interact"));
+	}
+}
+
 FText UApartmentLifeBuilderLibrary::GetDisplayNameForInteraction(EApartmentLifeFurnitureInteraction Interaction)
 {
 	switch (Interaction)

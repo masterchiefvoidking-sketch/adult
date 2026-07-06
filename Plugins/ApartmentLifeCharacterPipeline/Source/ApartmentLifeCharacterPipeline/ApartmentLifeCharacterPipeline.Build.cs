@@ -12,7 +12,7 @@ public class ApartmentLifeCharacterPipeline : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "Json", "JsonUtilities",
 			"ApartmentLifeCore", "ApartmentLifeCharacter", "ApartmentLifeWardrobe", "ApartmentLifeActivities",
-			"ApartmentLifeCamera"
+			"ApartmentLifeCamera", "ApartmentLifeApartment"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

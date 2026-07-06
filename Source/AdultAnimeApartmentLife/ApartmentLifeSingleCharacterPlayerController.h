@@ -17,6 +17,7 @@ class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWardrobeShoppingComponent;
 class UApartmentLifeWorkUiController;
 class UApartmentLifeFinanceUiController;
+class UApartmentLifeUiBridgeComponent;
 
 /**
  * Player camera controller for the single-girl private build.
@@ -31,7 +32,10 @@ public:
 	AApartmentLifeSingleCharacterPlayerController();
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Single Character")
-	void SetSingleCharacterContext(AApartmentLifeApartmentUnit* InApartment, AApartmentLifeSimCharacter* InGirlCharacter);
+	void SetSingleCharacterContext(
+		AApartmentLifeApartmentUnit* InApartment,
+		AApartmentLifeSimCharacter* InGirlCharacter,
+		bool bInEnterGameplayDirectly = true);
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Single Character")
 	AApartmentLifeSimCharacter* GetGirlCharacter() const { return GirlCharacter.Get(); }
@@ -73,6 +77,11 @@ protected:
 	void OnFocusGirlFace();
 	void OnFocusGirlOutfit();
 	void OnToggleDebugMenu();
+	void OnUiBack();
+	void OnToggleGameHud();
+	void OnOpenSaveLoadScreen();
+	void OnOpenProfileScreen();
+	void OnOpenRoutinesScreen();
 	void OnCharacterCreatorCamera();
 	void OnDebugAddMoney();
 	void OnDebugAdvanceHour();
@@ -146,8 +155,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Single Character|Debug")
 	TObjectPtr<UApartmentLifeDebugMenuComponent> DebugMenuComponent;
 
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|UI")
+	TObjectPtr<UApartmentLifeUiBridgeComponent> UiBridgeComponent;
+
 	UPROPERTY(EditAnywhere, Category = "Single Character|Save")
 	int32 QuickSaveSlot = 0;
 
 	bool bBuildModeActive = false;
+	bool bEnterGameplayDirectly = true;
 };

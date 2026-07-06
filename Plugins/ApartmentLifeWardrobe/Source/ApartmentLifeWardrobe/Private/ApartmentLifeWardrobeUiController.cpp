@@ -5,6 +5,7 @@
 #include "ApartmentLifeWardrobeCatalogLibrary.h"
 #include "ApartmentLifeWardrobeLibrary.h"
 #include "ApartmentLifeWardrobeShoppingComponent.h"
+#include "ApartmentLifeUiOverlayGate.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "Engine/Engine.h"
 
@@ -309,7 +310,7 @@ void UApartmentLifeWardrobeUiController::RefreshItemList()
 
 void UApartmentLifeWardrobeUiController::RefreshOverlay() const
 {
-	if (!GEngine || !bIsOpen)
+	if (FApartmentLifeUiOverlayGate::bSuppressDebugOverlays || !GEngine || !bIsOpen)
 	{
 		return;
 	}

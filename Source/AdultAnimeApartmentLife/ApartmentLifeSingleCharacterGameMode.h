@@ -42,4 +42,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AApartmentLifeSimCharacter> GirlCharacter;
+
+	bool bLoadedSaveOnStart = false;
 };

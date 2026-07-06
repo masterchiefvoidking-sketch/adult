@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeInteractionHudComponent.h"
+#include "ApartmentLifeUiOverlayGate.h"
 #include "Engine/Engine.h"
 
 void UApartmentLifeInteractionHudComponent::BindSelectionComponent(UApartmentLifeInteractionSelectionComponent* SelectionComponent)
@@ -34,7 +35,7 @@ void UApartmentLifeInteractionHudComponent::RefreshOverlay() const
 
 void UApartmentLifeInteractionHudComponent::HandleInteractableSelected(AActor* Target, const TArray<FApartmentLifeInteractionDescriptor>& Actions)
 {
-	if (!GEngine || !Target)
+	if (FApartmentLifeUiOverlayGate::bSuppressDebugOverlays || !GEngine || !Target)
 	{
 		return;
 	}
@@ -58,8 +59,10 @@ void UApartmentLifeInteractionHudComponent::HandleInteractableSelected(AActor* T
 
 void UApartmentLifeInteractionHudComponent::HandleInteractableCleared()
 {
-	if (GEngine)
+	if (FApartmentLifeUiOverlayGate::bSuppressDebugOverlays || !GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(7001, 0.1f, FColor::Silver, TEXT("Selection cleared"));
+		return;
 	}
+
+	GEngine->AddOnScreenDebugMessage(7001, 0.1f, FColor::Silver, TEXT("Selection cleared"));
 }

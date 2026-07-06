@@ -3,6 +3,7 @@
 #include "ApartmentLifeFinanceUiController.h"
 #include "ApartmentLifeFinanceLibrary.h"
 #include "ApartmentLifeShoppingCatalogLibrary.h"
+#include "ApartmentLifeUiOverlayGate.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeProgressionComponent.h"
 #include "Engine/Engine.h"
@@ -52,9 +53,32 @@ bool UApartmentLifeFinanceUiController::PurchaseShopItemIndex(int32 Index)
 	return bPurchased;
 }
 
+void UApartmentLifeFinanceUiController::OpenShoppingOverlay(EApartmentLifeShopCategory Category)
+{
+	bShoppingOpen = true;
+	bBudgetOpen = false;
+	ShoppingCategory = Category;
+	VisibleShopItems = UApartmentLifeShoppingCatalogLibrary::GetItemsForCategory(Category);
+
+	if (Progression.IsValid())
+	{
+		VisibleShopItems.RemoveAll([this](const FApartmentLifeBuiltinShopItem& Item)
+		{
+			return !Progression->IsShopTierUnlocked(Item.Tier)
+				|| (Item.SavingsUnlockThreshold > 0.f && !Progression->IsShopItemUnlocked(Item.ItemId));
+		});
+	}
+}
+
+void UApartmentLifeFinanceUiController::CloseAllOverlays()
+{
+	bBudgetOpen = false;
+	bShoppingOpen = false;
+}
+
 void UApartmentLifeFinanceUiController::RefreshOverlay() const
 {
-	if (!GEngine || (!bBudgetOpen && !bShoppingOpen))
+	if (FApartmentLifeUiOverlayGate::bSuppressDebugOverlays || !GEngine || (!bBudgetOpen && !bShoppingOpen))
 	{
 		return;
 	}

@@ -64,6 +64,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Build")
 	bool Redo();
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Build")
+	FGuid GetSelectedInstanceId() const { return SelectedInstanceId; }
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Build")
 	FOnBuildModeSelectionChanged OnSelectionChanged;
 

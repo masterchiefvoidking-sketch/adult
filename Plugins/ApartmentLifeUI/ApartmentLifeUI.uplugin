@@ -1,0 +1,20 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life UI",
+	"Description": "Slate-based UI foundation: main menu, HUD, interaction menus, feature screens, and settings.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeUI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

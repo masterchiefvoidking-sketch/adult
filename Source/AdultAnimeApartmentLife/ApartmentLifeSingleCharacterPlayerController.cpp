@@ -23,6 +23,8 @@
 #include "ApartmentLifeCameraSettingsSubsystem.h"
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeDebugMenuComponent.h"
+#include "ApartmentLifeUiBridgeComponent.h"
+#include "ApartmentLifeUiSubsystem.h"
 #include "Engine/World.h"
 
 AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlayerController()
@@ -33,14 +35,17 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 	WardrobeShoppingComponent = CreateDefaultSubobject<UApartmentLifeWardrobeShoppingComponent>(TEXT("WardrobeShopping"));
 	WorkUiController = CreateDefaultSubobject<UApartmentLifeWorkUiController>(TEXT("WorkUi"));
 	FinanceUiController = CreateDefaultSubobject<UApartmentLifeFinanceUiController>(TEXT("FinanceUi"));
+	UiBridgeComponent = CreateDefaultSubobject<UApartmentLifeUiBridgeComponent>(TEXT("UiBridge"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 	AApartmentLifeApartmentUnit* InApartment,
-	AApartmentLifeSimCharacter* InGirlCharacter)
+	AApartmentLifeSimCharacter* InGirlCharacter,
+	bool bInEnterGameplayDirectly)
 {
 	ApartmentUnit = InApartment;
 	GirlCharacter = InGirlCharacter;
+	bEnterGameplayDirectly = bInEnterGameplayDirectly;
 
 	if (DebugMenuComponent)
 	{
@@ -103,6 +108,21 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			InGirlCharacter->GetSimulationComponent(),
 			InGirlCharacter->GetProgressionComponent());
 	}
+
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->OnPostLoadRequested.AddDynamic(this, &AApartmentLifeSingleCharacterPlayerController::ApplyPostLoadState);
+		UiBridgeComponent->InitializeContext(
+			this,
+			InApartment,
+			InGirlCharacter,
+			WardrobeUiController,
+			WorkUiController,
+			FinanceUiController,
+			InteractionHudComponent,
+			QuickSaveSlot,
+			bEnterGameplayDirectly);
+	}
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
@@ -140,6 +160,11 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("FocusGirlFace"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlFace);
 	InputComponent->BindAction(TEXT("FocusGirlOutfit"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit);
 	InputComponent->BindAction(TEXT("ToggleDebugMenu"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu);
+	InputComponent->BindAction(TEXT("UiBack"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnUiBack);
+	InputComponent->BindAction(TEXT("ToggleGameHud"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleGameHud);
+	InputComponent->BindAction(TEXT("OpenSaveLoadScreen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenSaveLoadScreen);
+	InputComponent->BindAction(TEXT("OpenProfileScreen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenProfileScreen);
+	InputComponent->BindAction(TEXT("OpenRoutinesScreen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenRoutinesScreen);
 	InputComponent->BindAction(TEXT("CharacterCreatorCamera"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnCharacterCreatorCamera);
 
 	InputComponent->BindAction(TEXT("DebugAddMoney"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugAddMoney);
@@ -394,6 +419,16 @@ void AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode()
 			{
 				CameraPawn->EnterBuildModeCamera(ApartmentUnit.Get());
 			}
+			if (UiBridgeComponent)
+			{
+				if (UGameInstance* GI = GetGameInstance())
+				{
+					if (UApartmentLifeUiSubsystem* Ui = GI->GetSubsystem<UApartmentLifeUiSubsystem>())
+					{
+						Ui->ShowScreen(EApartmentLifeUiScreen::BuildMode);
+					}
+				}
+			}
 		}
 		else
 		{
@@ -402,6 +437,10 @@ void AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode()
 			{
 				CameraPawn->ExitActivityCamera();
 				CameraPawn->SetBuildTopDownMode(false);
+			}
+			if (UiBridgeComponent)
+			{
+				UiBridgeComponent->HandleUiBack();
 			}
 		}
 	}
@@ -612,6 +651,46 @@ void AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu()
 	if (DebugMenuComponent)
 	{
 		DebugMenuComponent->ToggleMenu();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnUiBack()
+{
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->HandleUiBack();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnToggleGameHud()
+{
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->ToggleHud();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnOpenSaveLoadScreen()
+{
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->OpenSaveLoadScreen();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnOpenProfileScreen()
+{
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->OpenProfileScreen();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnOpenRoutinesScreen()
+{
+	if (UiBridgeComponent)
+	{
+		UiBridgeComponent->OpenRoutinesScreen();
 	}
 }
 

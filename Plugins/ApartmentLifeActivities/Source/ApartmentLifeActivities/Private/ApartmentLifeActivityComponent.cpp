@@ -7,6 +7,7 @@
 #include "ApartmentLifeActivityFallbackLibrary.h"
 #include "ApartmentLifeActivityLibrary.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
+#include "ApartmentLifeSaveSubsystem.h"
 
 void UApartmentLifeActivityComponent::HandleMinuteAdvanced(const FApartmentLifeGameTime& NewTime)
 {
@@ -89,6 +90,16 @@ void UApartmentLifeActivityComponent::CancelCurrentActivity()
 	RemainingMinutes = 0;
 }
 
+void UApartmentLifeActivityComponent::ForceCompleteActivity()
+{
+	if (!bActivityActive)
+	{
+		return;
+	}
+	RemainingMinutes = 0;
+	CompleteActivity();
+}
+
 void UApartmentLifeActivityComponent::CompleteActivity()
 {
 	const FName CompletedId = CurrentActivityId;
@@ -110,6 +121,17 @@ void UApartmentLifeActivityComponent::CompleteActivity()
 
 	OnActivityCompleted.Broadcast(CompletedId);
 	OnActivityCompletedWithResult.Broadcast(CompletedId, LastCompletionResult);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				SaveSubsystem->RequestAutosave(SaveSubsystem->DefaultAutosaveSlot, FName(TEXT("activity_complete")));
+			}
+		}
+	}
 }
 
 bool UApartmentLifeActivityComponent::IsCooldownReady(FName ActivityId) const

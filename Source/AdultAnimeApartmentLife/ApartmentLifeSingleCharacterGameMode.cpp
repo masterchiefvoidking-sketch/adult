@@ -32,7 +32,14 @@ void AApartmentLifeSingleCharacterGameMode::BeginPlay()
 			{
 				if (SaveSubsystem->DoesSaveExist(AutoLoadSlot))
 				{
-					SaveSubsystem->LoadFromSlot(AutoLoadSlot);
+					if (SaveSubsystem->LoadFromSlot(AutoLoadSlot))
+					{
+						if (AApartmentLifeSingleCharacterPlayerController* PC =
+							Cast<AApartmentLifeSingleCharacterPlayerController>(GetWorld()->GetFirstPlayerController()))
+						{
+							PC->ApplyPostLoadState();
+						}
+					}
 				}
 			}
 		}

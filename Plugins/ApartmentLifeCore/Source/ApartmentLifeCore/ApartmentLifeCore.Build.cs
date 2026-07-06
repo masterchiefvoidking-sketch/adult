@@ -21,5 +21,10 @@ public class ApartmentLifeCore : ModuleRules
 			"Json",
 			"JsonUtilities"
 		});
+
+		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)
+		{
+			PrivateDependencyModuleNames.Add("AutomationTest");
+		}
 	}
 }

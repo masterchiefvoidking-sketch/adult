@@ -74,6 +74,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Time")
 	void RegisterBirthday(const FApartmentLifeBirthdayRecord& Birthday);
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Time")
+	const TArray<FApartmentLifeHolidayDefinition>& GetRegisteredHolidays() const { return Holidays; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Time")
+	const TArray<FApartmentLifeBirthdayRecord>& GetRegisteredBirthdays() const { return Birthdays; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Time")
+	void RestoreFromSave(
+		const FApartmentLifeGameTime& InTime,
+		const FApartmentLifeWeatherState& InWeather,
+		EApartmentLifeSeason InSeason,
+		const TArray<FApartmentLifeHolidayDefinition>& InHolidays,
+		const TArray<FApartmentLifeBirthdayRecord>& InBirthdays);
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Time")
 	FOnApartmentLifeMinuteAdvanced OnMinuteAdvanced;
 

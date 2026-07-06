@@ -156,6 +156,24 @@ void UApartmentLifeGameTimeSubsystem::RegisterBirthday(const FApartmentLifeBirth
 	Birthdays.AddUnique(Birthday);
 }
 
+void UApartmentLifeGameTimeSubsystem::RestoreFromSave(
+	const FApartmentLifeGameTime& InTime,
+	const FApartmentLifeWeatherState& InWeather,
+	EApartmentLifeSeason InSeason,
+	const TArray<FApartmentLifeHolidayDefinition>& InHolidays,
+	const TArray<FApartmentLifeBirthdayRecord>& InBirthdays)
+{
+	CurrentTime = InTime;
+	CurrentWeather = InWeather;
+	CurrentSeason = InSeason;
+	Holidays = InHolidays;
+	Birthdays = InBirthdays;
+	LastProcessedDay = CurrentTime.Day;
+	LastProcessedHour = CurrentTime.Hour;
+	LastHolidayBroadcast = NAME_None;
+	FApartmentLifeCalendarUtils::SyncCalendarFields(CurrentTime, CurrentTime.Year, CurrentTime.Month, CurrentTime.Day, CurrentTime.Hour, CurrentTime.Minute);
+}
+
 void UApartmentLifeGameTimeSubsystem::ProcessCalendarEvents(const FApartmentLifeGameTime& PreviousTime, const FApartmentLifeGameTime& NewTime)
 {
 	if (NewTime.Day != PreviousTime.Day || NewTime.Month != PreviousTime.Month)

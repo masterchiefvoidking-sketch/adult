@@ -16,6 +16,7 @@
 #include "ApartmentLifeWorkUiController.h"
 #include "ApartmentLifeFinanceUiController.h"
 #include "ApartmentLifeProgressionTypes.h"
+#include "ApartmentLifeProgressionComponent.h"
 #include "ApartmentLifeCameraPawn.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
@@ -160,6 +161,20 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("DebugSaveNow"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugSaveNow);
 	InputComponent->BindAction(TEXT("DebugLoadNow"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow);
 	InputComponent->BindAction(TEXT("DebugResetApartment"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment);
+	InputComponent->BindAction(TEXT("DebugResetCharacter"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetCharacter);
+	InputComponent->BindAction(TEXT("DebugRemoveMoney"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugRemoveMoney);
+	InputComponent->BindAction(TEXT("DebugStressUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugStressUp);
+	InputComponent->BindAction(TEXT("DebugStressDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugStressDown);
+	InputComponent->BindAction(TEXT("DebugHungerUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugHungerUp);
+	InputComponent->BindAction(TEXT("DebugHungerDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugHungerDown);
+	InputComponent->BindAction(TEXT("DebugComfortUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugComfortUp);
+	InputComponent->BindAction(TEXT("DebugComfortDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugComfortDown);
+	InputComponent->BindAction(TEXT("DebugUnlockClothing"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugUnlockClothing);
+	InputComponent->BindAction(TEXT("DebugUnlockShop"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugUnlockShop);
+	InputComponent->BindAction(TEXT("DebugCompleteActivity"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugCompleteActivity);
+	InputComponent->BindAction(TEXT("DebugSpawnDesk"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugSpawnDesk);
+	InputComponent->BindAction(TEXT("DebugDeleteSave"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugDeleteSave);
+	InputComponent->BindAction(TEXT("DebugClearSaves"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugClearSaves);
 }
 
 UApartmentLifeBuildModeComponent* AApartmentLifeSingleCharacterPlayerController::GetBuildMode() const
@@ -526,12 +541,28 @@ void AApartmentLifeSingleCharacterPlayerController::OnQuickLoad()
 			SaveSubsystem->LoadFromSlot(QuickSaveSlot);
 		}
 
+		ApplyPostLoadState();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::ApplyPostLoadState()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
 		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 		{
 			if (UApartmentLifeCameraSettingsSubsystem* CameraSettings = GI->GetSubsystem<UApartmentLifeCameraSettingsSubsystem>())
 			{
 				CameraSettings->ApplySettingsToPawn(CameraPawn);
 			}
+		}
+	}
+
+	if (GirlCharacter.IsValid())
+	{
+		if (UApartmentLifeProgressionComponent* Progression = GirlCharacter->GetProgressionComponent())
+		{
+			Progression->ReapplyOwnedUpgrades();
 		}
 	}
 }
@@ -614,3 +645,17 @@ void AApartmentLifeSingleCharacterPlayerController::OnDebugTriggerYoga() { if (D
 void AApartmentLifeSingleCharacterPlayerController::OnDebugSaveNow() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("SaveNow"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("LoadNow"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetApartment"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugResetCharacter() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetCharacter"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugRemoveMoney() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("RemoveMoney"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugStressUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("StressUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugStressDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("StressDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugHungerUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("HungerUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugHungerDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("HungerDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugComfortUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ComfortUp"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugComfortDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ComfortDown"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugUnlockClothing() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("UnlockAllClothing"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugUnlockShop() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("UnlockAllShop"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugCompleteActivity() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("CompleteActivity"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugSpawnDesk() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("SpawnDesk"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugDeleteSave() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("DeleteSave"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugClearSaves() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ClearSaves"))); }

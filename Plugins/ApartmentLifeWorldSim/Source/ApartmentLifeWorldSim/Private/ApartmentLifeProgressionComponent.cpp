@@ -5,6 +5,7 @@
 #include "ApartmentLifeFinanceLibrary.h"
 #include "ApartmentLifeUnlockLibrary.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
+#include "ApartmentLifeSaveSubsystem.h"
 #include "JsonObjectConverter.h"
 
 void UApartmentLifeProgressionComponent::SeedStarterUnlocks()
@@ -77,6 +78,17 @@ void UApartmentLifeProgressionComponent::RecordWorkSession(const FApartmentLifeW
 	}
 	AddDailyIncome(Result.TotalIncome);
 	OnWorkSessionCompleted.Broadcast(Result);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				SaveSubsystem->RequestAutosave(SaveSubsystem->DefaultAutosaveSlot, FName(TEXT("work_session")));
+			}
+		}
+	}
 }
 
 void UApartmentLifeProgressionComponent::AddDailyIncome(float Amount)
@@ -140,12 +152,38 @@ bool UApartmentLifeProgressionComponent::TryPurchaseShopItem(UApartmentLifeNPCSi
 	Simulation->Mood.Comfort = FMath::Clamp(Simulation->Mood.Comfort + Item.ComfortBonus, 0.f, 100.f);
 	Simulation->Mood.OverallMood = FMath::Clamp(Simulation->Mood.OverallMood + Item.MoodBonus, 0.f, 100.f);
 	EvaluateUnlocks(Simulation);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				SaveSubsystem->RequestAutosave(SaveSubsystem->DefaultAutosaveSlot, FName(TEXT("shop_purchase")));
+			}
+		}
+	}
 	return true;
 }
 
 void UApartmentLifeProgressionComponent::EvaluateUnlocks(UApartmentLifeNPCSimulationComponent* Simulation)
 {
 	UApartmentLifeUnlockLibrary::EvaluateUnlocks(Simulation, this);
+}
+
+void UApartmentLifeProgressionComponent::ReapplyOwnedUpgrades()
+{
+	ComputerQuality = FApartmentLifeComputerQualityState();
+	UpgradeState = FApartmentLifeApartmentUpgradeState();
+
+	for (const FName& ItemId : OwnedShopItems)
+	{
+		FApartmentLifeBuiltinShopItem Item;
+		if (UApartmentLifeShoppingCatalogLibrary::TryGetShopItem(ItemId, Item))
+		{
+			ApplyUpgrade(Item);
+		}
+	}
 }
 
 FString UApartmentLifeProgressionComponent::GetSaveId_Implementation() const
@@ -216,4 +254,6 @@ void UApartmentLifeProgressionComponent::RestoreSaveData_Implementation(const TM
 			if (!S.IsEmpty()) UnlockedShopTiers.Add(static_cast<uint8>(FCString::Atoi(*S)));
 		}
 	}
+
+	ReapplyOwnedUpgrades();
 }

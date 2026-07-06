@@ -6,6 +6,7 @@
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeCharacterCreatorTypes.h"
 #include "ApartmentLifeAnimationData.h"
+#include "ApartmentLifeYogaMinigameComponent.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FApartmentLifeActivityAnimationMapTest,
@@ -81,6 +82,27 @@ bool FApartmentLifeBodyFitProfileTest::RunTest(const FString& Parameters)
 
 	const FVector Scale = Body.GetScaleVector();
 	TestTrue(TEXT("Taller body scales up"), Scale.Z > 1.f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeYogaSaveRoundTripTest,
+	"ApartmentLife.CharacterPipeline.YogaSaveRoundTrip",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeYogaSaveRoundTripTest::RunTest(const FString& Parameters)
+{
+	UApartmentLifeYogaMinigameComponent* Yoga = NewObject<UApartmentLifeYogaMinigameComponent>();
+	Yoga->StartYogaSession(FName(TEXT("pose.builtin.stretch")), true);
+
+	TMap<FString, FString> Saved;
+	Yoga->CaptureSaveData(Saved);
+
+	UApartmentLifeYogaMinigameComponent* Restored = NewObject<UApartmentLifeYogaMinigameComponent>();
+	Restored->RestoreSaveData(Saved);
+
+	TestEqual(TEXT("Pose restored"), Restored->GetSessionState().CurrentPoseId, FName(TEXT("pose.builtin.stretch")));
+	TestTrue(TEXT("On mat restored"), Restored->GetSessionState().bOnYogaMat);
 	return true;
 }
 

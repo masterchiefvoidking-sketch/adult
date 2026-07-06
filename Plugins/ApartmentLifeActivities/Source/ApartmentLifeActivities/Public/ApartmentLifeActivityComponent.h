@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Activity")
 	void CancelCurrentActivity();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Activity")
+	void ForceCompleteActivity();
+
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Activity")
 	bool IsActivityActive() const { return bActivityActive; }
 

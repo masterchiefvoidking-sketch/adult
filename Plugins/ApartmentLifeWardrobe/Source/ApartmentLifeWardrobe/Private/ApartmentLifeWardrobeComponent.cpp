@@ -6,6 +6,7 @@
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeProgressionComponent.h"
 #include "ApartmentLifeFinanceLibrary.h"
+#include "ApartmentLifeSaveSubsystem.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "JsonObjectConverter.h"
 
@@ -335,6 +336,17 @@ bool UApartmentLifeWardrobeComponent::PurchaseClothing(UApartmentLifeNPCSimulati
 	Record.DayPurchased = DayPurchased;
 	ShoppingHistory.Add(Record);
 	OnWardrobeUpdated.Broadcast();
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GI = World->GetGameInstance())
+		{
+			if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
+			{
+				SaveSubsystem->RequestAutosave(SaveSubsystem->DefaultAutosaveSlot, FName(TEXT("clothing_purchase")));
+			}
+		}
+	}
 	return true;
 }
 

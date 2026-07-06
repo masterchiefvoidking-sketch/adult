@@ -116,4 +116,50 @@ bool FApartmentLifeDailyBudgetTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeNpcFinanceSaveTest,
+	"ApartmentLife.Progression.NpcFinanceSaveRoundTrip",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeNpcFinanceSaveTest::RunTest(const FString& Parameters)
+{
+	UApartmentLifeNPCSimulationComponent* Sim = NewObject<UApartmentLifeNPCSimulationComponent>();
+	Sim->CharacterId = FName(TEXT("character.main"));
+	Sim->Finance.Savings = 2345.f;
+	Sim->Finance.MonthlyRent = 950.f;
+	Sim->Career.HourlyWage = 32.f;
+	Sim->Career.CareerId = FName(TEXT("career.remote_programmer"));
+
+	TMap<FString, FString> Saved;
+	Sim->CaptureSaveData(Saved);
+
+	UApartmentLifeNPCSimulationComponent* Restored = NewObject<UApartmentLifeNPCSimulationComponent>();
+	Restored->RestoreSaveData(Saved);
+
+	TestEqual(TEXT("Savings restored"), Restored->Finance.Savings, 2345.f);
+	TestEqual(TEXT("Career ID restored"), Restored->Career.CareerId, FName(TEXT("career.remote_programmer")));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FApartmentLifeProgressionUpgradeReapplyTest,
+	"ApartmentLife.Progression.UpgradeReapplyOnLoad",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FApartmentLifeProgressionUpgradeReapplyTest::RunTest(const FString& Parameters)
+{
+	UApartmentLifeProgressionComponent* Progression = NewObject<UApartmentLifeProgressionComponent>();
+	Progression->SeedStarterUnlocks();
+
+	UApartmentLifeNPCSimulationComponent* Sim = NewObject<UApartmentLifeNPCSimulationComponent>();
+	Sim->Finance.Savings = 1000.f;
+	TestTrue(TEXT("Purchase computer"), Progression->TryPurchaseShopItem(Sim, FName(TEXT("shop.electronics.computer.budget"))));
+
+	const int32 Tier = Progression->GetComputerQuality().ComputerTier;
+	TestTrue(TEXT("Computer tier applied"), Tier >= 2);
+	Progression->ReapplyOwnedUpgrades();
+	TestEqual(TEXT("Upgrade tier preserved after reapply"), Progression->GetComputerQuality().ComputerTier, Tier);
+	return true;
+}
+
 #endif

@@ -137,7 +137,8 @@ void SApartmentLifeRootWidget::SetView(
 		|| Screen == EApartmentLifeUiScreen::Routines
 		|| Screen == EApartmentLifeUiScreen::Profile
 		|| Screen == EApartmentLifeUiScreen::SaveLoad
-		|| Screen == EApartmentLifeUiScreen::Settings;
+		|| Screen == EApartmentLifeUiScreen::Settings
+		|| Screen == EApartmentLifeUiScreen::CharacterCreator;
 
 	if (bShowMainMenu)
 	{

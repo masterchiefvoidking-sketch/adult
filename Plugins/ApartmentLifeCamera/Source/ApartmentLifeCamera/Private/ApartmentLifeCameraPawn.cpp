@@ -449,6 +449,21 @@ void AApartmentLifeCameraPawn::EnterCharacterCreatorMode(AActor* Character)
 	PrimaryCameraMode = EApartmentLifePrimaryCameraMode::CharacterFocus;
 	bRotateCharacterInsteadOfCamera = true;
 	CurrentPitch = -10.f;
+	CurrentArmLength = ActiveSettings.PreferredCreatorZoom;
+	ActiveCreatorLightingMode = ActiveSettings.CreatorLightingMode;
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+}
+
+void AApartmentLifeCameraPawn::ExitCharacterCreatorMode()
+{
+	bRotateCharacterInsteadOfCamera = false;
+	ReturnToApartmentCamera();
+}
+
+void AApartmentLifeCameraPawn::SetCreatorLightingMode(uint8 LightingMode)
+{
+	ActiveCreatorLightingMode = LightingMode;
+	ActiveSettings.CreatorLightingMode = LightingMode;
 }
 
 void AApartmentLifeCameraPawn::EnterBuildModeCamera(AActor* ApartmentActor)

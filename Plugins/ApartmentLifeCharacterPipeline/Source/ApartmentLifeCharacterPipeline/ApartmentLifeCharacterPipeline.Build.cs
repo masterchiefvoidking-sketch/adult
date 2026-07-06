@@ -11,7 +11,8 @@ public class ApartmentLifeCharacterPipeline : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "Json", "JsonUtilities",
-			"ApartmentLifeCore", "ApartmentLifeCharacter", "ApartmentLifeWardrobe", "ApartmentLifeActivities"
+			"ApartmentLifeCore", "ApartmentLifeCharacter", "ApartmentLifeWardrobe", "ApartmentLifeActivities",
+			"ApartmentLifeCamera"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

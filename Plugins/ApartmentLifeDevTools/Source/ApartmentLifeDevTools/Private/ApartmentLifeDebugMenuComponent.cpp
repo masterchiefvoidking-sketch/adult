@@ -48,8 +48,9 @@ void UApartmentLifeDebugMenuComponent::ShowMenuOverlay() const
 	const FString Summary = UApartmentLifeDevToolsLibrary::BuildCharacterDebugSummary(GetGirlActor());
 	const FString Help = TEXT(
 		"[F1] Close | M +$500 | Shift+M -$200 | H +1hr | Shift+H 8am\n"
-		"[/] Mood | ;' Energy | -= Hygiene | ,. Stress | <> Hunger | \\ / Comfort\n"
+		"[/] Mood (creator: adjust slider) | ;' Energy | -= Hygiene | ,. Stress | <> Hunger | \\ / Comfort\n"
 		"O Outfit | U Unlock clothes | I Unlock shop | X Complete activity | Y Yoga\n"
+		"Shift+P Print creator | Shift+F Reset creator face | Shift+B Reset creator body\n"
 		"3-7 Teleport rooms | S Save | L Load | Shift+S Delete | Shift+L Clear saves\n"
 		"R Reset apartment | Shift+R Reset character | F4 Spawn desk");
 
@@ -254,6 +255,21 @@ void UApartmentLifeDebugMenuComponent::HandleDebugAction(FName ActionName)
 	else if (Action == TEXT("ResetCharacter"))
 	{
 		UApartmentLifeDevToolsLibrary::ResetCharacterState(Girl);
+	}
+	else if (Action == TEXT("PrintCreatorData"))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(9010, 8.f, FColor::Green, UApartmentLifeDevToolsLibrary::ExportCreatorData(Girl));
+		}
+	}
+	else if (Action == TEXT("ResetCreatorFace"))
+	{
+		UApartmentLifeDevToolsLibrary::ResetCreatorFace(Girl);
+	}
+	else if (Action == TEXT("ResetCreatorBody"))
+	{
+		UApartmentLifeDevToolsLibrary::ResetCreatorBody(Girl);
 	}
 
 	ShowMenuOverlay();

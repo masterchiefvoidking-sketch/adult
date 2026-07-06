@@ -12,7 +12,7 @@ public class ApartmentLifeDevTools : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine",
 			"ApartmentLifeCore", "ApartmentLifeApartment", "ApartmentLifeWorldSim",
-			"ApartmentLifeSocial", "ApartmentLifeCharacterPipeline", "ApartmentLifeActivities",
+			"ApartmentLifeSocial", "ApartmentLifeCharacter", "ApartmentLifeCharacterPipeline", "ApartmentLifeActivities",
 			"ApartmentLifeWardrobe"
 		});
 

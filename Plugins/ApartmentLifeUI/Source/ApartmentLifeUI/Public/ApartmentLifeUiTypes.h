@@ -22,7 +22,8 @@ enum class EApartmentLifeUiScreen : uint8
 	Yoga			UMETA(DisplayName = "Yoga"),
 	Profile			UMETA(DisplayName = "Profile"),
 	SaveLoad		UMETA(DisplayName = "Save / Load"),
-	Settings		UMETA(DisplayName = "Settings")
+	Settings		UMETA(DisplayName = "Settings"),
+	CharacterCreator UMETA(DisplayName = "Character Creator")
 };
 
 USTRUCT(BlueprintType)

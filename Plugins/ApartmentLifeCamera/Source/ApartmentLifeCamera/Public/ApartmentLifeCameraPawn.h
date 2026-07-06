@@ -126,6 +126,15 @@ public:
 	void EnterCharacterCreatorMode(AActor* Character);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void ExitCharacterCreatorMode();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void SetCreatorLightingMode(uint8 LightingMode);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Camera")
+	uint8 GetCreatorLightingMode() const { return ActiveCreatorLightingMode; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void EnterBuildModeCamera(AActor* ApartmentActor = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
@@ -277,4 +286,5 @@ protected:
 	float DefaultArmLength = 400.f;
 	FVector DefaultPivotLocation = FVector::ZeroVector;
 	FVector FreeCameraVelocity = FVector::ZeroVector;
+	uint8 ActiveCreatorLightingMode = 3;
 };

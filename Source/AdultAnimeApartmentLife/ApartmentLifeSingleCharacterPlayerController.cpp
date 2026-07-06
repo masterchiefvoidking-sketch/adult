@@ -25,6 +25,8 @@
 #include "ApartmentLifeDebugMenuComponent.h"
 #include "ApartmentLifeUiBridgeComponent.h"
 #include "ApartmentLifeUiSubsystem.h"
+#include "ApartmentLifeCharacterCreatorUiController.h"
+#include "ApartmentLifeCharacterCreatorComponent.h"
 #include "Engine/World.h"
 
 AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlayerController()
@@ -36,6 +38,7 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 	WorkUiController = CreateDefaultSubobject<UApartmentLifeWorkUiController>(TEXT("WorkUi"));
 	FinanceUiController = CreateDefaultSubobject<UApartmentLifeFinanceUiController>(TEXT("FinanceUi"));
 	UiBridgeComponent = CreateDefaultSubobject<UApartmentLifeUiBridgeComponent>(TEXT("UiBridge"));
+	CreatorUiController = CreateDefaultSubobject<UApartmentLifeCharacterCreatorUiController>(TEXT("CreatorUi"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -120,8 +123,18 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			WorkUiController,
 			FinanceUiController,
 			InteractionHudComponent,
+			CreatorUiController,
 			QuickSaveSlot,
 			bEnterGameplayDirectly);
+	}
+
+	if (CreatorUiController && InGirlCharacter)
+	{
+		CreatorUiController->InitializeContext(
+			InGirlCharacter->GetCreatorComponent(),
+			InGirlCharacter->GetWardrobeComponent(),
+			InGirlCharacter->GetAnimationComponent(),
+			GetCameraPawn());
 	}
 }
 
@@ -187,6 +200,9 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("DebugLoadNow"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow);
 	InputComponent->BindAction(TEXT("DebugResetApartment"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment);
 	InputComponent->BindAction(TEXT("DebugResetCharacter"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetCharacter);
+	InputComponent->BindAction(TEXT("DebugPrintCreatorData"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugPrintCreatorData);
+	InputComponent->BindAction(TEXT("DebugResetCreatorFace"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetCreatorFace);
+	InputComponent->BindAction(TEXT("DebugResetCreatorBody"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugResetCreatorBody);
 	InputComponent->BindAction(TEXT("DebugRemoveMoney"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugRemoveMoney);
 	InputComponent->BindAction(TEXT("DebugStressUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugStressUp);
 	InputComponent->BindAction(TEXT("DebugStressDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnDebugStressDown);
@@ -696,20 +712,37 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenRoutinesScreen()
 
 void AApartmentLifeSingleCharacterPlayerController::OnCharacterCreatorCamera()
 {
-	if (GirlCharacter.IsValid())
+	if (CreatorUiController)
 	{
-		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
-		{
-			CameraPawn->EnterCharacterCreatorMode(GirlCharacter.Get());
-		}
+		CreatorUiController->ToggleCreator();
 	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodUp()
+{
+	if (CreatorUiController && CreatorUiController->IsCreatorOpen())
+	{
+		CreatorUiController->AdjustSelectedSlider(0.05f);
+		return;
+	}
+
+	if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodUp")));
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodDown()
+{
+	if (CreatorUiController && CreatorUiController->IsCreatorOpen())
+	{
+		CreatorUiController->AdjustSelectedSlider(-0.05f);
+		return;
+	}
+
+	if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodDown")));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::OnDebugAddMoney() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("AddMoney"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugAdvanceHour() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("AdvanceHour"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugSetMorning() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("SetMorning"))); }
-void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodUp"))); }
-void AApartmentLifeSingleCharacterPlayerController::OnDebugMoodDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("MoodDown"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("EnergyUp"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugEnergyDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("EnergyDown"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugHygieneUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("HygieneUp"))); }
@@ -725,6 +758,9 @@ void AApartmentLifeSingleCharacterPlayerController::OnDebugSaveNow() { if (Debug
 void AApartmentLifeSingleCharacterPlayerController::OnDebugLoadNow() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("LoadNow"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugResetApartment() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetApartment"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugResetCharacter() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetCharacter"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugPrintCreatorData() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("PrintCreatorData"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugResetCreatorFace() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetCreatorFace"))); }
+void AApartmentLifeSingleCharacterPlayerController::OnDebugResetCreatorBody() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("ResetCreatorBody"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugRemoveMoney() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("RemoveMoney"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugStressUp() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("StressUp"))); }
 void AApartmentLifeSingleCharacterPlayerController::OnDebugStressDown() { if (DebugMenuComponent) DebugMenuComponent->HandleDebugAction(FName(TEXT("StressDown"))); }

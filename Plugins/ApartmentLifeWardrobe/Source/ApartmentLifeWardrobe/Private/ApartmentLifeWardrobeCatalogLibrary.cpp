@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeWardrobeCatalogLibrary.h"
+#include "ApartmentLifeWardrobeContentPack01.h"
 
 namespace
 {
@@ -35,7 +36,7 @@ namespace
 
 TArray<FApartmentLifeBuiltinClothingItem> UApartmentLifeWardrobeCatalogLibrary::GetBuiltinCatalog()
 {
-	return {
+	TArray<FApartmentLifeBuiltinClothingItem> Catalog = {
 		MakeItem(TEXT("clothing.casual.tshirt.pink"), TEXT("Pink Casual Tee"), EApartmentLifeClothingLayer::Tops, EApartmentLifeWardrobeCategoryTab::Casual, 35.f, EApartmentLifeClothingIncomeTier::Budget, { EApartmentLifeClothingStyleTag::Cute, EApartmentLifeClothingStyleTag::Casual }, { EApartmentLifeOutfitContext::Everyday }),
 		MakeItem(TEXT("clothing.casual.jeans.blue"), TEXT("Blue Jeans"), EApartmentLifeClothingLayer::Bottoms, EApartmentLifeWardrobeCategoryTab::Casual, 55.f, EApartmentLifeClothingIncomeTier::Budget, { EApartmentLifeClothingStyleTag::Casual }, { EApartmentLifeOutfitContext::Everyday }),
 		MakeItem(TEXT("clothing.casual.sneakers.white"), TEXT("White Sneakers"), EApartmentLifeClothingLayer::Shoes, EApartmentLifeWardrobeCategoryTab::Casual, 45.f, EApartmentLifeClothingIncomeTier::Budget, { EApartmentLifeClothingStyleTag::Sporty, EApartmentLifeClothingStyleTag::Casual }, { EApartmentLifeOutfitContext::Everyday, EApartmentLifeOutfitContext::Athletic }, 0.8f, true),
@@ -74,6 +75,8 @@ TArray<FApartmentLifeBuiltinClothingItem> UApartmentLifeWardrobeCatalogLibrary::
 		MakeItem(TEXT("clothing.shop.hoodie.gamer"), TEXT("Gamer Hoodie"), EApartmentLifeClothingLayer::Tops, EApartmentLifeWardrobeCategoryTab::Casual, 62.f, EApartmentLifeClothingIncomeTier::MidRange, { EApartmentLifeClothingStyleTag::Gamer, EApartmentLifeClothingStyleTag::Cozy }, { EApartmentLifeOutfitContext::Lounge, EApartmentLifeOutfitContext::Everyday }),
 		MakeItem(TEXT("clothing.shop.dress.designer"), TEXT("Designer Cocktail Dress"), EApartmentLifeClothingLayer::Dress, EApartmentLifeWardrobeCategoryTab::Formal, 320.f, EApartmentLifeClothingIncomeTier::Luxury, { EApartmentLifeClothingStyleTag::Luxury, EApartmentLifeClothingStyleTag::Elegant }, { EApartmentLifeOutfitContext::Formal, EApartmentLifeOutfitContext::Date })
 	};
+	Catalog.Append(ApartmentLifeWardrobeContentPack01::GetExpansionClothing());
+	return Catalog;
 }
 
 bool UApartmentLifeWardrobeCatalogLibrary::TryGetBuiltinItem(FName ItemId, FApartmentLifeBuiltinClothingItem& OutItem)

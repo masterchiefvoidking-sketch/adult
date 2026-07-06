@@ -40,7 +40,9 @@ TArray<FApartmentLifeWorkTypeDefinition> UApartmentLifeWorkLibrary::GetBuiltinWo
 		MakeWork(TEXT("work.design"), TEXT("activity.work.design"), TEXT("Freelance Design"), EApartmentLifeSkill::Art, 50.f, 3.f, 600.f),
 		MakeWork(TEXT("work.writing"), TEXT("activity.work.writing"), TEXT("Writing Task"), EApartmentLifeSkill::Creativity, 38.f, 1.f, 250.f),
 		MakeWork(TEXT("work.computer"), TEXT("activity.work.computer"), TEXT("Remote Work"), EApartmentLifeSkill::Programming, 45.f),
-		MakeWork(TEXT("work.freelance"), TEXT("activity.work.freelance"), TEXT("Freelance Task"), EApartmentLifeSkill::Creativity, 40.f, 2.f, 150.f)
+		MakeWork(TEXT("work.freelance"), TEXT("activity.work.freelance"), TEXT("Freelance Task"), EApartmentLifeSkill::Creativity, 40.f, 2.f, 150.f),
+		MakeWork(TEXT("work.focus"), TEXT("activity.work.focus"), TEXT("Focus Work Session"), EApartmentLifeSkill::Organization, 50.f, 2.f, 350.f),
+		MakeWork(TEXT("work.creative"), TEXT("activity.work.creative"), TEXT("Creative Work Session"), EApartmentLifeSkill::Creativity, 46.f, 2.f, 280.f)
 	};
 }
 

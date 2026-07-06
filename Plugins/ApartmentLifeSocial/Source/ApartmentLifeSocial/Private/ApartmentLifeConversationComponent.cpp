@@ -2,6 +2,7 @@
 
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSocialLibrary.h"
+#include "ApartmentLifeDialogueCatalogLibrary.h"
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 #include "JsonObjectConverter.h"
@@ -49,6 +50,28 @@ bool UApartmentLifeConversationComponent::StartConversationWithPlayer()
 	CurrentSession.Phase = EApartmentLifeConversationPhase::Greeting;
 	CurrentPartner = nullptr;
 	bPlayerConversation = true;
+
+	if (UApartmentLifeNPCSimulationComponent* GirlSim = GetOwnerSimulation())
+	{
+		FApartmentLifeGameTime Time;
+		FApartmentLifeWeatherState Weather;
+		if (UWorld* World = GetWorld())
+		{
+			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+			{
+				Time = TimeSubsystem->GetCurrentTime();
+				Weather = TimeSubsystem->GetCurrentWeather();
+			}
+		}
+		const FApartmentLifeDialogueContext Context =
+			UApartmentLifeSocialLibrary::BuildPlayerDialogueContext(GirlSim, Time, Weather, FName(TEXT("apartment.home")));
+		const FApartmentLifeDialogueLine Line = UApartmentLifeDialogueCatalogLibrary::GenerateContextualPlayerLine(Context);
+		CurrentSession.Transcript.Add(Line);
+		CurrentSession.TopicsDiscussed.AddUnique(Line.Topic);
+		OnConversationLineSpoken.Broadcast(Line);
+		CurrentSession.Phase = EApartmentLifeConversationPhase::Topic;
+	}
+
 	return true;
 }
 

@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeActivityCatalogLibrary.h"
+#include "ApartmentLifeActivityContentPack01.h"
 
 namespace
 {
@@ -57,7 +58,7 @@ namespace
 
 TArray<FApartmentLifeActivityDefinition> UApartmentLifeActivityCatalogLibrary::GetBuiltinCatalog()
 {
-	return {
+	TArray<FApartmentLifeActivityDefinition> Catalog = {
 		// Bedroom
 		MakeActivity(TEXT("activity.sleep.bed"), TEXT("Sleep"), EApartmentLifeActivityCategory::Sleep, EApartmentLifeActivityRoom::Bedroom, EApartmentLifeAnimationGroup::Sleeping, 480, Stats(0, 60, 0, 0, 5, 0, -50), 0, false, false, EApartmentLifeOutfitContext::Sleep),
 		MakeActivity(TEXT("activity.sleep.nap"), TEXT("Nap"), EApartmentLifeActivityCategory::Sleep, EApartmentLifeActivityRoom::Bedroom, EApartmentLifeAnimationGroup::Sleeping, 60, Stats(2, 25, 0, 0, 8, 0, -20), 0, false, false, EApartmentLifeOutfitContext::Sleep),
@@ -133,6 +134,8 @@ TArray<FApartmentLifeActivityDefinition> UApartmentLifeActivityCatalogLibrary::G
 		// Dining
 		MakeActivity(TEXT("activity.eat.dining"), TEXT("Dine"), EApartmentLifeActivityCategory::Eating, EApartmentLifeActivityRoom::DiningRoom, EApartmentLifeAnimationGroup::Eating, 25, Stats(3, 3, 0, -30, 7, 1, -2))
 	};
+	Catalog.Append(ApartmentLifeActivityContentPack01::GetExpansionActivities());
+	return Catalog;
 }
 
 bool UApartmentLifeActivityCatalogLibrary::TryGetActivityDefinition(FName ActivityId, FApartmentLifeActivityDefinition& OutDefinition)
@@ -175,7 +178,9 @@ TArray<FApartmentLifeRoutineChainDefinition> UApartmentLifeActivityCatalogLibrar
 		FName(TEXT("activity.sleep.bed"))
 	};
 
-	return { Morning, Evening };
+	TArray<FApartmentLifeRoutineChainDefinition> Chains = { Morning, Evening };
+	Chains.Append(ApartmentLifeActivityContentPack01::GetExpansionRoutineChains());
+	return Chains;
 }
 
 bool UApartmentLifeActivityCatalogLibrary::TryGetRoutineChain(FName ChainId, FApartmentLifeRoutineChainDefinition& OutChain)

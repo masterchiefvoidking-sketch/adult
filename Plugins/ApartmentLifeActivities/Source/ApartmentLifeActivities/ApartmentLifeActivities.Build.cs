@@ -22,7 +22,9 @@ public class ApartmentLifeActivities : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"ApartmentLifeWorldSim"
+			"ApartmentLifeWorldSim",
+			"ApartmentLifeSocial",
+			"ApartmentLifeCharacter"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

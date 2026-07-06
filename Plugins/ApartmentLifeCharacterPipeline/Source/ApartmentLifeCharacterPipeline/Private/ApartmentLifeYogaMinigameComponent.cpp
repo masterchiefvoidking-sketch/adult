@@ -2,6 +2,7 @@
 
 #include "ApartmentLifeYogaMinigameComponent.h"
 #include "ApartmentLifeAnimationData.h"
+#include "ApartmentLifeYogaPoseCatalogLibrary.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "ApartmentLifeClothingItemData.h"
@@ -18,6 +19,20 @@ bool UApartmentLifeYogaMinigameComponent::StartYogaSession(FName PoseId, bool bO
 			{
 				ActivePose = Cast<UApartmentLifeYogaPoseData>(Registry->FindAsset(PoseId));
 			}
+		}
+	}
+
+	if (!ActivePose)
+	{
+		FApartmentLifeBuiltinYogaPose BuiltinPose;
+		if (UApartmentLifeYogaPoseCatalogLibrary::TryGetBuiltinPose(PoseId, BuiltinPose))
+		{
+			ActivePose = NewObject<UApartmentLifeYogaPoseData>(this);
+			ActivePose->AssetId = BuiltinPose.PoseId;
+			ActivePose->PoseMontageId = BuiltinPose.PoseMontageId;
+			ActivePose->Difficulty = BuiltinPose.Difficulty;
+			ActivePose->FlexibilityReward = BuiltinPose.FlexibilityReward;
+			ActivePose->StressReduction = BuiltinPose.StressReduction;
 		}
 	}
 

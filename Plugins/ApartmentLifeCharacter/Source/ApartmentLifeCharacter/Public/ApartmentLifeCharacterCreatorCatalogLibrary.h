@@ -22,6 +22,9 @@ public:
 	static TArray<FName> GetBuiltinHairstyleIds();
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Creator")
+	static TArray<FApartmentLifeColorPalette> GetBuiltinColorPalettes();
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Creator")
 	static TArray<FName> GetBuiltinVoicePresetIds();
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Creator")

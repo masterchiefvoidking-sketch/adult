@@ -195,6 +195,21 @@ struct APARTMENTLIFECHARACTER_API FApartmentLifeCharacterCreatorState
 };
 
 USTRUCT(BlueprintType)
+struct APARTMENTLIFECHARACTER_API FApartmentLifeColorPalette
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Creator")
+	FName PaletteId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Creator")
+	FText DisplayName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Creator")
+	TArray<FLinearColor> Colors;
+};
+
+USTRUCT(BlueprintType)
 struct APARTMENTLIFECHARACTER_API FApartmentLifeBodyFitProfile
 {
 	GENERATED_BODY()

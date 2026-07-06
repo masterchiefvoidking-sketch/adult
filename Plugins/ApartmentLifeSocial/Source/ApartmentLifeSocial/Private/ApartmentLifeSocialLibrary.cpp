@@ -329,6 +329,8 @@ FApartmentLifeDialogueContext UApartmentLifeSocialLibrary::BuildPlayerDialogueCo
 	Context.Relationship.Comfort = GirlSim->GetMood().Comfort;
 	Context.Relationship.RomanceAttraction = GirlSim->GetAffectionTowardPlayer() * 0.85f;
 	Context.Relationship.Compatibility = (GirlSim->GetAffectionTowardPlayer() + GirlSim->TrustTowardPlayer) * 0.5f;
+	Context.SavingsSnapshot = GirlSim->Finance.Savings;
+	Context.ApartmentComfortScore = GirlSim->Apartment.ComfortScore;
 
 	return Context;
 }

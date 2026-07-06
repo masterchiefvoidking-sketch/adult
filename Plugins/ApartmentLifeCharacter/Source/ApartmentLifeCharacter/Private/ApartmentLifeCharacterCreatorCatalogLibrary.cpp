@@ -54,8 +54,40 @@ TArray<FName> UApartmentLifeCharacterCreatorCatalogLibrary::GetBuiltinHairstyleI
 		FName(TEXT("hair.bob.soft")),
 		FName(TEXT("hair.ponytail.high")),
 		FName(TEXT("hair.bun.casual")),
-		FName(TEXT("hair.pixie.soft"))
+		FName(TEXT("hair.pixie.soft")),
+		FName(TEXT("hair.twintails.casual")),
+		FName(TEXT("hair.braided.side")),
+		FName(TEXT("hair.messy.bun")),
+		FName(TEXT("hair.short.bob")),
+		FName(TEXT("hair.half.up"))
 	};
+}
+
+TArray<FApartmentLifeColorPalette> UApartmentLifeCharacterCreatorCatalogLibrary::GetBuiltinColorPalettes()
+{
+	TArray<FApartmentLifeColorPalette> Palettes;
+
+	auto AddPalette = [&](FName Id, const FString& Name, std::initializer_list<FLinearColor> Colors)
+	{
+		FApartmentLifeColorPalette Palette;
+		Palette.PaletteId = Id;
+		Palette.DisplayName = FText::FromString(Name);
+		Palette.Colors = Colors;
+		Palettes.Add(Palette);
+	};
+
+	AddPalette(FName(TEXT("palette.sakura.soft")), TEXT("Sakura Soft"),
+		{ FLinearColor(0.95f, 0.75f, 0.82f), FLinearColor(0.98f, 0.88f, 0.92f), FLinearColor(0.55f, 0.35f, 0.45f) });
+	AddPalette(FName(TEXT("palette.ocean.calm")), TEXT("Ocean Calm"),
+		{ FLinearColor(0.35f, 0.55f, 0.75f), FLinearColor(0.55f, 0.75f, 0.88f), FLinearColor(0.15f, 0.25f, 0.4f) });
+	AddPalette(FName(TEXT("palette.sunset.warm")), TEXT("Sunset Warm"),
+		{ FLinearColor(0.95f, 0.55f, 0.35f), FLinearColor(0.98f, 0.78f, 0.45f), FLinearColor(0.65f, 0.25f, 0.2f) });
+	AddPalette(FName(TEXT("palette.forest.muted")), TEXT("Forest Muted"),
+		{ FLinearColor(0.35f, 0.5f, 0.38f), FLinearColor(0.55f, 0.65f, 0.45f), FLinearColor(0.2f, 0.28f, 0.18f) });
+	AddPalette(FName(TEXT("palette.midnight.elegant")), TEXT("Midnight Elegant"),
+		{ FLinearColor(0.12f, 0.14f, 0.22f), FLinearColor(0.35f, 0.38f, 0.55f), FLinearColor(0.75f, 0.72f, 0.85f) });
+
+	return Palettes;
 }
 
 TArray<FName> UApartmentLifeCharacterCreatorCatalogLibrary::GetBuiltinVoicePresetIds()

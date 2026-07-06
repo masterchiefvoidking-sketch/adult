@@ -1,0 +1,35 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life World Simulation",
+	"Description": "World simulation engine: schedules, careers, finance, mood, memory, relationships, shopping, apartment progression, and random events.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeWorldSim",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeAI",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeActivities",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeApartment",
+			"Enabled": true
+		}
+	]
+}

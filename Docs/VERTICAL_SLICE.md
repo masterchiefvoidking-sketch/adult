@@ -6,6 +6,8 @@ Use [SINGLE_CHARACTER.md](SINGLE_CHARACTER.md) as the current playable spec.
 
 For MP09 build order and done criteria, see [FIRST_VERTICAL_SLICE.md](FIRST_VERTICAL_SLICE.md).
 
+For camera and interaction polish (MP10), see [CAMERA_MP10.md](CAMERA_MP10.md).
+
 ## What Changed (MP08)
 
 | MP07 | MP08 |

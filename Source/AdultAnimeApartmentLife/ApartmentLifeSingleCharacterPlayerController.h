@@ -9,6 +9,8 @@
 class AApartmentLifeApartmentUnit;
 class AApartmentLifeSimCharacter;
 class UApartmentLifeInteractionComponent;
+class UApartmentLifeInteractionSelectionComponent;
+class UApartmentLifeInteractionHudComponent;
 class UApartmentLifeBuildModeComponent;
 class UApartmentLifeDebugMenuComponent;
 
@@ -34,6 +36,17 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	void OnInteract();
+	void OnSelectInteractable();
+	void OnFocusDoubleClick();
+	void OnExecuteAction1();
+	void OnExecuteAction2();
+	void OnExecuteAction3();
+	void OnExecuteAction4();
+	void OnFocusGirlUpperBody();
+	void OnFocusGirlHair();
+	void OnFocusGirlShoes();
+	void OnPhotoFovUp();
+	void OnPhotoFovDown();
 	void OnToggleBuildMode();
 	void OnBuildTopDown();
 	void OnOpenWardrobe();
@@ -68,8 +81,19 @@ protected:
 
 	UApartmentLifeBuildModeComponent* GetBuildMode() const;
 	UApartmentLifeInteractionComponent* GetGirlInteraction() const;
+	UApartmentLifeInteractionSelectionComponent* GetGirlSelection() const;
 
-	void FocusCameraOnInteractable(AActor* Target);
+	void FocusCameraOnInteractable(AActor* Target, const FVector& FocusOffset = FVector::ZeroVector);
+	void FocusCameraForActivity(FName ActivityId, AActor* ContextActor = nullptr);
+
+	UFUNCTION()
+	void HandleGirlActivityStarted(FName ActivityId);
+
+	UFUNCTION()
+	void HandleGirlActivityCompleted(FName ActivityId);
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Interaction")
+	TObjectPtr<UApartmentLifeInteractionHudComponent> InteractionHudComponent;
 
 	UPROPERTY()
 	TWeakObjectPtr<AApartmentLifeApartmentUnit> ApartmentUnit;

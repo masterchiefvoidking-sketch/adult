@@ -5,12 +5,16 @@
 #include "ApartmentLifeApartmentUnit.h"
 #include "ApartmentLifeBuildModeComponent.h"
 #include "ApartmentLifeInteractionComponent.h"
+#include "ApartmentLifeInteractionSelectionComponent.h"
+#include "ApartmentLifeInteractionHudComponent.h"
+#include "ApartmentLifeInteractionTypes.h"
 #include "ApartmentLifeActivityComponent.h"
 #include "ApartmentLifeWardrobeComponent.h"
 #include "ApartmentLifeWardrobeTypes.h"
 #include "ApartmentLifeCameraPawn.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
+#include "ApartmentLifeCameraSettingsSubsystem.h"
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeDebugMenuComponent.h"
 #include "Engine/World.h"
@@ -18,6 +22,7 @@
 AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlayerController()
 {
 	DebugMenuComponent = CreateDefaultSubobject<UApartmentLifeDebugMenuComponent>(TEXT("DebugMenu"));
+	InteractionHudComponent = CreateDefaultSubobject<UApartmentLifeInteractionHudComponent>(TEXT("InteractionHud"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -34,6 +39,11 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
+		if (InApartment)
+		{
+			CameraPawn->SetApartmentBounds(FBox(InApartment->GetActorLocation() - FVector(500.f), InApartment->GetActorLocation() + FVector(500.f)));
+		}
+
 		if (InGirlCharacter)
 		{
 			CameraPawn->SetFocusTarget(InGirlCharacter);
@@ -43,6 +53,17 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			CameraPawn->SetFocusTarget(InApartment);
 		}
 	}
+
+	if (InteractionHudComponent && InGirlCharacter)
+	{
+		InteractionHudComponent->BindSelectionComponent(InGirlCharacter->GetInteractionSelectionComponent());
+	}
+
+	if (InGirlCharacter && InGirlCharacter->GetActivityComponent())
+	{
+		InGirlCharacter->GetActivityComponent()->OnActivityStarted.AddDynamic(this, &AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted);
+		InGirlCharacter->GetActivityComponent()->OnActivityCompleted.AddDynamic(this, &AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityCompleted);
+	}
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
@@ -50,6 +71,17 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	InputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnInteract);
+	InputComponent->BindAction(TEXT("SelectInteractable"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnSelectInteractable);
+	InputComponent->BindAction(TEXT("CameraFocus"), IE_DoubleClick, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusDoubleClick);
+	InputComponent->BindAction(TEXT("ExecuteAction1"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnExecuteAction1);
+	InputComponent->BindAction(TEXT("ExecuteAction2"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnExecuteAction2);
+	InputComponent->BindAction(TEXT("ExecuteAction3"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnExecuteAction3);
+	InputComponent->BindAction(TEXT("ExecuteAction4"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnExecuteAction4);
+	InputComponent->BindAction(TEXT("FocusGirlUpperBody"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlUpperBody);
+	InputComponent->BindAction(TEXT("FocusGirlHair"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlHair);
+	InputComponent->BindAction(TEXT("FocusGirlShoes"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlShoes);
+	InputComponent->BindAction(TEXT("PhotoFovUp"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoFovUp);
+	InputComponent->BindAction(TEXT("PhotoFovDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnPhotoFovDown);
 	InputComponent->BindAction(TEXT("ToggleBuildMode"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode);
 	InputComponent->BindAction(TEXT("BuildTopDown"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnBuildTopDown);
 	InputComponent->BindAction(TEXT("OpenWardrobe"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe);
@@ -96,7 +128,14 @@ UApartmentLifeInteractionComponent* AApartmentLifeSingleCharacterPlayerControlle
 		: nullptr;
 }
 
-void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AActor* Target)
+UApartmentLifeInteractionSelectionComponent* AApartmentLifeSingleCharacterPlayerController::GetGirlSelection() const
+{
+	return GirlCharacter.IsValid()
+		? GirlCharacter->GetInteractionSelectionComponent()
+		: nullptr;
+}
+
+void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AActor* Target, const FVector& FocusOffset)
 {
 	if (!Target)
 	{
@@ -107,7 +146,7 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AA
 	{
 		if (Cast<AApartmentLifeFurnitureActor>(Target))
 		{
-			CameraPawn->FocusFurniture(Target);
+			CameraPawn->FocusFurniture(Target, FocusOffset);
 		}
 		else if (Cast<AApartmentLifeSimCharacter>(Target))
 		{
@@ -120,13 +159,164 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AA
 	}
 }
 
+void AApartmentLifeSingleCharacterPlayerController::FocusCameraForActivity(FName ActivityId, AActor* ContextActor)
+{
+	if (!GirlCharacter.IsValid())
+	{
+		return;
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->EnterActivityCamera(GirlCharacter.Get(), ActivityId, ContextActor);
+	}
+}
+
 void AApartmentLifeSingleCharacterPlayerController::OnInteract()
 {
+	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
+	{
+		if (Selection->GetSelectedInteractable())
+		{
+			Selection->ExecuteInteractionByIndex(0);
+			FocusCameraForActivity(
+				Selection->GetAvailableActions().Num() > 0
+					? Selection->GetAvailableActions()[0].ActivityId
+					: NAME_None,
+				Selection->GetSelectedInteractable());
+			return;
+		}
+	}
+
 	if (UApartmentLifeInteractionComponent* Interaction = GetGirlInteraction())
 	{
 		if (Interaction->TryInteractFromView(this))
 		{
 			FocusCameraOnInteractable(Interaction->GetFocusedInteractable());
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnSelectInteractable()
+{
+	if (bBuildModeActive)
+	{
+		return;
+	}
+
+	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
+	{
+		if (Selection->SelectFromView(this))
+		{
+			FocusCameraOnInteractable(Selection->GetSelectedInteractable());
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnFocusDoubleClick()
+{
+	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
+	{
+		if (AActor* Target = Selection->GetSelectedInteractable())
+		{
+			if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+			{
+				CameraPawn->FocusTargetFromDoubleClick(Target);
+			}
+			return;
+		}
+
+		if (Selection->SelectFromView(this))
+		{
+			if (AActor* Target = Selection->GetSelectedInteractable())
+			{
+				if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+				{
+					CameraPawn->FocusTargetFromDoubleClick(Target);
+				}
+			}
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnExecuteAction1() { if (UApartmentLifeInteractionSelectionComponent* S = GetGirlSelection()) { if (S->ExecuteInteractionByIndex(0)) FocusCameraForActivity(S->GetAvailableActions()[0].ActivityId, S->GetSelectedInteractable()); } }
+void AApartmentLifeSingleCharacterPlayerController::OnExecuteAction2() { if (UApartmentLifeInteractionSelectionComponent* S = GetGirlSelection()) { if (S->ExecuteInteractionByIndex(1)) FocusCameraForActivity(S->GetAvailableActions()[1].ActivityId, S->GetSelectedInteractable()); } }
+void AApartmentLifeSingleCharacterPlayerController::OnExecuteAction3() { if (UApartmentLifeInteractionSelectionComponent* S = GetGirlSelection()) { if (S->ExecuteInteractionByIndex(2)) FocusCameraForActivity(S->GetAvailableActions()[2].ActivityId, S->GetSelectedInteractable()); } }
+void AApartmentLifeSingleCharacterPlayerController::OnExecuteAction4() { if (UApartmentLifeInteractionSelectionComponent* S = GetGirlSelection()) { if (S->ExecuteInteractionByIndex(3)) FocusCameraForActivity(S->GetAvailableActions()[3].ActivityId, S->GetSelectedInteractable()); } }
+
+void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlUpperBody()
+{
+	if (GirlCharacter.IsValid())
+	{
+		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+		{
+			CameraPawn->FocusCharacter(GirlCharacter.Get(), EApartmentLifeCharacterFocusMode::UpperBody);
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlHair()
+{
+	if (GirlCharacter.IsValid())
+	{
+		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+		{
+			CameraPawn->FocusCharacter(GirlCharacter.Get(), EApartmentLifeCharacterFocusMode::Hair);
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlShoes()
+{
+	if (GirlCharacter.IsValid())
+	{
+		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+		{
+			CameraPawn->FocusCharacter(GirlCharacter.Get(), EApartmentLifeCharacterFocusMode::Shoes);
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoFovUp()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->AdjustPhotoFieldOfView(2.f);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OnPhotoFovDown()
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->AdjustPhotoFieldOfView(-2.f);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FName ActivityId)
+{
+	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
+	{
+		FocusCameraForActivity(ActivityId, Selection->GetSelectedInteractable());
+	}
+	else
+	{
+		FocusCameraForActivity(ActivityId, nullptr);
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityCompleted(FName ActivityId)
+{
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Activity)
+		{
+			CameraPawn->ExitActivityCamera();
+		}
+		else if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Wardrobe
+			&& ActivityId.ToString().Contains(TEXT("dress")))
+		{
+			CameraPawn->ExitWardrobeCamera();
 		}
 	}
 }
@@ -149,6 +339,7 @@ void AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode()
 			BuildMode->ExitBuildMode();
 			if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 			{
+				CameraPawn->ExitActivityCamera();
 				CameraPawn->SetBuildTopDownMode(false);
 			}
 		}
@@ -179,7 +370,7 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
-		CameraPawn->FocusCharacter(GirlCharacter.Get(), EApartmentLifeCharacterFocusMode::Outfit);
+		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
 	}
 
 	if (UApartmentLifeActivityComponent* Activity = GirlCharacter->GetActivityComponent())
@@ -206,6 +397,17 @@ void AApartmentLifeSingleCharacterPlayerController::OnBuildRedo()
 
 void AApartmentLifeSingleCharacterPlayerController::OnQuickSave()
 {
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		if (UGameInstance* GI = GetGameInstance())
+		{
+			if (UApartmentLifeCameraSettingsSubsystem* CameraSettings = GI->GetSubsystem<UApartmentLifeCameraSettingsSubsystem>())
+			{
+				CameraSettings->CaptureFromPawn(CameraPawn);
+			}
+		}
+	}
+
 	if (UGameInstance* GI = GetGameInstance())
 	{
 		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
@@ -222,6 +424,14 @@ void AApartmentLifeSingleCharacterPlayerController::OnQuickLoad()
 		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
 		{
 			SaveSubsystem->LoadFromSlot(QuickSaveSlot);
+		}
+
+		if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+		{
+			if (UApartmentLifeCameraSettingsSubsystem* CameraSettings = GI->GetSubsystem<UApartmentLifeCameraSettingsSubsystem>())
+			{
+				CameraSettings->ApplySettingsToPawn(CameraPawn);
+			}
 		}
 	}
 }

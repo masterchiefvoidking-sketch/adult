@@ -16,6 +16,9 @@ struct APARTMENTLIFEINTERACTION_API FApartmentLifeInteractionDescriptor
 	FName InteractionId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	EApartmentLifeFurnitureInteraction InteractionType = EApartmentLifeFurnitureInteraction::Sit;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FText DisplayName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")

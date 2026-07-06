@@ -54,6 +54,7 @@ int32 UApartmentLifeInteractionLibrary::GetDurationMinutesForActivity(FName Acti
 FApartmentLifeInteractionDescriptor UApartmentLifeInteractionLibrary::BuildDescriptor(EApartmentLifeFurnitureInteraction Interaction)
 {
 	FApartmentLifeInteractionDescriptor Desc;
+	Desc.InteractionType = Interaction;
 	Desc.InteractionId = FName(*FString::Printf(TEXT("interaction.%d"), static_cast<int32>(Interaction)));
 	Desc.ActivityId = GetDefaultActivityForInteraction(Interaction);
 	Desc.DurationMinutes = GetDurationMinutesForActivity(Desc.ActivityId);

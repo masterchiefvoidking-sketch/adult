@@ -14,6 +14,8 @@ public class ApartmentLifeCamera : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			"Json",
+			"JsonUtilities",
 			"ApartmentLifeCore"
 		});
 
@@ -21,5 +23,10 @@ public class ApartmentLifeCamera : ModuleRules
 		{
 			"CinematicCamera"
 		});
+
+		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)
+		{
+			PrivateDependencyModuleNames.Add("AutomationTest");
+		}
 	}
 }

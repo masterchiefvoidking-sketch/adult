@@ -12,6 +12,7 @@
 #include "ApartmentLifeClothingFitComponent.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeInteractionComponent.h"
+#include "ApartmentLifeInteractionSelectionComponent.h"
 #include "ApartmentLifeBedroomRoutineComponent.h"
 #include "ApartmentLifeGirlLifeLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
@@ -30,6 +31,7 @@ AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
 	ClothingFitComponent = CreateDefaultSubobject<UApartmentLifeClothingFitComponent>(TEXT("ClothingFit"));
 	ConversationComponent = CreateDefaultSubobject<UApartmentLifeConversationComponent>(TEXT("Conversation"));
 	InteractionComponent = CreateDefaultSubobject<UApartmentLifeInteractionComponent>(TEXT("Interaction"));
+	InteractionSelectionComponent = CreateDefaultSubobject<UApartmentLifeInteractionSelectionComponent>(TEXT("InteractionSelection"));
 	BedroomRoutineComponent = CreateDefaultSubobject<UApartmentLifeBedroomRoutineComponent>(TEXT("BedroomRoutine"));
 }
 

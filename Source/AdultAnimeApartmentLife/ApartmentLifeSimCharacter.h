@@ -11,6 +11,7 @@ class UApartmentLifeNPCSimulationComponent;
 class UApartmentLifeWardrobeComponent;
 class UApartmentLifeActivityComponent;
 class UApartmentLifeInteractionComponent;
+class UApartmentLifeInteractionSelectionComponent;
 class UApartmentLifeAnimationComponent;
 class UApartmentLifeYogaMinigameComponent;
 class UApartmentLifeGroomingRoutineComponent;
@@ -58,6 +59,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeInteractionComponent* GetInteractionComponent() const { return InteractionComponent; }
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life")
+	UApartmentLifeInteractionSelectionComponent* GetInteractionSelectionComponent() const { return InteractionSelectionComponent; }
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life")
 	UApartmentLifeBedroomRoutineComponent* GetBedroomRoutineComponent() const { return BedroomRoutineComponent; }
@@ -115,6 +119,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeInteractionComponent> InteractionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
+	TObjectPtr<UApartmentLifeInteractionSelectionComponent> InteractionSelectionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
 	TObjectPtr<UApartmentLifeBedroomRoutineComponent> BedroomRoutineComponent;

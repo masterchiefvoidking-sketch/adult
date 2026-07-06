@@ -80,10 +80,10 @@ TArray<FApartmentLifeActivityDefinition> UApartmentLifeActivityCatalogLibrary::G
 		MakeActivity(TEXT("activity.chores.laundry_hamper"), TEXT("Laundry Hamper"), EApartmentLifeActivityCategory::Laundry, EApartmentLifeActivityRoom::Bathroom, EApartmentLifeAnimationGroup::Laundry, 10, Stats(0, -2, 0, 0, 2, 0, 0)),
 
 		// Wardrobe / closet
-		MakeActivity(TEXT("activity.dress.wardrobe"), TEXT("Open Wardrobe"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::WalkInCloset, EApartmentLifeAnimationGroup::Dressing, 10, Stats(2, 0, 0, 0, 3, 4, 0)),
-		MakeActivity(TEXT("activity.dress.change"), TEXT("Change Outfit"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::WalkInCloset, EApartmentLifeAnimationGroup::Dressing, 8, Stats(1, 0, 0, 0, 2, 3, 0)),
-		MakeActivity(TEXT("activity.dress.save_preset"), TEXT("Save Outfit Preset"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::WalkInCloset, EApartmentLifeAnimationGroup::Dressing, 5, Stats(1, 0, 0, 0, 2, 2, 0)),
-		MakeActivity(TEXT("activity.dress.organize"), TEXT("Organize Closet"), EApartmentLifeActivityCategory::Cleaning, EApartmentLifeActivityRoom::WalkInCloset, EApartmentLifeAnimationGroup::Dressing, 20, Stats(1, -3, 0, 0, 4, 2, -2)),
+		MakeActivity(TEXT("activity.dress.wardrobe"), TEXT("Open Wardrobe"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::Any, EApartmentLifeAnimationGroup::Dressing, 10, Stats(2, 0, 0, 0, 3, 4, 0)),
+		MakeActivity(TEXT("activity.dress.change"), TEXT("Change Outfit"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::Any, EApartmentLifeAnimationGroup::Dressing, 8, Stats(1, 0, 0, 0, 2, 3, 0)),
+		MakeActivity(TEXT("activity.dress.save_preset"), TEXT("Save Outfit Preset"), EApartmentLifeActivityCategory::Relaxing, EApartmentLifeActivityRoom::Any, EApartmentLifeAnimationGroup::Dressing, 5, Stats(1, 0, 0, 0, 2, 2, 0)),
+		MakeActivity(TEXT("activity.dress.organize"), TEXT("Organize Closet"), EApartmentLifeActivityCategory::Cleaning, EApartmentLifeActivityRoom::Any, EApartmentLifeAnimationGroup::Dressing, 20, Stats(1, -3, 0, 0, 4, 2, -2)),
 		MakeActivity(TEXT("activity.chores.laundry"), TEXT("Do Laundry"), EApartmentLifeActivityCategory::Laundry, EApartmentLifeActivityRoom::LaundryRoom, EApartmentLifeAnimationGroup::Laundry, 30, Stats(0, -5, 0, 0, 5, 1, 0)),
 
 		// Desk / computer

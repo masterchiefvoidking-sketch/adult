@@ -41,7 +41,8 @@ FApartmentLifeYogaSessionState UApartmentLifeCharacterPipelineLibrary::UpdateYog
 
 	Updated.PoseMatchScore = FMath::FInterpTo(Updated.PoseMatchScore, PlayerInputAccuracy * 100.f, DeltaTime, 3.f);
 	Updated.BalanceMeter = FMath::Clamp(Updated.BalanceMeter + (PlayerInputAccuracy - 0.5f) * DeltaTime * 20.f, 0.f, 100.f);
-	Updated.BreathingRhythm = FMath::Clamp(50.f + FMath::Sin(Updated.SessionDurationMinutes * 6.f) * 30.f, 0.f, 100.f);
+	Updated.BreathingPhase += DeltaTime * 2.f;
+	Updated.BreathingRhythm = FMath::Clamp(50.f + FMath::Sin(Updated.BreathingPhase) * 30.f, 0.f, 100.f);
 	Updated.SessionDurationMinutes += DeltaTime / 60.f;
 
 	if (Updated.PoseMatchScore > 75.f)

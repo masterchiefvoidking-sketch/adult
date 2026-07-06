@@ -261,6 +261,9 @@ struct APARTMENTLIFECHARACTERPIPELINE_API FApartmentLifeYogaSessionState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoga")
 	float SessionDurationMinutes = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Yoga")
+	float BreathingPhase = 0.f;
 };
 
 USTRUCT(BlueprintType)

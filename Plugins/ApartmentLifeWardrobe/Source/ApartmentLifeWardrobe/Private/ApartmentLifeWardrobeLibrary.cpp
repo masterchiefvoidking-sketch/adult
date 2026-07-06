@@ -78,6 +78,12 @@ TArray<FName> UApartmentLifeWardrobeLibrary::FilterAndSortCloset(
 	return Results;
 }
 
+bool UApartmentLifeWardrobeLibrary::ShouldAutoRecommendOutfitForActivity(FName ActivityId)
+{
+	const FString Id = ActivityId.ToString().ToLower();
+	return !Id.Contains(TEXT("wardrobe")) && !Id.Contains(TEXT("preview"));
+}
+
 void UApartmentLifeWardrobeLibrary::RecommendOutfitForActivity(UApartmentLifeWardrobeComponent* Wardrobe, FName ActivityId)
 {
 	if (!Wardrobe)

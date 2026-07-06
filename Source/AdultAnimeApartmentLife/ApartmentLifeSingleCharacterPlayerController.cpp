@@ -23,10 +23,11 @@
 #include "ApartmentLifeCameraSettingsSubsystem.h"
 #include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeDebugMenuComponent.h"
+#include "ApartmentLifeDeveloperUiController.h"
+#include "ApartmentLifeDeveloperSubsystem.h"
 #include "ApartmentLifeUiBridgeComponent.h"
 #include "ApartmentLifeUiSubsystem.h"
 #include "ApartmentLifeCharacterCreatorUiController.h"
-#include "ApartmentLifeCharacterCreatorComponent.h"
 #include "ApartmentLifeImmersionSubsystem.h"
 #include "ApartmentLifeImmersionTypes.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
@@ -42,6 +43,7 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 	FinanceUiController = CreateDefaultSubobject<UApartmentLifeFinanceUiController>(TEXT("FinanceUi"));
 	UiBridgeComponent = CreateDefaultSubobject<UApartmentLifeUiBridgeComponent>(TEXT("UiBridge"));
 	CreatorUiController = CreateDefaultSubobject<UApartmentLifeCharacterCreatorUiController>(TEXT("CreatorUi"));
+	DeveloperUiController = CreateDefaultSubobject<UApartmentLifeDeveloperUiController>(TEXT("DeveloperUi"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -127,8 +129,14 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 			FinanceUiController,
 			InteractionHudComponent,
 			CreatorUiController,
+			DeveloperUiController,
 			QuickSaveSlot,
 			bEnterGameplayDirectly);
+	}
+
+	if (DeveloperUiController)
+	{
+		DeveloperUiController->InitializeContext(this, InApartment, InGirlCharacter);
 	}
 
 	if (CreatorUiController && InGirlCharacter)
@@ -180,6 +188,7 @@ void AApartmentLifeSingleCharacterPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("FocusGirlFace"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlFace);
 	InputComponent->BindAction(TEXT("FocusGirlOutfit"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit);
 	InputComponent->BindAction(TEXT("ToggleDebugMenu"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu);
+	InputComponent->BindAction(TEXT("TogglePerfOverlay"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnTogglePerfOverlay);
 	InputComponent->BindAction(TEXT("UiBack"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnUiBack);
 	InputComponent->BindAction(TEXT("ToggleGameHud"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnToggleGameHud);
 	InputComponent->BindAction(TEXT("OpenSaveLoadScreen"), IE_Pressed, this, &AApartmentLifeSingleCharacterPlayerController::OnOpenSaveLoadScreen);
@@ -270,7 +279,7 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AA
 
 void AApartmentLifeSingleCharacterPlayerController::FocusCameraForActivity(FName ActivityId, AActor* ContextActor)
 {
-	if (!GirlCharacter.IsValid())
+	if (!GirlCharacter.IsValid() || IsWardrobeActivityId(ActivityId))
 	{
 		return;
 	}
@@ -278,6 +287,30 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraForActivity(FName
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
 		CameraPawn->EnterActivityCamera(GirlCharacter.Get(), ActivityId, ContextActor);
+	}
+}
+
+bool AApartmentLifeSingleCharacterPlayerController::IsWardrobeActivityId(FName ActivityId) const
+{
+	const FString Id = ActivityId.ToString().ToLower();
+	return Id.Contains(TEXT("dress")) || Id.Contains(TEXT("wardrobe"));
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OpenWardrobeSession()
+{
+	if (!GirlCharacter.IsValid())
+	{
+		return;
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
+	}
+
+	if (WardrobeUiController)
+	{
+		WardrobeUiController->OpenWardrobe();
 	}
 }
 
@@ -454,6 +487,15 @@ void AApartmentLifeSingleCharacterPlayerController::OnPhotoSaveBookmark()
 
 void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FName ActivityId)
 {
+	if (IsWardrobeActivityId(ActivityId))
+	{
+		if (!WardrobeUiController || !WardrobeUiController->IsWardrobeOpen())
+		{
+			OpenWardrobeSession();
+		}
+		return;
+	}
+
 	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
 	{
 		FocusCameraForActivity(ActivityId, Selection->GetSelectedInteractable());
@@ -466,16 +508,91 @@ void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FN
 
 void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityCompleted(FName ActivityId)
 {
+	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
+	{
+		return;
+	}
+
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
 		if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Activity)
 		{
 			CameraPawn->ExitActivityCamera();
 		}
-		else if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Wardrobe
-			&& ActivityId.ToString().Contains(TEXT("dress")))
+		else if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Wardrobe)
 		{
 			CameraPawn->ExitWardrobeCamera();
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::CloseWardrobeSession()
+{
+	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
+	{
+		WardrobeUiController->CloseWardrobe();
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Wardrobe)
+		{
+			CameraPawn->ExitWardrobeCamera();
+		}
+	}
+
+	if (GirlCharacter.IsValid())
+	{
+		if (UApartmentLifeActivityComponent* Activity = GirlCharacter->GetActivityComponent())
+		{
+			if (Activity->IsActivityActive())
+			{
+				const FString Id = Activity->GetCurrentActivityId().ToString().ToLower();
+				if (Id.Contains(TEXT("wardrobe")) || Id.Contains(TEXT("dress")))
+				{
+					Activity->CancelCurrentActivity();
+				}
+			}
+		}
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::CloseBuildModeSession()
+{
+	bBuildModeActive = false;
+
+	if (UApartmentLifeBuildModeComponent* BuildMode = GetBuildMode())
+	{
+		BuildMode->ExitBuildMode();
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->SetBuildTopDownMode(false);
+		CameraPawn->ReturnToApartmentCamera();
+	}
+}
+
+void AApartmentLifeSingleCharacterPlayerController::CloseConversationSession()
+{
+	if (!GirlCharacter.IsValid())
+	{
+		return;
+	}
+
+	if (UApartmentLifeConversationComponent* Conversation = GirlCharacter->GetConversationComponent())
+	{
+		if (Conversation->GetCurrentSession().bIsActive)
+		{
+			Conversation->EndConversation();
+		}
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::CharacterFocus)
+		{
+			CameraPawn->ReturnToApartmentCamera();
 		}
 	}
 }
@@ -505,12 +622,7 @@ void AApartmentLifeSingleCharacterPlayerController::OnToggleBuildMode()
 		}
 		else
 		{
-			BuildMode->ExitBuildMode();
-			if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
-			{
-				CameraPawn->ExitActivityCamera();
-				CameraPawn->SetBuildTopDownMode(false);
-			}
+			CloseBuildModeSession();
 			if (UiBridgeComponent)
 			{
 				UiBridgeComponent->HandleUiBack();
@@ -536,20 +648,13 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 		return;
 	}
 
-	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
 	{
-		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
+		CloseWardrobeSession();
+		return;
 	}
 
-	if (WardrobeUiController)
-	{
-		WardrobeUiController->OpenWardrobe();
-	}
-
-	if (UApartmentLifeActivityComponent* Activity = GirlCharacter->GetActivityComponent())
-	{
-		Activity->StartActivity(FName(TEXT("activity.dress.wardrobe")));
-	}
+	OpenWardrobeSession();
 }
 
 void AApartmentLifeSingleCharacterPlayerController::OnOpenWorkMenu()
@@ -639,7 +744,18 @@ void AApartmentLifeSingleCharacterPlayerController::OnQuickSave()
 	{
 		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
 		{
-			SaveSubsystem->SaveToSlot(QuickSaveSlot);
+			const bool bSaved = SaveSubsystem->SaveToSlot(QuickSaveSlot);
+			if (UiBridgeComponent && GI)
+			{
+				if (UApartmentLifeUiSubsystem* Ui = GI->GetSubsystem<UApartmentLifeUiSubsystem>())
+				{
+					Ui->ShowToast(
+						bSaved
+							? FText::FromString(TEXT("Quick save complete"))
+							: FText::FromString(TEXT("Quick save failed")),
+						2.f);
+				}
+			}
 		}
 	}
 }
@@ -650,10 +766,29 @@ void AApartmentLifeSingleCharacterPlayerController::OnQuickLoad()
 	{
 		if (UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>())
 		{
-			SaveSubsystem->LoadFromSlot(QuickSaveSlot);
-		}
+			if (!SaveSubsystem->DoesSaveExist(QuickSaveSlot))
+			{
+				if (UApartmentLifeUiSubsystem* Ui = GI->GetSubsystem<UApartmentLifeUiSubsystem>())
+				{
+					Ui->ShowToast(FText::FromString(TEXT("No quick save found")), 2.f);
+				}
+				return;
+			}
 
-		ApplyPostLoadState();
+			const bool bLoaded = SaveSubsystem->LoadFromSlot(QuickSaveSlot);
+			if (bLoaded)
+			{
+				ApplyPostLoadState();
+				if (UApartmentLifeUiSubsystem* Ui = GI->GetSubsystem<UApartmentLifeUiSubsystem>())
+				{
+					Ui->ShowToast(FText::FromString(TEXT("Quick load complete")), 2.f);
+				}
+			}
+			else if (UApartmentLifeUiSubsystem* Ui = GI->GetSubsystem<UApartmentLifeUiSubsystem>())
+			{
+				Ui->ShowToast(FText::FromString(TEXT("Quick load failed")), 2.f);
+			}
+		}
 	}
 }
 
@@ -684,6 +819,7 @@ void AApartmentLifeSingleCharacterPlayerController::ApplyPostLoadState()
 		if (UiBridgeComponent)
 		{
 			UiBridgeComponent->SyncImmersionSettingsFromSubsystem();
+			UiBridgeComponent->RefreshAfterLoad();
 		}
 	}
 
@@ -707,6 +843,12 @@ void AApartmentLifeSingleCharacterPlayerController::OnTalkWithGirl()
 
 	if (UApartmentLifeConversationComponent* Conversation = GirlCharacter->GetConversationComponent())
 	{
+		if (Conversation->GetCurrentSession().bIsActive)
+		{
+			CloseConversationSession();
+			return;
+		}
+
 		Conversation->StartConversationWithPlayer();
 	}
 
@@ -740,14 +882,55 @@ void AApartmentLifeSingleCharacterPlayerController::OnFocusGirlOutfit()
 
 void AApartmentLifeSingleCharacterPlayerController::OnToggleDebugMenu()
 {
+	if (DeveloperUiController)
+	{
+		DeveloperUiController->ToggleDeveloperHub();
+		return;
+	}
+
 	if (DebugMenuComponent)
 	{
 		DebugMenuComponent->ToggleMenu();
 	}
 }
 
+void AApartmentLifeSingleCharacterPlayerController::OnTogglePerfOverlay()
+{
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UApartmentLifeDeveloperSubsystem* Dev = GI->GetSubsystem<UApartmentLifeDeveloperSubsystem>())
+		{
+			Dev->TogglePerformanceOverlay();
+		}
+	}
+}
+
 void AApartmentLifeSingleCharacterPlayerController::OnUiBack()
 {
+	if (GirlCharacter.IsValid())
+	{
+		if (UApartmentLifeConversationComponent* Conversation = GirlCharacter->GetConversationComponent())
+		{
+			if (Conversation->GetCurrentSession().bIsActive)
+			{
+				CloseConversationSession();
+				return;
+			}
+		}
+	}
+
+	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
+	{
+		CloseWardrobeSession();
+		return;
+	}
+
+	if (DeveloperUiController && DeveloperUiController->IsDeveloperHubOpen())
+	{
+		DeveloperUiController->CloseDeveloperHub();
+		return;
+	}
+
 	if (UiBridgeComponent)
 	{
 		UiBridgeComponent->HandleUiBack();

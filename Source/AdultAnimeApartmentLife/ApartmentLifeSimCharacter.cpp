@@ -190,7 +190,7 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 {
 	const FString Id = ActivityId.ToString().ToLower();
 
-	if (WardrobeComponent)
+	if (WardrobeComponent && UApartmentLifeWardrobeLibrary::ShouldAutoRecommendOutfitForActivity(ActivityId))
 	{
 		UApartmentLifeWardrobeLibrary::RecommendOutfitForActivity(WardrobeComponent, ActivityId);
 
@@ -339,30 +339,8 @@ void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 
 void AApartmentLifeSimCharacter::HandleScheduleOccasion(const FApartmentLifeGameTime& NewTime)
 {
-	if (!WardrobeComponent || !SimulationComponent)
-	{
-		return;
-	}
-
-	EApartmentLifeOccasion Occasion = EApartmentLifeOccasion::Everyday;
-	if (NewTime.Hour >= 9 && NewTime.Hour < 17)
-	{
-		Occasion = EApartmentLifeOccasion::Work;
-	}
-	else if (NewTime.Hour >= 22 || NewTime.Hour < 6)
-	{
-		Occasion = EApartmentLifeOccasion::Sleep;
-	}
-
-	if (UWorld* World = GetWorld())
-	{
-		if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
-		{
-			WardrobeComponent->SelectOutfitForContext(Occasion, TimeSubsystem->GetCurrentWeather());
-		}
-	}
-
-	RefreshNPCStyleFromSimulation();
+	(void)NewTime;
+	// Player-directed single-character build: outfit changes are manual via wardrobe.
 }
 
 void AApartmentLifeSimCharacter::HandleDayAdvanced(const FApartmentLifeGameTime& NewTime)

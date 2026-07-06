@@ -21,4 +21,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void SetFocusTarget(AActor* NewTarget);
+
+	/** Tear down wardrobe camera, activity, and UI when supported by the game controller. */
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Session")
+	virtual void CloseWardrobeSession();
+
+	/** Tear down build mode camera state when supported by the game controller. */
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Session")
+	virtual void CloseBuildModeSession();
+
+	/** End an active player conversation and restore camera when supported. */
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Session")
+	virtual void CloseConversationSession();
 };

@@ -198,6 +198,23 @@ protected:
 	void PushModeSnapshot();
 	void RestoreModeSnapshot();
 
+	struct FCameraModeSnapshot
+	{
+		EApartmentLifeCameraMode CameraMode = EApartmentLifeCameraMode::Orbit;
+		EApartmentLifePrimaryCameraMode PrimaryMode = EApartmentLifePrimaryCameraMode::Apartment;
+		EApartmentLifeCharacterFocusMode CharacterFocus = EApartmentLifeCharacterFocusMode::FullBody;
+		float Yaw = 0.f;
+		float Pitch = -25.f;
+		float ArmLength = 400.f;
+		FVector PivotLocation = FVector::ZeroVector;
+		bool bFocusLock = true;
+		bool bRotateCharacter = false;
+		TWeakObjectPtr<AActor> FocusTarget;
+		FVector ActivityFocusOffset = FVector::ZeroVector;
+		bool bPrivacyFraming = false;
+		bool bAllowManualOrbit = true;
+	};
+
 	void OnOrbitPressed();
 	void OnOrbitReleased();
 	void OnRotatePressed();
@@ -267,8 +284,7 @@ protected:
 	EApartmentLifePrimaryCameraMode PrimaryCameraMode = EApartmentLifePrimaryCameraMode::Apartment;
 	EApartmentLifeCharacterFocusMode ActiveCharacterFocus = EApartmentLifeCharacterFocusMode::FullBody;
 	EApartmentLifeCameraMode CameraMode = EApartmentLifeCameraMode::Orbit;
-	EApartmentLifeCameraMode PreviousCameraMode = EApartmentLifeCameraMode::Orbit;
-	EApartmentLifePrimaryCameraMode PreviousPrimaryMode = EApartmentLifePrimaryCameraMode::Apartment;
+	FCameraModeSnapshot ModeSnapshot;
 
 	FApartmentLifeCameraUserSettings ActiveSettings;
 	FBox ApartmentBounds;
@@ -280,6 +296,7 @@ protected:
 	bool bRotateInputActive = false;
 	bool bPanInputActive = false;
 	bool bInvertYAxis = false;
+	bool bReduceMotion = false;
 
 	float CurrentYaw = 0.f;
 	float CurrentPitch = -25.f;
@@ -288,6 +305,6 @@ protected:
 	float DefaultPitch = -25.f;
 	float DefaultArmLength = 400.f;
 	FVector DefaultPivotLocation = FVector::ZeroVector;
-	FVector FreeCameraVelocity = FVector::ZeroVector;
+	float LastTickDeltaSeconds = 0.016f;
 	uint8 ActiveCreatorLightingMode = 3;
 };

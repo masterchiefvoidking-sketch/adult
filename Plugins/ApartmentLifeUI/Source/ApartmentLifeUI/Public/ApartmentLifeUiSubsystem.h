@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnApartmentLifeUiScreenChanged, EApartmentLifeUiScreen, NewScreen);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnApartmentLifeUiListItemActivated, EApartmentLifeUiScreen, Screen, int32, Index);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnApartmentLifeUiListItemSelected, EApartmentLifeUiScreen, Screen, int32, Index);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApartmentLifeUiMainMenuNewGame);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnApartmentLifeUiMainMenuContinue, int32, SlotIndex);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApartmentLifeUiBackRequested);
@@ -92,6 +93,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|UI")
 	FOnApartmentLifeUiListItemActivated OnListItemActivated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|UI")
+	FOnApartmentLifeUiListItemSelected OnListItemSelected;
 
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|UI")
 	FOnApartmentLifeUiMainMenuNewGame OnMainMenuNewGame;

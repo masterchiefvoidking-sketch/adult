@@ -21,3 +21,15 @@ void AApartmentLifePlayerController::SetFocusTarget(AActor* NewTarget)
 		CameraPawn->SetFocusTarget(NewTarget);
 	}
 }
+
+void AApartmentLifePlayerController::CloseWardrobeSession()
+{
+}
+
+void AApartmentLifePlayerController::CloseBuildModeSession()
+{
+}
+
+void AApartmentLifePlayerController::CloseConversationSession()
+{
+}

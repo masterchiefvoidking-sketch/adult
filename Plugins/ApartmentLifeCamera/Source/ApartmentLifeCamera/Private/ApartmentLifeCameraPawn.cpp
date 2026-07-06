@@ -51,6 +51,7 @@ void AApartmentLifeCameraPawn::BeginPlay()
 void AApartmentLifeCameraPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	LastTickDeltaSeconds = DeltaSeconds;
 
 	const bool bOrbitStyleMode = CameraMode == EApartmentLifeCameraMode::Orbit
 		|| CameraMode == EApartmentLifeCameraMode::Photo
@@ -166,6 +167,7 @@ void AApartmentLifeCameraPawn::ApplyUserSettings(const FApartmentLifeCameraUserS
 	ZoomSpeed = 45.f * Settings.ZoomSensitivity;
 	PanSpeed = 4.f * Settings.PanSensitivity;
 	bInvertYAxis = Settings.bInvertYAxis;
+	bReduceMotion = Settings.bReduceMotion;
 	CharacterOutfitArmLength = Settings.PreferredWardrobeZoom;
 	ApplyPhotoSettings(Settings.PhotoSettings);
 }
@@ -179,6 +181,7 @@ FApartmentLifeCameraUserSettings AApartmentLifeCameraPawn::BuildUserSettings() c
 	Settings.bInvertYAxis = bInvertYAxis;
 	Settings.LastPrimaryMode = PrimaryCameraMode;
 	Settings.PreferredWardrobeZoom = CharacterOutfitArmLength;
+	Settings.bReduceMotion = bReduceMotion;
 	return Settings;
 }
 
@@ -238,7 +241,8 @@ void AApartmentLifeCameraPawn::AddYawInput(float YawDelta)
 
 	if (bRotateCharacterInsteadOfCamera && FocusTarget)
 	{
-		RotateFocusedCharacter(ScaledDelta);
+		const float WardrobeBoost = CameraMode == EApartmentLifeCameraMode::Wardrobe ? 1.35f : 1.f;
+		RotateFocusedCharacter(ScaledDelta * WardrobeBoost);
 		return;
 	}
 
@@ -327,6 +331,7 @@ void AApartmentLifeCameraPawn::AddPanInputY(float PanDelta)
 	}
 
 	PivotComponent->AddWorldOffset(FVector::UpVector * PanDelta * PanSpeed);
+	ClampPivotToBounds();
 }
 
 void AApartmentLifeCameraPawn::UpdateOrbitPivot()
@@ -364,7 +369,15 @@ void AApartmentLifeCameraPawn::UpdateOrbitPivot()
 		TargetLocation += FVector(0.f, 80.f, 0.f);
 	}
 
-	PivotComponent->SetWorldLocation(FMath::VInterpTo(PivotComponent->GetComponentLocation(), TargetLocation, GetWorld()->GetDeltaSeconds(), 8.f));
+	if (bReduceMotion)
+	{
+		PivotComponent->SetWorldLocation(TargetLocation);
+	}
+	else
+	{
+		PivotComponent->SetWorldLocation(
+			FMath::VInterpTo(PivotComponent->GetComponentLocation(), TargetLocation, LastTickDeltaSeconds, 8.f));
+	}
 }
 
 void AApartmentLifeCameraPawn::ClampPivotToBounds()
@@ -717,14 +730,37 @@ void AApartmentLifeCameraPawn::ApplyPhotoSettings(const FApartmentLifePhotoModeS
 
 void AApartmentLifeCameraPawn::PushModeSnapshot()
 {
-	PreviousCameraMode = CameraMode;
-	PreviousPrimaryMode = PrimaryCameraMode;
+	ModeSnapshot.CameraMode = CameraMode;
+	ModeSnapshot.PrimaryMode = PrimaryCameraMode;
+	ModeSnapshot.CharacterFocus = ActiveCharacterFocus;
+	ModeSnapshot.Yaw = CurrentYaw;
+	ModeSnapshot.Pitch = CurrentPitch;
+	ModeSnapshot.ArmLength = CurrentArmLength;
+	ModeSnapshot.PivotLocation = PivotComponent->GetComponentLocation();
+	ModeSnapshot.bFocusLock = bFocusLockEnabled;
+	ModeSnapshot.bRotateCharacter = bRotateCharacterInsteadOfCamera;
+	ModeSnapshot.FocusTarget = FocusTarget;
+	ModeSnapshot.ActivityFocusOffset = ActivityFocusOffset;
+	ModeSnapshot.bPrivacyFraming = bActivityPrivacyFraming;
+	ModeSnapshot.bAllowManualOrbit = bActivityAllowManualOrbit;
 }
 
 void AApartmentLifeCameraPawn::RestoreModeSnapshot()
 {
-	CameraMode = PreviousCameraMode;
-	PrimaryCameraMode = PreviousPrimaryMode;
+	CameraMode = ModeSnapshot.CameraMode;
+	PrimaryCameraMode = ModeSnapshot.PrimaryMode;
+	ActiveCharacterFocus = ModeSnapshot.CharacterFocus;
+	CurrentYaw = ModeSnapshot.Yaw;
+	CurrentPitch = ModeSnapshot.Pitch;
+	CurrentArmLength = ModeSnapshot.ArmLength;
+	PivotComponent->SetWorldLocation(ModeSnapshot.PivotLocation);
+	bFocusLockEnabled = ModeSnapshot.bFocusLock;
+	bRotateCharacterInsteadOfCamera = ModeSnapshot.bRotateCharacter;
+	FocusTarget = ModeSnapshot.FocusTarget.Get();
+	ActivityFocusOffset = ModeSnapshot.ActivityFocusOffset;
+	bActivityPrivacyFraming = ModeSnapshot.bPrivacyFraming;
+	bActivityAllowManualOrbit = ModeSnapshot.bAllowManualOrbit;
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength, bReduceMotion ? 24.f : 8.f);
 }
 
 void AApartmentLifeCameraPawn::OnOrbitPressed() { bOrbitInputActive = true; }

@@ -190,7 +190,7 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 {
 	const FString Id = ActivityId.ToString().ToLower();
 
-	if (WardrobeComponent)
+	if (WardrobeComponent && UApartmentLifeWardrobeLibrary::ShouldAutoRecommendOutfitForActivity(ActivityId))
 	{
 		UApartmentLifeWardrobeLibrary::RecommendOutfitForActivity(WardrobeComponent, ActivityId);
 

@@ -85,6 +85,9 @@ struct APARTMENTLIFECAMERA_API FApartmentLifeCameraUserSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	uint8 CreatorLightingMode = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Accessibility")
+	bool bReduceMotion = false;
 };
 
 USTRUCT(BlueprintType)

@@ -44,6 +44,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Single Character")
 	void ApplyPostLoadState();
 
+	virtual void CloseWardrobeSession() override;
+	virtual void CloseBuildModeSession() override;
+	virtual void CloseConversationSession() override;
+
 protected:
 	virtual void SetupInputComponent() override;
 

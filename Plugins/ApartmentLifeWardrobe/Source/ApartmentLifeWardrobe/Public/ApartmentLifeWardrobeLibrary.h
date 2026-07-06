@@ -25,6 +25,9 @@ public:
 	static void RecommendOutfitForActivity(UApartmentLifeWardrobeComponent* Wardrobe, FName ActivityId);
 
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Wardrobe")
+	static bool ShouldAutoRecommendOutfitForActivity(FName ActivityId);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Wardrobe")
 	static FApartmentLifeOutfitMoodEffect ComputeOutfitMoodEffect(
 		const UApartmentLifeWardrobeComponent* Wardrobe,
 		FName ActivityId = NAME_None);

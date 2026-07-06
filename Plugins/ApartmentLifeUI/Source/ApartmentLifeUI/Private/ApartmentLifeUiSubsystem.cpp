@@ -126,6 +126,7 @@ void UApartmentLifeUiSubsystem::RefreshView()
 void UApartmentLifeUiSubsystem::HandleListItemClicked(int32 Index)
 {
 	PanelState.SelectedIndex = Index;
+	OnListItemSelected.Broadcast(ActiveScreen, Index);
 	RefreshView();
 }
 

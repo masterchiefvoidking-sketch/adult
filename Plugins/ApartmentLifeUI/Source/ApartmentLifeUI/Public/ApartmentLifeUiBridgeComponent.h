@@ -63,6 +63,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
 	void SyncImmersionSettingsFromSubsystem();
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
+	void RefreshAfterLoad();
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|UI")
 	FOnApartmentLifeUiBridgePostLoadRequested OnPostLoadRequested;
 
@@ -108,6 +111,9 @@ protected:
 
 	UFUNCTION()
 	void HandleListItemActivated(EApartmentLifeUiScreen Screen, int32 Index);
+
+	UFUNCTION()
+	void HandleListItemSelected(EApartmentLifeUiScreen Screen, int32 Index);
 
 	UFUNCTION()
 	void HandleMainMenuNewGame();

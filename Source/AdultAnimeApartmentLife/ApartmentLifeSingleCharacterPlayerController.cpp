@@ -279,7 +279,7 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraOnInteractable(AA
 
 void AApartmentLifeSingleCharacterPlayerController::FocusCameraForActivity(FName ActivityId, AActor* ContextActor)
 {
-	if (!GirlCharacter.IsValid())
+	if (!GirlCharacter.IsValid() || IsWardrobeActivityId(ActivityId))
 	{
 		return;
 	}
@@ -287,6 +287,30 @@ void AApartmentLifeSingleCharacterPlayerController::FocusCameraForActivity(FName
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
 		CameraPawn->EnterActivityCamera(GirlCharacter.Get(), ActivityId, ContextActor);
+	}
+}
+
+bool AApartmentLifeSingleCharacterPlayerController::IsWardrobeActivityId(FName ActivityId) const
+{
+	const FString Id = ActivityId.ToString().ToLower();
+	return Id.Contains(TEXT("dress")) || Id.Contains(TEXT("wardrobe"));
+}
+
+void AApartmentLifeSingleCharacterPlayerController::OpenWardrobeSession()
+{
+	if (!GirlCharacter.IsValid())
+	{
+		return;
+	}
+
+	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
+	{
+		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
+	}
+
+	if (WardrobeUiController)
+	{
+		WardrobeUiController->OpenWardrobe();
 	}
 }
 
@@ -463,6 +487,15 @@ void AApartmentLifeSingleCharacterPlayerController::OnPhotoSaveBookmark()
 
 void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FName ActivityId)
 {
+	if (IsWardrobeActivityId(ActivityId))
+	{
+		if (!WardrobeUiController || !WardrobeUiController->IsWardrobeOpen())
+		{
+			OpenWardrobeSession();
+		}
+		return;
+	}
+
 	if (UApartmentLifeInteractionSelectionComponent* Selection = GetGirlSelection())
 	{
 		FocusCameraForActivity(ActivityId, Selection->GetSelectedInteractable());
@@ -475,6 +508,11 @@ void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted(FN
 
 void AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityCompleted(FName ActivityId)
 {
+	if (WardrobeUiController && WardrobeUiController->IsWardrobeOpen())
+	{
+		return;
+	}
+
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
 		if (CameraPawn->GetPrimaryCameraMode() == EApartmentLifePrimaryCameraMode::Activity)
@@ -616,20 +654,7 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 		return;
 	}
 
-	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
-	{
-		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
-	}
-
-	if (WardrobeUiController)
-	{
-		WardrobeUiController->OpenWardrobe();
-	}
-
-	if (UApartmentLifeActivityComponent* Activity = GirlCharacter->GetActivityComponent())
-	{
-		Activity->StartActivity(FName(TEXT("activity.dress.wardrobe")));
-	}
+	OpenWardrobeSession();
 }
 
 void AApartmentLifeSingleCharacterPlayerController::OnOpenWorkMenu()

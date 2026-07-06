@@ -71,6 +71,8 @@ protected:
 	void OnToggleBuildMode();
 	void OnBuildTopDown();
 	void OnOpenWardrobe();
+	void OpenWardrobeSession();
+	bool IsWardrobeActivityId(FName ActivityId) const;
 	void OnOpenWorkMenu();
 	void OnToggleBudget();
 	void OnOpenApartmentShop();

@@ -1733,8 +1733,15 @@ void UApartmentLifeUiBridgeComponent::HandleMainMenuContinue(int32 SlotIndex)
 	UApartmentLifeSaveSubsystem* SaveSubsystem = GI->GetSubsystem<UApartmentLifeSaveSubsystem>();
 	if (SaveSubsystem && SaveSubsystem->DoesSaveExist(SlotIndex))
 	{
-		SaveSubsystem->LoadFromSlot(SlotIndex);
-		OnPostLoadRequested.Broadcast();
+		const bool bLoaded = SaveSubsystem->LoadFromSlot(SlotIndex);
+		if (bLoaded)
+		{
+			OnPostLoadRequested.Broadcast();
+		}
+		else if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())
+		{
+			Ui->ShowToast(FText::FromString(TEXT("Load failed")), 2.f);
+		}
 	}
 
 	if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())

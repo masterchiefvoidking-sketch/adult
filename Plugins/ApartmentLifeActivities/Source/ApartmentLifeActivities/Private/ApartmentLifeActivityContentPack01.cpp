@@ -28,6 +28,10 @@ namespace
 		Def.StatEffects = S;
 		Def.RequiredOutfitContext = Outfit;
 		Def.bRequiresOutfitMatch = Outfit == EApartmentLifeOutfitContext::Athletic || Outfit == EApartmentLifeOutfitContext::Sleep;
+		if (Id.ToString().Contains(TEXT("work.")))
+		{
+			Def.bUsesIncomeFormula = true;
+		}
 		if (Id.ToString().Contains(TEXT("dress")) || Id.ToString().Contains(TEXT("wardrobe")))
 		{
 			Def.CameraMode = EApartmentLifePrimaryCameraMode::Wardrobe;

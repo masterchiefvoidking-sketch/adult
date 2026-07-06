@@ -3,6 +3,7 @@
 #include "ApartmentLifeRoutineChainComponent.h"
 #include "ApartmentLifeActivityCatalogLibrary.h"
 #include "ApartmentLifeActivityComponent.h"
+#include "ApartmentLifeActivityLibrary.h"
 
 bool UApartmentLifeRoutineChainComponent::StartRoutineChain(FName ChainId)
 {
@@ -68,6 +69,12 @@ void UApartmentLifeRoutineChainComponent::ResumeAfterLoad()
 	{
 		Activity->OnActivityCompleted.RemoveDynamic(this, &UApartmentLifeRoutineChainComponent::HandleActivityCompleted);
 		Activity->OnActivityCompleted.AddDynamic(this, &UApartmentLifeRoutineChainComponent::HandleActivityCompleted);
+
+		const FName ExpectedActivityId = GetCurrentStepActivityId();
+		if (Activity->IsActivityActive() && Activity->GetCurrentActivityId() == ExpectedActivityId)
+		{
+			return;
+		}
 	}
 
 	StartCurrentStep();
@@ -85,9 +92,15 @@ void UApartmentLifeRoutineChainComponent::StartCurrentStep()
 		return;
 	}
 
+	const FName StepActivityId = ActiveChain.ActivityIds[CurrentStepIndex];
 	if (UApartmentLifeActivityComponent* Activity = GetActivityComponent())
 	{
-		Activity->StartActivity(ActiveChain.ActivityIds[CurrentStepIndex]);
+		const EApartmentLifeRoomType PreferredRoom = UApartmentLifeActivityLibrary::GetPreferredRoomForActivity(StepActivityId);
+		if (!Activity->StartActivity(StepActivityId, PreferredRoom))
+		{
+			CancelRoutineChain();
+			return;
+		}
 	}
 
 	OnRoutineChainStepChanged.Broadcast(CurrentStepIndex);

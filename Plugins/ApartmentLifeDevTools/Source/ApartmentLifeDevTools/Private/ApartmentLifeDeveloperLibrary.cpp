@@ -687,9 +687,7 @@ bool UApartmentLifeDeveloperLibrary::ExecuteQuickAction(
 		{
 			if (UApartmentLifeGameTimeSubsystem* Time = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
 			{
-				FApartmentLifeGameTime Current = Time->GetCurrentTime();
-				Current.Hour = (Current.Hour + 1) % 24;
-				Time->SetCurrentTime(Current);
+				Time->AdvanceMinutes(60);
 				return true;
 			}
 		}

@@ -11,6 +11,8 @@
 #include "ApartmentLifeActivityComponent.h"
 #include "ApartmentLifeWardrobeComponent.h"
 #include "ApartmentLifeWardrobeTypes.h"
+#include "ApartmentLifeWardrobeUiController.h"
+#include "ApartmentLifeWardrobeShoppingComponent.h"
 #include "ApartmentLifeCameraPawn.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
@@ -23,6 +25,8 @@ AApartmentLifeSingleCharacterPlayerController::AApartmentLifeSingleCharacterPlay
 {
 	DebugMenuComponent = CreateDefaultSubobject<UApartmentLifeDebugMenuComponent>(TEXT("DebugMenu"));
 	InteractionHudComponent = CreateDefaultSubobject<UApartmentLifeInteractionHudComponent>(TEXT("InteractionHud"));
+	WardrobeUiController = CreateDefaultSubobject<UApartmentLifeWardrobeUiController>(TEXT("WardrobeUi"));
+	WardrobeShoppingComponent = CreateDefaultSubobject<UApartmentLifeWardrobeShoppingComponent>(TEXT("WardrobeShopping"));
 }
 
 void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
@@ -63,6 +67,20 @@ void AApartmentLifeSingleCharacterPlayerController::SetSingleCharacterContext(
 	{
 		InGirlCharacter->GetActivityComponent()->OnActivityStarted.AddDynamic(this, &AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityStarted);
 		InGirlCharacter->GetActivityComponent()->OnActivityCompleted.AddDynamic(this, &AApartmentLifeSingleCharacterPlayerController::HandleGirlActivityCompleted);
+	}
+
+	if (WardrobeUiController && InGirlCharacter)
+	{
+		WardrobeUiController->InitializeContext(
+			InGirlCharacter->GetWardrobeComponent(),
+			InGirlCharacter->GetSimulationComponent());
+	}
+
+	if (WardrobeShoppingComponent && InGirlCharacter)
+	{
+		WardrobeShoppingComponent->InitializeContext(
+			InGirlCharacter->GetWardrobeComponent(),
+			InGirlCharacter->GetSimulationComponent());
 	}
 }
 
@@ -363,14 +381,14 @@ void AApartmentLifeSingleCharacterPlayerController::OnOpenWardrobe()
 		return;
 	}
 
-	if (UApartmentLifeWardrobeComponent* Wardrobe = GirlCharacter->GetWardrobeComponent())
-	{
-		Wardrobe->SelectOutfitForOutfitContext(EApartmentLifeOutfitContext::Everyday, FApartmentLifeWeatherState());
-	}
-
 	if (AApartmentLifeCameraPawn* CameraPawn = GetCameraPawn())
 	{
 		CameraPawn->EnterWardrobeCamera(GirlCharacter.Get());
+	}
+
+	if (WardrobeUiController)
+	{
+		WardrobeUiController->OpenWardrobe();
 	}
 
 	if (UApartmentLifeActivityComponent* Activity = GirlCharacter->GetActivityComponent())

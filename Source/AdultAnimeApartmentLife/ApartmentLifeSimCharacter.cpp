@@ -15,6 +15,8 @@
 #include "ApartmentLifeInteractionSelectionComponent.h"
 #include "ApartmentLifeBedroomRoutineComponent.h"
 #include "ApartmentLifeGirlLifeLibrary.h"
+#include "ApartmentLifeWardrobeLibrary.h"
+#include "ApartmentLifeWardrobeCatalogLibrary.h"
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
@@ -42,6 +44,12 @@ void AApartmentLifeSimCharacter::BeginPlay()
 	if (SimulationComponent)
 	{
 		SimulationComponent->OnActivityChanged.AddDynamic(this, &AApartmentLifeSimCharacter::HandleActivityChanged);
+		SimulationComponent->OnPurchasedItem.AddDynamic(this, &AApartmentLifeSimCharacter::HandlePurchasedItem);
+	}
+
+	if (WardrobeComponent)
+	{
+		WardrobeComponent->OnWardrobeUpdated.AddDynamic(this, &AApartmentLifeSimCharacter::HandleWardrobeUpdated);
 	}
 
 	if (ActivityComponent)
@@ -110,7 +118,25 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 {
 	const FString Id = ActivityId.ToString().ToLower();
 
-	if (Id.Contains(TEXT("yoga")) || Id.Contains(TEXT("stretch")))
+	if (WardrobeComponent)
+	{
+		UApartmentLifeWardrobeLibrary::RecommendOutfitForActivity(WardrobeComponent, ActivityId);
+
+		if (SimulationComponent)
+		{
+			const FApartmentLifeOutfitMoodEffect Effect = UApartmentLifeWardrobeLibrary::ComputeOutfitMoodEffect(WardrobeComponent, ActivityId);
+			UApartmentLifeWardrobeLibrary::ApplyOutfitMoodEffect(SimulationComponent, Effect);
+		}
+	}
+
+	if (Id.Contains(TEXT("laundry")))
+	{
+		if (WardrobeComponent)
+		{
+			WardrobeComponent->StartLaundryCycle();
+		}
+	}
+	else if (Id.Contains(TEXT("yoga")) || Id.Contains(TEXT("stretch")))
 	{
 		if (YogaComponent)
 		{
@@ -166,6 +192,17 @@ void AApartmentLifeSimCharacter::HandleActivityCompleted(FName ActivityId)
 	if (SimulationComponent)
 	{
 		UApartmentLifeGirlLifeLibrary::ApplyActivityCompletion(SimulationComponent, ActivityId);
+	}
+
+	if (WardrobeComponent)
+	{
+		WardrobeComponent->MarkEquippedWorn();
+
+		const FString Id = ActivityId.ToString().ToLower();
+		if (Id.Contains(TEXT("laundry")))
+		{
+			WardrobeComponent->AdvanceLaundryCycle();
+		}
 	}
 
 	if (YogaComponent && ActivityId.ToString().Contains(TEXT("yoga")))
@@ -230,8 +267,32 @@ void AApartmentLifeSimCharacter::RefreshClothingFitFromBody()
 {
 	if (BodyCustomizationComponent && ClothingFitComponent)
 	{
-		ClothingFitComponent->RefreshClothingFit(BodyCustomizationComponent->GetFitProfile());
+		const FApartmentLifeBodyFitProfile& FitProfile = BodyCustomizationComponent->GetFitProfile();
+		ClothingFitComponent->RefreshClothingFit(FitProfile);
+		if (WardrobeComponent)
+		{
+			ClothingFitComponent->ValidateEquippedFit(WardrobeComponent, FitProfile);
+		}
 	}
+}
+
+void AApartmentLifeSimCharacter::HandlePurchasedItem(FName ItemId)
+{
+	if (!WardrobeComponent)
+	{
+		return;
+	}
+
+	FApartmentLifeBuiltinClothingItem Item;
+	if (UApartmentLifeWardrobeCatalogLibrary::TryGetBuiltinItem(ItemId, Item))
+	{
+		WardrobeComponent->AddOwnedClothing(ItemId);
+	}
+}
+
+void AApartmentLifeSimCharacter::HandleWardrobeUpdated()
+{
+	RefreshClothingFitFromBody();
 }
 
 void AApartmentLifeSimCharacter::RefreshNPCStyleFromSimulation()

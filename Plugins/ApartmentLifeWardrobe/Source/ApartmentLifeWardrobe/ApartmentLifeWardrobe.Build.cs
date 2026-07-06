@@ -16,7 +16,8 @@ public class ApartmentLifeWardrobe : ModuleRules
 			"Json",
 			"JsonUtilities",
 			"ApartmentLifeCore",
-			"ApartmentLifeCharacter"
+			"ApartmentLifeCharacter",
+			"ApartmentLifeWorldSim"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

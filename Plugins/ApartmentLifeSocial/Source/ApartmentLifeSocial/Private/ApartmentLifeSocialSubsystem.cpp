@@ -10,14 +10,6 @@
 void UApartmentLifeSocialSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-
-	if (UWorld* World = GetWorld())
-	{
-		if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
-		{
-			TimeSubsystem->OnHourAdvanced.AddDynamic(this, &UApartmentLifeSocialSubsystem::HandleHourAdvanced);
-		}
-	}
 }
 
 void UApartmentLifeSocialSubsystem::HandleHourAdvanced(const FApartmentLifeGameTime& CurrentTime)
@@ -27,9 +19,23 @@ void UApartmentLifeSocialSubsystem::HandleHourAdvanced(const FApartmentLifeGameT
 
 void UApartmentLifeSocialSubsystem::RegisterSimCharacter(AActor* Character)
 {
-	if (Character)
+	if (!Character)
 	{
-		RegisteredCharacters.AddUnique(Character);
+		return;
+	}
+
+	RegisteredCharacters.AddUnique(Character);
+
+	if (!bTimeBound)
+	{
+		if (UWorld* World = Character->GetWorld())
+		{
+			if (UApartmentLifeGameTimeSubsystem* TimeSubsystem = World->GetSubsystem<UApartmentLifeGameTimeSubsystem>())
+			{
+				TimeSubsystem->OnHourAdvanced.AddDynamic(this, &UApartmentLifeSocialSubsystem::HandleHourAdvanced);
+				bTimeBound = true;
+			}
+		}
 	}
 }
 

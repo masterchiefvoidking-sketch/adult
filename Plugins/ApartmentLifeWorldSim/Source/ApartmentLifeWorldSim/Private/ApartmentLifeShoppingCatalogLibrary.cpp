@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeShoppingCatalogLibrary.h"
+#include "ApartmentLifeShoppingContentPack01.h"
 
 namespace
 {
@@ -35,7 +36,7 @@ namespace
 
 TArray<FApartmentLifeBuiltinShopItem> UApartmentLifeShoppingCatalogLibrary::GetBuiltinCatalog()
 {
-	return {
+	TArray<FApartmentLifeBuiltinShopItem> Catalog = {
 		MakeShop(TEXT("shop.furniture.chair.budget"), TEXT("Budget Office Chair"), EApartmentLifeShopCategory::Furniture, EApartmentLifeFurnitureTier::Budget, 120.f, EApartmentLifeUpgradeType::Chair, 2, 5.f, 2.f, 3.f),
 		MakeShop(TEXT("shop.furniture.desk.standard"), TEXT("Standard Desk"), EApartmentLifeShopCategory::Furniture, EApartmentLifeFurnitureTier::Standard, 280.f, EApartmentLifeUpgradeType::Desk, 2, 4.f, 3.f, 5.f, 500.f),
 		MakeShop(TEXT("shop.electronics.computer.budget"), TEXT("Budget Laptop"), EApartmentLifeShopCategory::Electronics, EApartmentLifeFurnitureTier::Budget, 450.f, EApartmentLifeUpgradeType::Computer, 2, 0.f, 2.f, 8.f),
@@ -53,6 +54,8 @@ TArray<FApartmentLifeBuiltinShopItem> UApartmentLifeShoppingCatalogLibrary::GetB
 		MakeShop(TEXT("shop.grocery.essentials"), TEXT("Grocery Essentials"), EApartmentLifeShopCategory::Groceries, EApartmentLifeFurnitureTier::Budget, 45.f, EApartmentLifeUpgradeType::Decor, 0, 0.f, 2.f),
 		MakeShop(TEXT("shop.furniture.chair.premium"), TEXT("Ergonomic Chair"), EApartmentLifeShopCategory::Furniture, EApartmentLifeFurnitureTier::Premium, 550.f, EApartmentLifeUpgradeType::Chair, 3, 10.f, 5.f, 8.f, 3000.f)
 	};
+	Catalog.Append(ApartmentLifeShoppingContentPack01::GetExpansionShopItems());
+	return Catalog;
 }
 
 bool UApartmentLifeShoppingCatalogLibrary::TryGetShopItem(FName ItemId, FApartmentLifeBuiltinShopItem& OutItem)

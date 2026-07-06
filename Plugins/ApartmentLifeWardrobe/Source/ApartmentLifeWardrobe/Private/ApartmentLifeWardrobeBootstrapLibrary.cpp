@@ -1,6 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeWardrobeBootstrapLibrary.h"
+#include "ApartmentLifeWardrobeContentPack01.h"
 #include "ApartmentLifeWardrobeComponent.h"
 #include "ApartmentLifeWardrobeTypes.h"
 
@@ -39,7 +40,7 @@ namespace
 
 TArray<FName> UApartmentLifeWardrobeBootstrapLibrary::GetVerticalSliceClothingIds()
 {
-	return {
+	TArray<FName> Ids = {
 		FName(TEXT("clothing.casual.tshirt.pink")),
 		FName(TEXT("clothing.casual.jeans.blue")),
 		FName(TEXT("clothing.casual.sneakers.white")),
@@ -68,6 +69,8 @@ TArray<FName> UApartmentLifeWardrobeBootstrapLibrary::GetVerticalSliceClothingId
 		FName(TEXT("clothing.formal.dress.evening")),
 		FName(TEXT("clothing.formal.heels.silver"))
 	};
+	Ids.Append(ApartmentLifeWardrobeContentPack01::GetExpansionClothingIds());
+	return Ids;
 }
 
 void UApartmentLifeWardrobeBootstrapLibrary::SeedVerticalSliceWardrobe(UApartmentLifeWardrobeComponent* Wardrobe)
@@ -136,6 +139,30 @@ void UApartmentLifeWardrobeBootstrapLibrary::SeedVerticalSliceWardrobe(UApartmen
 		{ T, FName(TEXT("clothing.athletic.sportsbra.black")) },
 		{ B, FName(TEXT("clothing.athletic.shorts.running")) },
 		{ S, FName(TEXT("clothing.casual.sneakers.white")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.casual.teal_day")), FText::FromString(TEXT("Teal Day Out")), EApartmentLifeOutfitContext::Everyday, EApartmentLifeOutfitPresetType::Custom, {
+		{ T, FName(TEXT("clothing.casual.hoodie.teal")) },
+		{ B, FName(TEXT("clothing.casual.joggers.gray")) },
+		{ S, FName(TEXT("clothing.casual.canvas.shoes")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.work.cozy")), FText::FromString(TEXT("Cozy Work Day")), EApartmentLifeOutfitContext::Work, EApartmentLifeOutfitPresetType::Custom, {
+		{ T, FName(TEXT("clothing.work.hoodie.zip")) },
+		{ B, FName(TEXT("clothing.work.joggers.black")) },
+		{ S, FName(TEXT("clothing.lounge.slippers.pink")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.lounge.evening")), FText::FromString(TEXT("Soft Evening")), EApartmentLifeOutfitContext::Lounge, EApartmentLifeOutfitPresetType::Custom, {
+		{ T, FName(TEXT("clothing.lounge.oversized.tee")) },
+		{ B, FName(TEXT("clothing.lounge.shorts.soft")) },
+		{ S, FName(TEXT("clothing.lounge.socks.fuzzy")) }
+	});
+
+	SavePreset(Wardrobe, FName(TEXT("outfit.sleep.silk")), FText::FromString(TEXT("Silk Sleep Set")), EApartmentLifeOutfitContext::Sleep, EApartmentLifeOutfitPresetType::Custom, {
+		{ T, FName(TEXT("clothing.sleep.camisole.silk")) },
+		{ B, FName(TEXT("clothing.sleep.shorts.silk")) },
+		{ S, FName(TEXT("clothing.sleep.sock.warm")) }
 	});
 
 	Wardrobe->ApplyOutfitPresetByType(EApartmentLifeOutfitPresetType::Morning);

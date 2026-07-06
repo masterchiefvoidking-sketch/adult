@@ -147,6 +147,12 @@ struct APARTMENTLIFESOCIAL_API FApartmentLifeDialogueContext
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue")
 	TArray<FName> RecentMemorySubjects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue")
+	float SavingsSnapshot = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dialogue")
+	float ApartmentComfortScore = 0.f;
 };
 
 USTRUCT(BlueprintType)

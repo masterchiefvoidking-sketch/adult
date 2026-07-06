@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life Core",
+	"Description": "Core framework: game time, save system, data registry, content settings, and shared interfaces.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

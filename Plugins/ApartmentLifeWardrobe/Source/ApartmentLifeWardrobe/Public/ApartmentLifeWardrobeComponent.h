@@ -32,6 +32,9 @@ public:
 	void ApplyOutfitPreset(UApartmentLifeOutfitPresetData* Preset);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
+	void ApplyFavoriteOutfit(FName OutfitNameId);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")
 	bool ApplyOutfitPresetByType(EApartmentLifeOutfitPresetType PresetType);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Wardrobe")

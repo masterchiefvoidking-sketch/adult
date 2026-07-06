@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life Activities",
+	"Description": "Data-driven daily activities and interactions: cooking, hygiene, leisure, work, and explicit adult activities.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeActivities",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		}
+	]
+}

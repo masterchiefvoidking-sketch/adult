@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "ApartmentLifeFurnitureData.h"
+#include "ApartmentLifeApartmentTypes.h"
 #include "ApartmentLifeFurniturePlacementComponent.generated.h"
 
+class AApartmentLifeFurnitureActor;
 class UApartmentLifeFurnitureItemData;
 class UApartmentLifeDataRegistrySubsystem;
 
@@ -17,14 +18,17 @@ class APARTMENTLIFEAPARTMENT_API UApartmentLifeFurniturePlacementComponent : pub
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Apartment")
-	AActor* SpawnFurnitureInstance(const FApartmentLifeFurniturePlacement& Placement);
+	AApartmentLifeFurnitureActor* SpawnFurnitureInstance(const FApartmentLifePlacedFurnitureInstance& Instance);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Apartment")
-	void DestroyFurnitureInstance(const FGuid& PlacementGuid);
+	void UpdateFurnitureInstance(const FApartmentLifePlacedFurnitureInstance& Instance);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Apartment")
+	void DestroyFurnitureInstance(const FGuid& InstanceId);
 
 protected:
 	UPROPERTY()
-	TMap<FGuid, TObjectPtr<AActor>> SpawnedFurniture;
+	TMap<FGuid, TObjectPtr<AApartmentLifeFurnitureActor>> SpawnedFurniture;
 
 	UApartmentLifeFurnitureItemData* ResolveFurnitureData(FName FurnitureItemId) const;
 };

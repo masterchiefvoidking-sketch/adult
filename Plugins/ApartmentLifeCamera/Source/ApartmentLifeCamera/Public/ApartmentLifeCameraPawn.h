@@ -15,7 +15,9 @@ enum class EApartmentLifeCameraMode : uint8
 {
 	Orbit		UMETA(DisplayName = "Orbit"),
 	Free		UMETA(DisplayName = "Free Camera"),
-	Photo		UMETA(DisplayName = "Photo Mode")
+	Photo		UMETA(DisplayName = "Photo Mode"),
+	TopDown		UMETA(DisplayName = "Top Down"),
+	RoomFocus	UMETA(DisplayName = "Room Focus")
 };
 
 /**
@@ -59,6 +61,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
 	void AddPanInputY(float PanDelta);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void SetBuildTopDownMode(bool bEnabled);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Camera")
+	void FocusRoom(const FBox& RoomBounds);
 
 protected:
 	virtual void BeginPlay() override;

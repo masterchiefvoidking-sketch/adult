@@ -35,13 +35,14 @@ Centered around realistic cohabitation, apartment customization, careers, relati
 | **ApartmentLifeCamera** | Orbit camera, zoom, collision, focus lock, free cam, photo mode, DoF |
 | **ApartmentLifeCharacter** | Modular appearance: face, body, hair, eyes, makeup, tattoos, voice |
 | **ApartmentLifeWardrobe** | Clothing layers, presets, laundry, seasonal/occasion outfit selection |
-| **ApartmentLifeApartment** | Room types, furniture placement, move/rotate/scale/recolor |
+| **ApartmentLifeApartment** | Apartment builder, furniture, inventory, decoration, room scoring |
 | **ApartmentLifeAI** | Schedules, economy, bills, relationships, memories, personalities |
 | **ApartmentLifeWorldSim** | Schedules, careers, finance, mood, memory, relationships, shopping, events, save |
 
 See [Docs/ARCHITECTURE.md](Docs/ARCHITECTURE.md) for system diagrams and extension points.
 
 See [Docs/WORLD_SIMULATION.md](Docs/WORLD_SIMULATION.md) for the simulation engine.
+See [Docs/APARTMENT_BUILDER.md](Docs/APARTMENT_BUILDER.md) for the apartment builder system.
 
 ## Key Classes
 

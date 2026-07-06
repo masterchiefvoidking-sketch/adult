@@ -1,38 +1,59 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeFurniturePlacementComponent.h"
+#include "ApartmentLifeFurnitureActor.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
 #include "Engine/World.h"
 
-AActor* UApartmentLifeFurniturePlacementComponent::SpawnFurnitureInstance(const FApartmentLifeFurniturePlacement& Placement)
+AApartmentLifeFurnitureActor* UApartmentLifeFurniturePlacementComponent::SpawnFurnitureInstance(const FApartmentLifePlacedFurnitureInstance& Instance)
 {
-	UApartmentLifeFurnitureItemData* Data = ResolveFurnitureData(Placement.FurnitureItemId);
-	if (!Data || !Data->Mesh || !GetWorld())
+	UApartmentLifeFurnitureItemData* Data = ResolveFurnitureData(Instance.FurnitureItemId);
+	if (!GetWorld())
 	{
 		return nullptr;
 	}
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	AActor* FurnitureActor = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), Placement.Transform, Params);
+	AApartmentLifeFurnitureActor* FurnitureActor = GetWorld()->SpawnActor<AApartmentLifeFurnitureActor>(
+		AApartmentLifeFurnitureActor::StaticClass(), Instance.Transform, Params);
+
 	if (!FurnitureActor)
 	{
 		return nullptr;
 	}
 
-	SpawnedFurniture.Add(Placement.PlacementGuid, FurnitureActor);
+	FurnitureActor->InitializeFromInstance(Instance, Data);
+	SpawnedFurniture.Add(Instance.InstanceId, FurnitureActor);
 	return FurnitureActor;
 }
 
-void UApartmentLifeFurniturePlacementComponent::DestroyFurnitureInstance(const FGuid& PlacementGuid)
+void UApartmentLifeFurniturePlacementComponent::UpdateFurnitureInstance(const FApartmentLifePlacedFurnitureInstance& Instance)
 {
-	if (TObjectPtr<AActor>* Found = SpawnedFurniture.Find(PlacementGuid))
+	if (TObjectPtr<AApartmentLifeFurnitureActor>* Found = SpawnedFurniture.Find(Instance.InstanceId))
 	{
-		if (AActor* Actor = Found->Get())
+		if (AApartmentLifeFurnitureActor* Actor = Found->Get())
+		{
+			Actor->SetActorTransform(Instance.Transform);
+			UApartmentLifeFurnitureItemData* Data = ResolveFurnitureData(Instance.FurnitureItemId);
+			Actor->InitializeFromInstance(Instance, Data);
+		}
+	}
+	else
+	{
+		SpawnFurnitureInstance(Instance);
+	}
+}
+
+void UApartmentLifeFurniturePlacementComponent::DestroyFurnitureInstance(const FGuid& InstanceId)
+{
+	if (TObjectPtr<AApartmentLifeFurnitureActor>* Found = SpawnedFurniture.Find(InstanceId))
+	{
+		if (AApartmentLifeFurnitureActor* Actor = Found->Get())
 		{
 			Actor->Destroy();
 		}
-		SpawnedFurniture.Remove(PlacementGuid);
+		SpawnedFurniture.Remove(InstanceId);
 	}
 }
 

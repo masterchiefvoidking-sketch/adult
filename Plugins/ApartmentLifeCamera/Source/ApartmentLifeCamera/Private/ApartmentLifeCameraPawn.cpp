@@ -37,11 +37,16 @@ void AApartmentLifeCameraPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (CameraMode == EApartmentLifeCameraMode::Orbit || CameraMode == EApartmentLifeCameraMode::Photo)
+	if (CameraMode == EApartmentLifeCameraMode::Orbit || CameraMode == EApartmentLifeCameraMode::Photo || CameraMode == EApartmentLifeCameraMode::RoomFocus)
 	{
 		UpdateOrbitPivot();
 		const FRotator OrbitRotation(CurrentPitch, CurrentYaw, 0.f);
 		SpringArm->SetWorldRotation(OrbitRotation);
+	}
+	else if (CameraMode == EApartmentLifeCameraMode::TopDown)
+	{
+		CurrentPitch = -89.f;
+		SpringArm->SetWorldRotation(FRotator(CurrentPitch, CurrentYaw, 0.f));
 	}
 	else if (CameraMode == EApartmentLifeCameraMode::Free)
 	{
@@ -217,6 +222,32 @@ void AApartmentLifeCameraPawn::ApplyFreeCameraMovement(float DeltaSeconds)
 	{
 		AddMovementInput(MoveInput.GetSafeNormal(), FreeMoveSpeed * DeltaSeconds);
 	}
+}
+
+void AApartmentLifeCameraPawn::SetBuildTopDownMode(bool bEnabled)
+{
+	if (bEnabled)
+	{
+		CameraMode = EApartmentLifeCameraMode::TopDown;
+		CurrentPitch = -89.f;
+		CurrentArmLength = FMath::Clamp(CurrentArmLength, 400.f, MaxArmLength);
+		SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+	}
+	else
+	{
+		CameraMode = EApartmentLifeCameraMode::Orbit;
+		CurrentPitch = -25.f;
+	}
+}
+
+void AApartmentLifeCameraPawn::FocusRoom(const FBox& RoomBounds)
+{
+	CameraMode = EApartmentLifeCameraMode::RoomFocus;
+	const FVector Center = RoomBounds.GetCenter();
+	PivotComponent->SetWorldLocation(Center);
+	CurrentArmLength = RoomBounds.GetExtent().GetMax() * 2.5f;
+	SpringArm->SetTargetArmLengthSmooth(CurrentArmLength);
+	bFocusLockEnabled = false;
 }
 
 void AApartmentLifeCameraPawn::OnOrbitPressed()

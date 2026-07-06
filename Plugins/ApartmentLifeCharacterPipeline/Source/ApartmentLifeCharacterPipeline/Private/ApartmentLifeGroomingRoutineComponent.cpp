@@ -46,8 +46,36 @@ void UApartmentLifeGroomingRoutineComponent::StartBuiltinMirrorRoutine()
 
 void UApartmentLifeGroomingRoutineComponent::AdvanceStep()
 {
-	if (!ActiveRoutine) return;
-	RoutineState = UApartmentLifeCharacterPipelineLibrary::AdvanceGroomingStep(RoutineState, ActiveRoutine);
+	if (RoutineState.PreferredStepOrder.Num() == 0)
+	{
+		return;
+	}
+
+	if (ActiveRoutine)
+	{
+		RoutineState = UApartmentLifeCharacterPipelineLibrary::AdvanceGroomingStep(RoutineState, ActiveRoutine);
+		OnGroomingStepChanged.Broadcast(RoutineState.CurrentStep);
+		return;
+	}
+
+	int32 Index = RoutineState.PreferredStepOrder.Find(RoutineState.CurrentStep);
+	if (Index == INDEX_NONE)
+	{
+		Index = 0;
+	}
+	else if (Index + 1 >= RoutineState.PreferredStepOrder.Num())
+	{
+		OnGroomingStepChanged.Broadcast(RoutineState.CurrentStep);
+		return;
+	}
+	else
+	{
+		Index++;
+	}
+
+	RoutineState.CurrentStep = RoutineState.PreferredStepOrder[Index];
+	RoutineState.Hygiene = FMath::Min(RoutineState.Hygiene + 5.f, 100.f);
+	RoutineState.Confidence = FMath::Min(RoutineState.Confidence + 2.f, 100.f);
 	OnGroomingStepChanged.Broadcast(RoutineState.CurrentStep);
 }
 

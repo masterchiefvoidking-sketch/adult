@@ -14,7 +14,7 @@ FApartmentLifeActivityCameraFrame UApartmentLifeActivityCameraLibrary::GetFrameF
 		Frame.FocusOffset = FVector(0.f, 0.f, 20.f);
 		Frame.bAllowManualOrbit = true;
 	}
-	else if (Id.Contains(TEXT("work.computer")) || Id.Contains(TEXT("study")))
+	else if (Id.Contains(TEXT("work.computer")) || Id.Contains(TEXT("study")) || Id.Contains(TEXT("freelance")) || Id.Contains(TEXT("programming")))
 	{
 		Frame.ArmLength = 340.f;
 		Frame.Pitch = -12.f;
@@ -50,6 +50,13 @@ FApartmentLifeActivityCameraFrame UApartmentLifeActivityCameraLibrary::GetFrameF
 		Frame.ArmLength = 320.f;
 		Frame.Pitch = -15.f;
 		Frame.FocusOffset = FVector(0.f, 20.f, 40.f);
+	}
+	else if (Id.Contains(TEXT("breathe")))
+	{
+		Frame.ArmLength = 400.f;
+		Frame.Pitch = -16.f;
+		Frame.FocusOffset = FVector(0.f, 0.f, 15.f);
+		Frame.bAllowManualOrbit = true;
 	}
 
 	return Frame;

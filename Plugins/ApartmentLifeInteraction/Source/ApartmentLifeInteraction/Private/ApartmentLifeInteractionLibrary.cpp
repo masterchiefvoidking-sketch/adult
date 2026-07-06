@@ -1,7 +1,7 @@
 // Copyright Adult Anime Apartment Life. All Rights Reserved.
 
 #include "ApartmentLifeInteractionLibrary.h"
-#include "ApartmentLifeActivityFallbackLibrary.h"
+#include "ApartmentLifeActivityLibrary.h"
 
 FName UApartmentLifeInteractionLibrary::GetDefaultActivityForInteraction(EApartmentLifeFurnitureInteraction Interaction)
 {
@@ -32,6 +32,16 @@ FName UApartmentLifeInteractionLibrary::GetDefaultActivityForInteraction(EApartm
 	case EApartmentLifeFurnitureInteraction::Stretch: return FName(TEXT("activity.fitness.stretch"));
 	case EApartmentLifeFurnitureInteraction::Exercise: return FName(TEXT("activity.fitness.exercise"));
 	case EApartmentLifeFurnitureInteraction::DoLaundry: return FName(TEXT("activity.chores.laundry"));
+	case EApartmentLifeFurnitureInteraction::PlayGame: return FName(TEXT("activity.entertainment.game"));
+	case EApartmentLifeFurnitureInteraction::ListenMusic: return FName(TEXT("activity.entertainment.music"));
+	case EApartmentLifeFurnitureInteraction::MakeSnack: return FName(TEXT("activity.cook.snack"));
+	case EApartmentLifeFurnitureInteraction::PhoneBrowse: return FName(TEXT("activity.phone.browse"));
+	case EApartmentLifeFurnitureInteraction::Freelance: return FName(TEXT("activity.work.freelance"));
+	case EApartmentLifeFurnitureInteraction::BudgetReview: return FName(TEXT("activity.finance.budget"));
+	case EApartmentLifeFurnitureInteraction::OrganizeCloset: return FName(TEXT("activity.dress.organize"));
+	case EApartmentLifeFurnitureInteraction::Decorate: return FName(TEXT("activity.decorate.room"));
+	case EApartmentLifeFurnitureInteraction::Breathe: return FName(TEXT("activity.fitness.breathe"));
+	case EApartmentLifeFurnitureInteraction::GroceryCheck: return FName(TEXT("activity.grocery.check"));
 	default: return FName(TEXT("activity.idle"));
 	}
 }
@@ -48,7 +58,7 @@ FText UApartmentLifeInteractionLibrary::GetDisplayNameForInteraction(EApartmentL
 
 int32 UApartmentLifeInteractionLibrary::GetDurationMinutesForActivity(FName ActivityId)
 {
-	return UApartmentLifeActivityFallbackLibrary::GetBuiltinDurationMinutes(ActivityId);
+	return UApartmentLifeActivityLibrary::GetDurationMinutes(ActivityId);
 }
 
 FApartmentLifeInteractionDescriptor UApartmentLifeInteractionLibrary::BuildDescriptor(EApartmentLifeFurnitureInteraction Interaction)
@@ -87,6 +97,18 @@ FApartmentLifeInteractionDescriptor UApartmentLifeInteractionLibrary::BuildDescr
 	case EApartmentLifeFurnitureInteraction::ManageWardrobe:
 		Desc.DisplayName = FText::FromString(TEXT("Open Wardrobe"));
 		Desc.StatEffectSummary = FText::FromString(TEXT("Confidence +4"));
+		break;
+	case EApartmentLifeFurnitureInteraction::PlayGame:
+		Desc.DisplayName = FText::FromString(TEXT("Play Game"));
+		Desc.StatEffectSummary = FText::FromString(TEXT("Mood +6, Fun"));
+		break;
+	case EApartmentLifeFurnitureInteraction::Freelance:
+		Desc.DisplayName = FText::FromString(TEXT("Freelance Task"));
+		Desc.StatEffectSummary = FText::FromString(TEXT("Income +variable"));
+		break;
+	case EApartmentLifeFurnitureInteraction::Breathe:
+		Desc.DisplayName = FText::FromString(TEXT("Breathing Exercise"));
+		Desc.StatEffectSummary = FText::FromString(TEXT("Stress -10, Mood +4"));
 		break;
 	default:
 		Desc.DisplayName = FText::FromString(UEnum::GetDisplayValueAsText(Interaction).ToString());

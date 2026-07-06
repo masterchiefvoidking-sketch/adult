@@ -29,7 +29,7 @@ class APARTMENTLIFECORE_API UApartmentLifeSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-	static constexpr int32 CurrentSaveVersion = 1;
+	static constexpr int32 CurrentSaveVersion = 2;
 
 	UPROPERTY()
 	int32 SaveVersion = CurrentSaveVersion;

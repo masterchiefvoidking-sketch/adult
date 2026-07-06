@@ -12,6 +12,8 @@
 #include "ApartmentLifeClothingFitComponent.h"
 #include "ApartmentLifeConversationComponent.h"
 #include "ApartmentLifeSocialSubsystem.h"
+#include "ApartmentLifeCitySubsystem.h"
+#include "ApartmentLifeWorldSimCityBridge.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 
@@ -65,6 +67,21 @@ void AApartmentLifeSimCharacter::BeginPlay()
 			SocialSubsystem->RegisterSimCharacter(this);
 		}
 	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UApartmentLifeCitySubsystem* CitySubsystem = World->GetSubsystem<UApartmentLifeCitySubsystem>())
+		{
+			if (SimulationComponent)
+			{
+				CitySubsystem->UpdateNPCLocation(
+					SimulationComponent->GetCharacterId(),
+					SimulationComponent->GetHomeDistrictId(),
+					NAME_None,
+					0.f);
+			}
+		}
+	}
 }
 
 void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
@@ -77,6 +94,11 @@ void AApartmentLifeSimCharacter::HandleActivityChanged(FName ActivityId)
 	if (AnimationComponent)
 	{
 		AnimationComponent->SetAnimationGroup(UApartmentLifeCharacterPipelineLibrary::GetAnimationGroupForActivity(ActivityId));
+	}
+
+	if (SimulationComponent)
+	{
+		UApartmentLifeWorldSimCityBridge::ApplyActivitySkillGain(SimulationComponent->Skills, ActivityId);
 	}
 
 	if (ActivityId.ToString().Contains(TEXT("social")) || ActivityId.ToString().Contains(TEXT("talk")))

@@ -82,3 +82,15 @@ float UApartmentLifeWorldEventSubsystem::ComputeEventProbability(const UApartmen
 {
 	return EventData ? FMath::Clamp(EventData->BaseProbability, 0.f, 1.f) : 0.f;
 }
+
+const UApartmentLifeRandomEventData* UApartmentLifeWorldEventSubsystem::FindEventData(FName EventId) const
+{
+	for (const TObjectPtr<UApartmentLifeRandomEventData>& Event : RegisteredEvents)
+	{
+		if (Event && Event->AssetId == EventId)
+		{
+			return Event;
+		}
+	}
+	return nullptr;
+}

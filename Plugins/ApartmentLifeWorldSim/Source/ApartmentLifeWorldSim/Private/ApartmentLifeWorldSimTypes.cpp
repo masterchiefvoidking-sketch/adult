@@ -30,6 +30,42 @@ float FApartmentLifeCareerState::ComputeMonthlyIncome() const
 	return HourlyWage * 8.f * 22.f;
 }
 
+void FApartmentLifeSkillSet::GainSkill(EApartmentLifeSkill Skill, float Amount)
+{
+	auto Apply = [Amount](float& Level) { Level = FMath::Clamp(Level + Amount, 1.f, 100.f); };
+	switch (Skill)
+	{
+	case EApartmentLifeSkill::Cooking: Apply(Cooking); break;
+	case EApartmentLifeSkill::Fitness: Apply(Fitness); break;
+	case EApartmentLifeSkill::Creativity: Apply(Creativity); break;
+	case EApartmentLifeSkill::Programming: Apply(Programming); break;
+	case EApartmentLifeSkill::Art: Apply(Art); break;
+	case EApartmentLifeSkill::Music: Apply(Music); break;
+	case EApartmentLifeSkill::Organization: Apply(Organization); break;
+	case EApartmentLifeSkill::Communication: Apply(Communication); break;
+	case EApartmentLifeSkill::Leadership: Apply(Leadership); break;
+	case EApartmentLifeSkill::HomeMaintenance: Apply(HomeMaintenance); break;
+	}
+}
+
+float FApartmentLifeSkillSet::GetSkill(EApartmentLifeSkill Skill) const
+{
+	switch (Skill)
+	{
+	case EApartmentLifeSkill::Cooking: return Cooking;
+	case EApartmentLifeSkill::Fitness: return Fitness;
+	case EApartmentLifeSkill::Creativity: return Creativity;
+	case EApartmentLifeSkill::Programming: return Programming;
+	case EApartmentLifeSkill::Art: return Art;
+	case EApartmentLifeSkill::Music: return Music;
+	case EApartmentLifeSkill::Organization: return Organization;
+	case EApartmentLifeSkill::Communication: return Communication;
+	case EApartmentLifeSkill::Leadership: return Leadership;
+	case EApartmentLifeSkill::HomeMaintenance: return HomeMaintenance;
+	default: return 1.f;
+	}
+}
+
 float FApartmentLifeFinancialLedger::GetMonthlyFixedExpenses() const
 {
 	return MonthlyRent + MonthlyUtilities + MonthlyFood + MonthlyInternet + MonthlyTransportation;

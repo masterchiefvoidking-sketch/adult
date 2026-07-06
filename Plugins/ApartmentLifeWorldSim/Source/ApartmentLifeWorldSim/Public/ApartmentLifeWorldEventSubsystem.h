@@ -28,6 +28,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Events")
 	void EvaluateDailyEvents();
 
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Events")
+	const UApartmentLifeRandomEventData* FindEventData(FName EventId) const;
+
 	UPROPERTY(BlueprintAssignable, Category = "Apartment Life|Events")
 	FOnWorldEventTriggered OnWorldEventTriggered;
 

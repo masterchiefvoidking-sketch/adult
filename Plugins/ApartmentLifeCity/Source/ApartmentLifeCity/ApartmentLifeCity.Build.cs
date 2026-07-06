@@ -2,24 +2,16 @@
 
 using UnrealBuildTool;
 
-public class ApartmentLifeWorldSim : ModuleRules
+public class ApartmentLifeCity : ModuleRules
 {
-	public ApartmentLifeWorldSim(ReadOnlyTargetRules Target) : base(Target)
+	public ApartmentLifeCity(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core",
-			"CoreUObject",
-			"Engine",
-			"Json",
-			"JsonUtilities",
-			"ApartmentLifeCore",
-			"ApartmentLifeAI",
-			"ApartmentLifeActivities",
-			"ApartmentLifeApartment",
-			"ApartmentLifeCity"
+			"Core", "CoreUObject", "Engine", "Json", "JsonUtilities",
+			"ApartmentLifeCore", "ApartmentLifeApartment"
 		});
 
 		if (Target.bBuildDeveloperTools || Target.Configuration != UnrealTargetConfiguration.Shipping)

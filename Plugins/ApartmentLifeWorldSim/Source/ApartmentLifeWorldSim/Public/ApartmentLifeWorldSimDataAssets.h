@@ -43,6 +43,24 @@ public:
 	int32 WorkEndHour = 17;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	float StressPerWorkDay = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	int32 VacationDaysPerYear = 15;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	FName DressCodeOutfitContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	FName WorkplacePOIId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	FName WorkDistrictId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
+	TMap<EApartmentLifeSkill, float> RequiredSkillLevels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Career")
 	FName WorkActivityId = FName(TEXT("activity.work.office"));
 };
 
@@ -155,4 +173,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Event")
 	FName TriggeredActivityId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Event")
+	FName DistrictId;
 };

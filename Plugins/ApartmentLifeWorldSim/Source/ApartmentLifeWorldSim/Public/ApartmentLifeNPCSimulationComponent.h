@@ -74,6 +74,18 @@ public:
 	void RecordSharedActivityWith(FName OtherCharacterId, float Quality);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void GainSkill(EApartmentLifeSkill Skill, float Amount);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	const FApartmentLifeSkillSet& GetSkills() const { return Skills; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
+	void SetHomeDistrict(FName DistrictId);
+
+	UFUNCTION(BlueprintPure, Category = "Apartment Life|Simulation")
+	FName GetHomeDistrictId() const { return Career.HomeDistrictId; }
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
 	void SetCareerData(UApartmentLifeCareerData* InCareerData);
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Simulation")
@@ -114,6 +126,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation")
 	FApartmentLifeNPCNeeds Needs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation")
+	FApartmentLifeSkillSet Skills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Simulation")
 	FApartmentLifeApartmentProgressState Apartment;

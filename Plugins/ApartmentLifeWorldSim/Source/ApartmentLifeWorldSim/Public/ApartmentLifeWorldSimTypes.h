@@ -71,6 +71,60 @@ enum class EApartmentLifeScheduleBlock : uint8
 	Social		UMETA(DisplayName = "Social")
 };
 
+UENUM(BlueprintType)
+enum class EApartmentLifeSkill : uint8
+{
+	Cooking			UMETA(DisplayName = "Cooking"),
+	Fitness			UMETA(DisplayName = "Fitness"),
+	Creativity		UMETA(DisplayName = "Creativity"),
+	Programming		UMETA(DisplayName = "Programming"),
+	Art				UMETA(DisplayName = "Art"),
+	Music			UMETA(DisplayName = "Music"),
+	Organization	UMETA(DisplayName = "Organization"),
+	Communication	UMETA(DisplayName = "Communication"),
+	Leadership		UMETA(DisplayName = "Leadership"),
+	HomeMaintenance	UMETA(DisplayName = "Home Maintenance")
+};
+
+USTRUCT(BlueprintType)
+struct APARTMENTLIFEWORLDSIM_API FApartmentLifeSkillSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Cooking = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Fitness = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Creativity = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Programming = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Art = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Music = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Organization = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Communication = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float Leadership = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skills", meta = (ClampMin = "1", ClampMax = "100"))
+	float HomeMaintenance = 1.f;
+
+	APARTMENTLIFEWORLDSIM_API void GainSkill(EApartmentLifeSkill Skill, float Amount);
+	APARTMENTLIFEWORLDSIM_API float GetSkill(EApartmentLifeSkill Skill) const;
+};
+
 USTRUCT(BlueprintType)
 struct APARTMENTLIFEWORLDSIM_API FApartmentLifePersonalityTraits
 {
@@ -247,6 +301,15 @@ struct APARTMENTLIFEWORLDSIM_API FApartmentLifeCareerState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Career", meta = (ClampMin = "0", ClampMax = "100"))
 	float WorkSatisfaction = 60.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Career")
+	FName WorkplacePOIId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Career")
+	FName HomeDistrictId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Career")
+	FName WorkDistrictId;
 
 	APARTMENTLIFEWORLDSIM_API float ComputeMonthlyIncome() const;
 };

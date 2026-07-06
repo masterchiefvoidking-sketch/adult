@@ -2,6 +2,7 @@
 
 #include "ApartmentLifeNPCSimulationComponent.h"
 #include "ApartmentLifeWorldSimLibrary.h"
+#include "ApartmentLifeWorldEventSubsystem.h"
 #include "ApartmentLifeActivityComponent.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 #include "ApartmentLifeDataRegistrySubsystem.h"
@@ -132,7 +133,20 @@ void UApartmentLifeNPCSimulationComponent::SetCareerData(UApartmentLifeCareerDat
 		Career.bIsSalaried = CareerData->bIsSalaried;
 		Career.HourlyWage = CareerData->BaseHourlyWage;
 		Career.MonthlySalary = CareerData->BaseMonthlySalary;
+		Career.WorkplacePOIId = CareerData->WorkplacePOIId;
+		Career.WorkDistrictId = CareerData->WorkDistrictId;
+		Career.VacationDaysRemaining = CareerData->VacationDaysPerYear;
 	}
+}
+
+void UApartmentLifeNPCSimulationComponent::GainSkill(EApartmentLifeSkill Skill, float Amount)
+{
+	Skills.GainSkill(Skill, Amount);
+}
+
+void UApartmentLifeNPCSimulationComponent::SetHomeDistrict(FName DistrictId)
+{
+	Career.HomeDistrictId = DistrictId;
 }
 
 void UApartmentLifeNPCSimulationComponent::SetScheduleTemplate(UApartmentLifeScheduleTemplateData* InTemplate)
@@ -167,6 +181,27 @@ void UApartmentLifeNPCSimulationComponent::HandleDayAdvanced(const FApartmentLif
 void UApartmentLifeNPCSimulationComponent::HandleRandomEvent(FName EventId)
 {
 	RecordMemory(EApartmentLifeMemoryCategory::LifeEvent, EventId, 0.5f);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UApartmentLifeWorldEventSubsystem* EventSubsystem = World->GetSubsystem<UApartmentLifeWorldEventSubsystem>())
+		{
+			if (const UApartmentLifeRandomEventData* EventData = EventSubsystem->FindEventData(EventId))
+			{
+				Mood.OverallMood = FMath::Clamp(Mood.OverallMood + EventData->MoodImpact, 0.f, 100.f);
+				Mood.Happiness = Mood.OverallMood;
+				Finance.Savings += EventData->FinancialImpact;
+
+				if (!EventData->TriggeredActivityId.IsNone())
+				{
+					CurrentActivityId = EventData->TriggeredActivityId;
+					StartActivityForCurrentSlot();
+				}
+				return;
+			}
+		}
+	}
+
 	Mood.OverallMood = FMath::Clamp(Mood.OverallMood - 5.f, 0.f, 100.f);
 }
 
@@ -551,6 +586,10 @@ void UApartmentLifeNPCSimulationComponent::CaptureSaveData_Implementation(TMap<F
 	FString MemoriesJson;
 	FJsonObjectConverter::UStructToJsonObjectString(Memories, MemoriesJson);
 	OutData.Add(TEXT("Memories"), MemoriesJson);
+
+	FString SkillsJson;
+	FJsonObjectConverter::UStructToJsonObjectString(Skills, SkillsJson);
+	OutData.Add(TEXT("Skills"), SkillsJson);
 }
 
 void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const TMap<FString, FString>& InData)
@@ -598,5 +637,9 @@ void UApartmentLifeNPCSimulationComponent::RestoreSaveData_Implementation(const 
 	if (const FString* MemoriesJson = InData.Find(TEXT("Memories")))
 	{
 		FJsonObjectConverter::JsonObjectStringToUStruct(*MemoriesJson, &Memories);
+	}
+	if (const FString* SkillsJson = InData.Find(TEXT("Skills")))
+	{
+		FJsonObjectConverter::JsonObjectStringToUStruct(*SkillsJson, &Skills);
 	}
 }

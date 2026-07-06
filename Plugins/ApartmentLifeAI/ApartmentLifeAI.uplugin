@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life AI",
+	"Description": "Independent NPC life simulation: schedules, economy, bills, relationships, hobbies, and memories.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeAI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		}
+	]
+}

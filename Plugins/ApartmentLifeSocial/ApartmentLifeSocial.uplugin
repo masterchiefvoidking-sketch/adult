@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life Social",
+	"Description": "Dialogue, relationships, memory, emotional AI, romance, reputation, and NPC social autonomy.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeSocial",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{ "Name": "ApartmentLifeCore", "Enabled": true },
+		{ "Name": "ApartmentLifeWorldSim", "Enabled": true },
+		{ "Name": "ApartmentLifeActivities", "Enabled": true },
+		{ "Name": "ApartmentLifeCharacterPipeline", "Enabled": true }
+	]
+}

@@ -73,6 +73,10 @@
 		{
 			"Name": "ApartmentLifeUI",
 			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeImmersion",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

@@ -612,6 +612,14 @@ void AApartmentLifeCameraPawn::AdjustPhotoAperture(float Delta)
 	CineCamera->SetDepthOfFieldSettings(ActiveSettings.PhotoSettings.FocusDistance, ActiveSettings.PhotoSettings.Aperture, ActiveSettings.PhotoSettings.BlurAmount);
 }
 
+void AApartmentLifeCameraPawn::TakeHighResScreenshot()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->ConsoleCommand(TEXT("HighResShot 1920x1080"));
+	}
+}
+
 void AApartmentLifeCameraPawn::ApplyCharacterFocusFraming(EApartmentLifeCharacterFocusMode FocusMode)
 {
 	if (!FocusTarget)

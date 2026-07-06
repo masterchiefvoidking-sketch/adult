@@ -98,8 +98,8 @@ void SApartmentLifeRootWidget::SetView(
 				[
 					SNew(STextBlock)
 					.Text(FText::FromString(FString::Printf(
-						TEXT("%s | $%.0f | Mood %.0f | Energy %.0f | Hygiene %.0f | Hunger %.0f"),
-						*Hud.TimeLabel, Hud.Savings, Hud.Mood, Hud.Energy, Hud.Hygiene, Hud.Hunger)))
+						TEXT("%s | %s | $%.0f | Mood %.0f | Energy %.0f | Hygiene %.0f | Hunger %.0f"),
+						*Hud.TimeLabel, *Hud.WeatherLabel, Hud.Savings, Hud.Mood, Hud.Energy, Hud.Hygiene, Hud.Hunger)))
 				]
 				+ SVerticalBox::Slot().AutoHeight().Padding(0.f, 4.f, 0.f, 0.f)
 				[

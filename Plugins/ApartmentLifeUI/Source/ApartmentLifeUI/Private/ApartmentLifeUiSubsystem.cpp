@@ -76,6 +76,12 @@ void UApartmentLifeUiSubsystem::ToggleHud()
 	RefreshView();
 }
 
+void UApartmentLifeUiSubsystem::SetHudSuppressed(bool bSuppressed)
+{
+	bHudSuppressed = bSuppressed;
+	RefreshView();
+}
+
 void UApartmentLifeUiSubsystem::SetHudState(const FApartmentLifeHudViewModel& State)
 {
 	HudState = State;
@@ -114,7 +120,7 @@ void UApartmentLifeUiSubsystem::RefreshView()
 		return;
 	}
 
-	RootWidget->SetView(ActiveScreen, Settings.bHudVisible, HudState, PanelState, MainMenuSlots, YogaState, ActiveToast);
+	RootWidget->SetView(ActiveScreen, Settings.bHudVisible && !bHudSuppressed, HudState, PanelState, MainMenuSlots, YogaState, ActiveToast);
 }
 
 void UApartmentLifeUiSubsystem::HandleListItemClicked(int32 Index)

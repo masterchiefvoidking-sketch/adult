@@ -24,6 +24,8 @@
 #include "ApartmentLifeSocialSubsystem.h"
 #include "ApartmentLifeCharacterPipelineLibrary.h"
 #include "ApartmentLifeAnimationLibrary.h"
+#include "ApartmentLifeImmersionSubsystem.h"
+#include "ApartmentLifeImmersionLibrary.h"
 #include "ApartmentLifeGameTimeSubsystem.h"
 
 AApartmentLifeSimCharacter::AApartmentLifeSimCharacter()
@@ -269,6 +271,16 @@ void AApartmentLifeSimCharacter::HandleActivityStarted(FName ActivityId)
 	}
 
 	ApplyActivityAnimationForId(ActivityId);
+
+	if (UGameInstance* GI = GetGameInstance())
+	{
+		if (UApartmentLifeImmersionSubsystem* Immersion = GI->GetSubsystem<UApartmentLifeImmersionSubsystem>())
+		{
+			Immersion->HandleActivityStarted(
+				ActivityId,
+				UApartmentLifeImmersionLibrary::GetRoomForActivity(ActivityId));
+		}
+	}
 }
 
 void AApartmentLifeSimCharacter::HandleGroomingStepChanged(EApartmentLifeGroomingStep Step)

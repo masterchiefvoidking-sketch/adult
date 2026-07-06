@@ -56,6 +56,9 @@ struct APARTMENTLIFEUI_API FApartmentLifeHudViewModel
 	FString TimeLabel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	FString WeatherLabel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
 	float Savings = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
@@ -129,6 +132,24 @@ struct APARTMENTLIFEUI_API FApartmentLifeUiSettingsState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	float UiVolume = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	float EffectsVolume = 0.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bSubtitlesEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	float SubtitleScale = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bReduceMotion = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	int32 GraphicsQuality = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bHighQualityEffects = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	bool bAutosaveEnabled = true;

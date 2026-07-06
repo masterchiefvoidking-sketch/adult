@@ -1,0 +1,30 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "Apartment Life Immersion",
+	"Description": "Audio ambience, adaptive music, lighting presets, visual polish, photo mode, and accessibility settings.",
+	"Category": "Apartment Life",
+	"CreatedBy": "Adult Anime Apartment Life",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "ApartmentLifeImmersion",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ApartmentLifeCore",
+			"Enabled": true
+		},
+		{
+			"Name": "ApartmentLifeCamera",
+			"Enabled": true
+		}
+	]
+}

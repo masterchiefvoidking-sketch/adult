@@ -211,3 +211,84 @@ struct APARTMENTLIFECHARACTER_API FApartmentLifeBodyFitProfile
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fit")
 	float CollisionRadius = 34.f;
 };
+
+UENUM(BlueprintType)
+enum class EApartmentLifeCreatorPresetType : uint8
+{
+	FullCharacter	UMETA(DisplayName = "Full Character"),
+	Face			UMETA(DisplayName = "Face"),
+	Body			UMETA(DisplayName = "Body"),
+	Hair			UMETA(DisplayName = "Hair"),
+	Makeup			UMETA(DisplayName = "Makeup"),
+	Outfit			UMETA(DisplayName = "Outfit")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeCreatorCategoryTab : uint8
+{
+	Face		UMETA(DisplayName = "Face"),
+	Body		UMETA(DisplayName = "Body"),
+	Hair		UMETA(DisplayName = "Hair"),
+	Colors		UMETA(DisplayName = "Colors"),
+	Makeup		UMETA(DisplayName = "Makeup"),
+	Accessories UMETA(DisplayName = "Accessories"),
+	Voice		UMETA(DisplayName = "Voice & Style"),
+	Presets		UMETA(DisplayName = "Presets"),
+	Preview		UMETA(DisplayName = "Preview")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeCreatorRandomizeScope : uint8
+{
+	FullCharacter	UMETA(DisplayName = "Full Character"),
+	FaceOnly		UMETA(DisplayName = "Face Only"),
+	BodyOnly		UMETA(DisplayName = "Body Only"),
+	HairOnly		UMETA(DisplayName = "Hair Only"),
+	ColorsOnly		UMETA(DisplayName = "Colors Only")
+};
+
+UENUM(BlueprintType)
+enum class EApartmentLifeCreatorLightingMode : uint8
+{
+	ApartmentNatural	UMETA(DisplayName = "Apartment Natural"),
+	BathroomMirror		UMETA(DisplayName = "Bathroom Mirror"),
+	BedroomSoft			UMETA(DisplayName = "Bedroom Soft"),
+	WardrobeStudio		UMETA(DisplayName = "Wardrobe Studio"),
+	EveningWarm			UMETA(DisplayName = "Evening Warm")
+};
+
+USTRUCT(BlueprintType)
+struct APARTMENTLIFECHARACTER_API FApartmentLifeCharacterCreatorPreset
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Preset")
+	FName PresetId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Preset")
+	FText DisplayName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Preset")
+	EApartmentLifeCreatorPresetType PresetType = EApartmentLifeCreatorPresetType::FullCharacter;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Preset")
+	int32 CompatibilityVersion = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Preset")
+	FApartmentLifeCharacterCreatorState CreatorState;
+};
+
+USTRUCT(BlueprintType)
+struct APARTMENTLIFECHARACTER_API FApartmentLifeCreatorCompatibilityReport
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Compatibility")
+	bool bHasClippingWarnings = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Compatibility")
+	TArray<FText> Warnings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Compatibility")
+	TArray<FName> InvalidOutfitItemIds;
+};

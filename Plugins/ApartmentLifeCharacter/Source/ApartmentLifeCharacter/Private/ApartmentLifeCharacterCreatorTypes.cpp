@@ -63,8 +63,40 @@ FApartmentLifeCharacterAppearanceState FApartmentLifeCharacterCreatorState::ToLe
 void FApartmentLifeCharacterCreatorState::FromLegacyAppearanceState(const FApartmentLifeCharacterAppearanceState& Legacy)
 {
 	Body.HeightCm = Legacy.HeightCm;
-	Body.ToMorphSliders();
-	Face.GetAllFaceMorphs();
+	for (const FApartmentLifeMorphSlider& Morph : Legacy.BodyProportions)
+	{
+		if (Morph.MorphTargetName == FName(TEXT("ShoulderWidth"))) Body.ShoulderWidth = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("Waist"))) Body.Waist = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("Hips"))) Body.Hips = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("ArmLength"))) Body.ArmLength = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("LegLength"))) Body.LegLength = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("TorsoLength"))) Body.TorsoLength = Morph.Value;
+		else if (Morph.MorphTargetName == FName(TEXT("MuscleTone"))) Body.MuscleTone = Morph.Value;
+	}
+
+	for (const FApartmentLifeMorphSlider& Morph : Legacy.FaceMorphs)
+	{
+		auto TryAdd = [&Morph](TArray<FApartmentLifeMorphSlider>& Target)
+		{
+			for (FApartmentLifeMorphSlider& Existing : Target)
+			{
+				if (Existing.MorphTargetName == Morph.MorphTargetName)
+				{
+					Existing.Value = Morph.Value;
+					return;
+				}
+			}
+		};
+		TryAdd(Face.FaceShapeMorphs);
+		TryAdd(Face.EyeMorphs);
+		TryAdd(Face.EyebrowMorphs);
+		TryAdd(Face.NoseMorphs);
+		TryAdd(Face.LipMorphs);
+		TryAdd(Face.JawMorphs);
+		TryAdd(Face.CheekMorphs);
+		TryAdd(Face.EarMorphs);
+	}
+
 	SkinTone = Legacy.SkinTone;
 	EyeColor = Legacy.EyeColor;
 	HairstyleId = Legacy.HairstyleId;

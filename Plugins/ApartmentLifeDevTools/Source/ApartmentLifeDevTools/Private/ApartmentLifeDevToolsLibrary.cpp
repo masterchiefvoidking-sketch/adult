@@ -19,6 +19,7 @@
 #include "ApartmentLifeWorkLibrary.h"
 #include "ApartmentLifeProgressionTypes.h"
 #include "ApartmentLifeWorldSimLibrary.h"
+#include "ApartmentLifeCharacterCreatorComponent.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"
@@ -610,6 +611,47 @@ bool UApartmentLifeDevToolsLibrary::ClearAllSaveSlots(UObject* WorldContextObjec
 			}
 			return bAnyDeleted;
 		}
+	}
+	return false;
+#endif
+}
+
+FString UApartmentLifeDevToolsLibrary::ExportCreatorData(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return FString();
+#else
+	if (UApartmentLifeCharacterCreatorComponent* Creator = Character ? Character->FindComponentByClass<UApartmentLifeCharacterCreatorComponent>() : nullptr)
+	{
+		return Creator->ExportCreatorStateJson();
+	}
+	return FString();
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ResetCreatorFace(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeCharacterCreatorComponent* Creator = Character ? Character->FindComponentByClass<UApartmentLifeCharacterCreatorComponent>() : nullptr)
+	{
+		Creator->ResetFace();
+		return true;
+	}
+	return false;
+#endif
+}
+
+bool UApartmentLifeDevToolsLibrary::ResetCreatorBody(AActor* Character)
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	if (UApartmentLifeCharacterCreatorComponent* Creator = Character ? Character->FindComponentByClass<UApartmentLifeCharacterCreatorComponent>() : nullptr)
+	{
+		Creator->ResetBody();
+		return true;
 	}
 	return false;
 #endif

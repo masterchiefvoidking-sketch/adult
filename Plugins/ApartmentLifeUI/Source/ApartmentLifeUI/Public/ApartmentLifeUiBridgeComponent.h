@@ -16,6 +16,7 @@ class UApartmentLifeInteractionSelectionComponent;
 class UApartmentLifeUiSubsystem;
 class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWorkUiController;
+class UApartmentLifeCharacterCreatorUiController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApartmentLifeUiBridgePostLoadRequested);
 
@@ -35,6 +36,7 @@ public:
 		UApartmentLifeWorkUiController* InWorkUi,
 		UApartmentLifeFinanceUiController* InFinanceUi,
 		UApartmentLifeInteractionHudComponent* InInteractionHud,
+		UApartmentLifeCharacterCreatorUiController* InCreatorUi,
 		int32 InQuickSaveSlot = 0,
 		bool bInEnterGameplayDirectly = true);
 
@@ -43,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
 	void OpenProfileScreen();
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
+	void OpenCharacterCreatorScreen();
 
 	UFUNCTION(BlueprintCallable, Category = "Apartment Life|UI")
 	void OpenRoutinesScreen();
@@ -76,6 +81,7 @@ protected:
 	void PushSaveLoadPanel();
 	void PushSettingsPanel();
 	void PushYogaPanel();
+	void PushCharacterCreatorPanel();
 	void SyncSettingsFromCamera();
 	void ApplySettingsToCamera();
 
@@ -93,6 +99,9 @@ protected:
 
 	UFUNCTION()
 	void HandleWardrobeUiStateChanged();
+
+	UFUNCTION()
+	void HandleCreatorUiStateChanged();
 
 	UFUNCTION()
 	void HandleInteractableSelected(AActor* Target, const TArray<struct FApartmentLifeInteractionDescriptor>& Actions);
@@ -139,6 +148,9 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<UApartmentLifeInteractionHudComponent> InteractionHud;
+
+	UPROPERTY()
+	TWeakObjectPtr<UApartmentLifeCharacterCreatorUiController> CreatorUi;
 
 	int32 QuickSaveSlot = 0;
 	bool bEnterGameplayDirectly = true;

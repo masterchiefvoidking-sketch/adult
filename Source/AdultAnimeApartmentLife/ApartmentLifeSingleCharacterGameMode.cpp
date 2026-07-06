@@ -11,6 +11,7 @@
 #include "ApartmentLifeWardrobeComponent.h"
 #include "ApartmentLifeWardrobeBootstrapLibrary.h"
 #include "ApartmentLifeProgressionComponent.h"
+#include "ApartmentLifeCharacterCreatorComponent.h"
 #include "ApartmentLifeSaveSubsystem.h"
 #include "Engine/World.h"
 
@@ -152,6 +153,11 @@ void AApartmentLifeSingleCharacterGameMode::ConfigureGirlCharacter(AApartmentLif
 
 	if (bSeedWardrobe)
 	{
+		if (UApartmentLifeCharacterCreatorComponent* Creator = Character->GetCreatorComponent())
+		{
+			Creator->InitializeFromBuiltinCatalog();
+		}
+
 		if (UApartmentLifeWardrobeComponent* Wardrobe = Character->GetWardrobeComponent())
 		{
 			UApartmentLifeWardrobeBootstrapLibrary::SeedVerticalSliceWardrobe(Wardrobe);

@@ -26,8 +26,9 @@
 #include "ApartmentLifeProgressionComponent.h"
 #include "ApartmentLifeProgressionComponent.h"
 #include "ApartmentLifeActivityComponent.h"
-#include "ApartmentLifeApartmentUnit.h"
-#include "Engine/GameInstance.h"
+#include "ApartmentLifeCharacterCreatorUiController.h"
+#include "ApartmentLifeCharacterCreatorTypes.h"
+#include "ApartmentLifeCharacterCreatorLibrary.h"
 
 namespace
 {
@@ -63,6 +64,7 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	UApartmentLifeWorkUiController* InWorkUi,
 	UApartmentLifeFinanceUiController* InFinanceUi,
 	UApartmentLifeInteractionHudComponent* InInteractionHud,
+	UApartmentLifeCharacterCreatorUiController* InCreatorUi,
 	int32 InQuickSaveSlot,
 	bool bInEnterGameplayDirectly)
 {
@@ -73,12 +75,18 @@ void UApartmentLifeUiBridgeComponent::InitializeContext(
 	WorkUi = InWorkUi;
 	FinanceUi = InFinanceUi;
 	InteractionHud = InInteractionHud;
+	CreatorUi = InCreatorUi;
 	QuickSaveSlot = InQuickSaveSlot;
 	bEnterGameplayDirectly = bInEnterGameplayDirectly;
 
 	if (WardrobeUi.IsValid())
 	{
 		WardrobeUi->OnWardrobeUiStateChanged.AddDynamic(this, &UApartmentLifeUiBridgeComponent::HandleWardrobeUiStateChanged);
+	}
+
+	if (CreatorUi.IsValid())
+	{
+		CreatorUi->OnCreatorUiStateChanged.AddDynamic(this, &UApartmentLifeUiBridgeComponent::HandleCreatorUiStateChanged);
 	}
 
 	if (UApartmentLifeInteractionSelectionComponent* Selection = GetSelection())
@@ -373,6 +381,7 @@ void UApartmentLifeUiBridgeComponent::RefreshActiveScreen()
 	case EApartmentLifeUiScreen::Profile: PushProfilePanel(); break;
 	case EApartmentLifeUiScreen::SaveLoad: PushSaveLoadPanel(); break;
 	case EApartmentLifeUiScreen::Settings: PushSettingsPanel(); break;
+	case EApartmentLifeUiScreen::CharacterCreator: PushCharacterCreatorPanel(); break;
 	case EApartmentLifeUiScreen::Yoga: PushYogaPanel(); break;
 	default: break;
 	}
@@ -716,6 +725,12 @@ void UApartmentLifeUiBridgeComponent::PushProfilePanel()
 		}
 	}
 
+	FApartmentLifeUiListEntry EditCharacter;
+	EditCharacter.Index = 900;
+	EditCharacter.Label = FText::FromString(TEXT("Edit Character"));
+	EditCharacter.Detail = FText::FromString(TEXT("Open character creator"));
+	Panel.Entries.Add(EditCharacter);
+
 	Ui->SetPanelState(Panel);
 }
 
@@ -813,6 +828,83 @@ void UApartmentLifeUiBridgeComponent::PushSettingsPanel()
 	AddValue(TEXT("UI Volume"), Settings.UiVolume);
 	AddToggle(TEXT("Autosave"), Settings.bAutosaveEnabled);
 	AddToggle(TEXT("HUD Visible"), Settings.bHudVisible);
+
+	Ui->SetPanelState(Panel);
+}
+
+void UApartmentLifeUiBridgeComponent::PushCharacterCreatorPanel()
+{
+	UApartmentLifeUiSubsystem* Ui = GetUiSubsystem();
+	if (!Ui || !CreatorUi.IsValid())
+	{
+		return;
+	}
+
+	FApartmentLifeUiPanelState Panel;
+	Panel.Title = FText::FromString(TEXT("Character Creator"));
+	Panel.Subtitle = FText::FromString(TEXT("Customize appearance — double-click to apply"));
+	Panel.Footer = FText::FromString(TEXT("[ / ] adjust slider | C to close | Confirm when done"));
+
+	const UEnum* TabEnum = StaticEnum<EApartmentLifeCreatorCategoryTab>();
+	if (TabEnum)
+	{
+		for (int32 TabIndex = 0; TabIndex < TabEnum->NumEnums() - 1; ++TabIndex)
+		{
+			FApartmentLifeUiListEntry TabEntry;
+			TabEntry.Index = TabIndex;
+			TabEntry.Label = TabEnum->GetDisplayNameTextByIndex(TabIndex);
+			TabEntry.bSelected = static_cast<int32>(CreatorUi->GetCategoryTab()) == TabIndex;
+			Panel.Entries.Add(TabEntry);
+		}
+	}
+
+	const TArray<FText>& Labels = CreatorUi->GetVisibleEntryLabels();
+	const TArray<FText>& Details = CreatorUi->GetVisibleEntryDetails();
+	for (int32 Index = 0; Index < Labels.Num(); ++Index)
+	{
+		FApartmentLifeUiListEntry Entry;
+		Entry.Index = 100 + Index;
+		Entry.Label = Labels[Index];
+		Entry.Detail = Details.IsValidIndex(Index) ? Details[Index] : FText::GetEmpty();
+		Entry.bSelected = Index == CreatorUi->GetSelectedEntryIndex();
+		Panel.Entries.Add(Entry);
+	}
+
+	auto AddAction = [&](int32 EncodedIndex, const FString& Label, const FString& Detail)
+	{
+		FApartmentLifeUiListEntry Entry;
+		Entry.Index = EncodedIndex;
+		Entry.Label = FText::FromString(Label);
+		Entry.Detail = FText::FromString(Detail);
+		Panel.Entries.Add(Entry);
+	};
+
+	AddAction(200, TEXT("Randomize Full"), TEXT("Believable full randomize"));
+	AddAction(201, TEXT("Randomize Face"), TEXT("Face only"));
+	AddAction(202, TEXT("Randomize Body"), TEXT("Body only"));
+	AddAction(203, TEXT("Reset Category"), TEXT("Reset current tab"));
+	AddAction(204, TEXT("Confirm Character"), TEXT("Save and close"));
+	AddAction(219, TEXT("Save Preset"), TEXT("Save current look to selected preset slot"));
+
+	const UEnum* LightingEnum = StaticEnum<EApartmentLifeCreatorLightingMode>();
+	if (LightingEnum)
+	{
+		for (int32 LightingIndex = 0; LightingIndex < LightingEnum->NumEnums() - 1; ++LightingIndex)
+		{
+			AddAction(205 + LightingIndex, LightingEnum->GetDisplayNameTextByIndex(LightingIndex).ToString(), TEXT("Lighting preview"));
+		}
+	}
+
+	AddAction(215, TEXT("Focus Face"), TEXT("Camera focus"));
+	AddAction(216, TEXT("Focus Upper Body"), TEXT("Camera focus"));
+	AddAction(217, TEXT("Focus Full Body"), TEXT("Camera focus"));
+	AddAction(218, TEXT("Focus Outfit"), TEXT("Camera focus"));
+
+	const FApartmentLifeCreatorCompatibilityReport Report = CreatorUi->GetCompatibilityReport();
+	if (Report.bHasClippingWarnings)
+	{
+		Panel.Footer = FText::FromString(FString::Printf(TEXT("Warning: %d outfit fit issues"), Report.Warnings.Num()));
+	}
 
 	Ui->SetPanelState(Panel);
 }
@@ -919,6 +1011,14 @@ void UApartmentLifeUiBridgeComponent::OpenProfileScreen()
 	}
 }
 
+void UApartmentLifeUiBridgeComponent::OpenCharacterCreatorScreen()
+{
+	if (CreatorUi.IsValid())
+	{
+		CreatorUi->OpenCreator(true);
+	}
+}
+
 void UApartmentLifeUiBridgeComponent::OpenRoutinesScreen()
 {
 	if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())
@@ -958,6 +1058,11 @@ void UApartmentLifeUiBridgeComponent::HandleUiBack()
 	if (Screen == EApartmentLifeUiScreen::Wardrobe && WardrobeUi.IsValid())
 	{
 		WardrobeUi->CloseWardrobe();
+	}
+
+	if (Screen == EApartmentLifeUiScreen::CharacterCreator && CreatorUi.IsValid())
+	{
+		CreatorUi->CloseCreator(false);
 	}
 
 	if (Screen == EApartmentLifeUiScreen::Work && WorkUi.IsValid())
@@ -1202,6 +1307,43 @@ void UApartmentLifeUiBridgeComponent::HandleListItemActivated(EApartmentLifeUiSc
 		}
 		break;
 
+	case EApartmentLifeUiScreen::CharacterCreator:
+		if (CreatorUi.IsValid())
+		{
+			if (Index < 9)
+			{
+				CreatorUi->SetCategoryTab(static_cast<EApartmentLifeCreatorCategoryTab>(Index));
+			}
+			else if (Index >= 100 && Index < 200)
+			{
+				CreatorUi->SelectEntryIndex(Index - 100);
+				CreatorUi->ActivateSelectedEntry();
+			}
+			else if (Index == 200) CreatorUi->Randomize(EApartmentLifeCreatorRandomizeScope::FullCharacter);
+			else if (Index == 201) CreatorUi->Randomize(EApartmentLifeCreatorRandomizeScope::FaceOnly);
+			else if (Index == 202) CreatorUi->Randomize(EApartmentLifeCreatorRandomizeScope::BodyOnly);
+			else if (Index == 203) CreatorUi->ResetCurrentCategory();
+			else if (Index == 204) CreatorUi->ConfirmCharacter();
+			else if (Index >= 205 && Index < 215)
+			{
+				CreatorUi->SetLightingMode(static_cast<EApartmentLifeCreatorLightingMode>(Index - 205));
+			}
+			else if (Index == 215) CreatorUi->SetCameraFocus(FName(TEXT("Face")));
+			else if (Index == 216) CreatorUi->SetCameraFocus(FName(TEXT("UpperBody")));
+			else if (Index == 217) CreatorUi->SetCameraFocus(FName(TEXT("FullBody")));
+			else if (Index == 218) CreatorUi->SetCameraFocus(FName(TEXT("Outfit")));
+			else if (Index == 219) CreatorUi->SavePresetByIndex(CreatorUi->GetSelectedEntryIndex());
+			PushCharacterCreatorPanel();
+		}
+		break;
+
+	case EApartmentLifeUiScreen::Profile:
+		if (Index == 900)
+		{
+			OpenCharacterCreatorScreen();
+		}
+		break;
+
 	default:
 		break;
 	}
@@ -1247,6 +1389,22 @@ void UApartmentLifeUiBridgeComponent::HandleWardrobeUiStateChanged()
 			PushWardrobePanel();
 		}
 		else if (Ui->GetActiveScreen() == EApartmentLifeUiScreen::Wardrobe)
+		{
+			Ui->CloseScreen();
+		}
+	}
+}
+
+void UApartmentLifeUiBridgeComponent::HandleCreatorUiStateChanged()
+{
+	if (UApartmentLifeUiSubsystem* Ui = GetUiSubsystem())
+	{
+		if (CreatorUi.IsValid() && CreatorUi->IsCreatorOpen())
+		{
+			Ui->ShowScreen(EApartmentLifeUiScreen::CharacterCreator);
+			PushCharacterCreatorPanel();
+		}
+		else if (Ui->GetActiveScreen() == EApartmentLifeUiScreen::CharacterCreator)
 		{
 			Ui->CloseScreen();
 		}

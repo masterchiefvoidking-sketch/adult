@@ -17,6 +17,7 @@ class UApartmentLifeWardrobeUiController;
 class UApartmentLifeWardrobeShoppingComponent;
 class UApartmentLifeWorkUiController;
 class UApartmentLifeFinanceUiController;
+class UApartmentLifeCharacterCreatorUiController;
 class UApartmentLifeUiBridgeComponent;
 
 /**
@@ -103,6 +104,9 @@ protected:
 	void OnDebugLoadNow();
 	void OnDebugResetApartment();
 	void OnDebugResetCharacter();
+	void OnDebugPrintCreatorData();
+	void OnDebugResetCreatorFace();
+	void OnDebugResetCreatorBody();
 	void OnDebugRemoveMoney();
 	void OnDebugStressUp();
 	void OnDebugStressDown();
@@ -157,6 +161,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Single Character|UI")
 	TObjectPtr<UApartmentLifeUiBridgeComponent> UiBridgeComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Single Character|Creator")
+	TObjectPtr<UApartmentLifeCharacterCreatorUiController> CreatorUiController;
 
 	UPROPERTY(EditAnywhere, Category = "Single Character|Save")
 	int32 QuickSaveSlot = 0;

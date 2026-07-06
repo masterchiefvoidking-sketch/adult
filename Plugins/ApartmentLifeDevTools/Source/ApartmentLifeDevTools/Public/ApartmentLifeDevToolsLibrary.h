@@ -118,5 +118,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Apartment Life|Dev")
 	static FString BuildCharacterDebugSummary(AActor* Character);
 
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static FString ExportCreatorData(AActor* Character);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ResetCreatorFace(AActor* Character);
+
+	UFUNCTION(BlueprintCallable, Category = "Apartment Life|Dev")
+	static bool ResetCreatorBody(AActor* Character);
+
 	static UApartmentLifeNPCSimulationComponent* GetSimulation(AActor* Character);
 };
